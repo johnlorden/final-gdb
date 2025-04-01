@@ -53,10 +53,32 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
     }, [verse, reference]);
     
     const handleSaveImage = async () => {
-      if (!ref || !ref.current) return;
+      // Check if ref exists and has a current property (it's a RefObject)
+      if (!ref) return;
+      
+      // Create a local variable to hold the element
+      let element: HTMLElement | null = null;
+      
+      // Check if ref is a RefObject (has .current) or a function
+      if (typeof ref === 'function') {
+        // We cannot directly access the DOM element with a callback ref
+        toast({
+          title: "Error",
+          description: "Unable to save image with this ref type.",
+          variant: "destructive",
+          duration: 2000,
+        });
+        return;
+      } else if (ref.current) {
+        // It's a RefObject
+        element = ref.current;
+      }
+      
+      // Ensure we have an element to capture
+      if (!element) return;
       
       try {
-        const canvas = await html2canvas(ref.current, {
+        const canvas = await html2canvas(element, {
           backgroundColor: null,
           scale: 2 // Better quality
         });
