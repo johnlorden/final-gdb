@@ -1,26 +1,45 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface CategoryProps {
-  categories: string[];
-  selectedCategory: string;
-  onSelectCategory: (category: string) => void;
+  onCategorySelect: (category: string) => void;
+  onRandomVerse: () => void;
 }
 
 const VerseCategories: React.FC<CategoryProps> = ({ 
-  categories,
-  selectedCategory,
-  onSelectCategory
+  onCategorySelect,
+  onRandomVerse
 }) => {
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  
+  // Define a list of categories
+  const categories = [
+    'Encouragement', 
+    'Faith', 
+    'Hope', 
+    'Love', 
+    'Peace', 
+    'Wisdom', 
+    'Strength',
+    'Forgiveness',
+    'Gratitude',
+    'Prayer'
+  ];
+  
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    onCategorySelect(category);
+  };
+
   return (
     <div className="mb-4">
       <h2 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">Categories</h2>
       <ScrollArea className="w-full pb-2">
         <div className="flex space-x-2 pb-1">
           <Button
-            onClick={() => onSelectCategory('All')}
+            onClick={() => handleCategorySelect('All')}
             variant={selectedCategory === 'All' ? "default" : "outline"}
             size="sm"
             className="rounded-full"
@@ -31,7 +50,7 @@ const VerseCategories: React.FC<CategoryProps> = ({
           {categories.map((category) => (
             <Button
               key={category}
-              onClick={() => onSelectCategory(category)}
+              onClick={() => handleCategorySelect(category)}
               variant={selectedCategory === category ? "default" : "outline"}
               size="sm"
               className="rounded-full whitespace-nowrap"
@@ -39,6 +58,15 @@ const VerseCategories: React.FC<CategoryProps> = ({
               {category}
             </Button>
           ))}
+          
+          <Button
+            onClick={onRandomVerse}
+            variant="outline"
+            size="sm"
+            className="rounded-full whitespace-nowrap bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600"
+          >
+            Random Verse
+          </Button>
         </div>
       </ScrollArea>
     </div>
