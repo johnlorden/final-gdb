@@ -8,14 +8,14 @@ import { Link } from 'react-router-dom';
 const Header = () => {
   return (
     <header className="w-full py-3 border-b dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm fixed top-0 z-10">
-      <div className="container flex justify-between items-center">
+      <div className="container px-4 sm:px-6 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Link to="/">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="h-9 w-9">
               <Home className="h-5 w-5" />
             </Button>
           </Link>
-          <h1 className="text-xl font-bold">God's Daily Bread</h1>
+          <h1 className="text-lg sm:text-xl font-bold truncate">God's Daily Bread</h1>
         </div>
         <div className="flex items-center space-x-2">
           <a 

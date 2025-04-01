@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Download, RefreshCw } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { Skeleton } from '@/components/ui/skeleton';
-import SocialShare from './SocialShare';
 
 interface BibleVerseCardProps {
   verse: string;
@@ -62,13 +61,13 @@ const BibleVerseCard: React.FC<BibleVerseCardProps> = ({
   return (
     <div 
       ref={cardRef}
-      className={`relative w-full max-w-2xl p-8 md:p-12 rounded-lg shadow-lg flex flex-col items-center text-center ${isCapturing ? background : ''} dark:text-white transition-all duration-300`}
+      className={`relative w-full max-w-2xl p-6 md:p-10 rounded-lg shadow-lg flex flex-col items-center text-center ${isCapturing ? background : ''} dark:text-white transition-all duration-300`}
     >
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">
         God's Daily Bread
       </h1>
       
-      <div className="my-8 w-full">
+      <div className="my-6 w-full">
         {loading ? (
           <>
             <Skeleton className="h-6 w-full mb-2" />
@@ -84,14 +83,12 @@ const BibleVerseCard: React.FC<BibleVerseCardProps> = ({
             <p className="text-lg md:text-xl font-semibold text-gray-800 dark:text-gray-100">
               — {reference}
             </p>
-            
-            {!isCapturing && <SocialShare verse={verse} reference={reference} />}
           </>
         )}
       </div>
       
       {!isCapturing && !loading && (
-        <div className="flex space-x-4 mt-6">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-4 mt-4 w-full sm:justify-center">
           <Button 
             variant="outline" 
             onClick={handleDownload}
@@ -103,7 +100,7 @@ const BibleVerseCard: React.FC<BibleVerseCardProps> = ({
           
           <Button 
             onClick={handleRefresh}
-            className={`bg-blue-600 hover:bg-blue-700 text-white ${isRefreshing ? 'animate-spin' : ''}`}
+            className={`bg-blue-600 hover:bg-blue-700 text-white ${isRefreshing ? 'opacity-75' : ''}`}
           >
             <RefreshCw size={18} className={`mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             New Verse

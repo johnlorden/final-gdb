@@ -5,7 +5,8 @@ import DonateFooter from '@/components/DonateFooter';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import VerseCategories from '@/components/VerseCategories';
-import RecentVerses from '@/components/RecentVerses';
+import SocialShareBar from '@/components/SocialShareBar';
+import CollapsibleRecentVerses from '@/components/CollapsibleRecentVerses';
 import { 
   getRandomVerse, 
   getRandomBackground, 
@@ -17,7 +18,6 @@ import {
 } from '@/services/BibleVerseService';
 import { useToast } from '@/hooks/use-toast';
 import { applySecurityHeaders } from '@/utils/security';
-import { BibleVerse } from '@/services/BibleVerseService';
 
 const Index = () => {
   const [verse, setVerse] = useState('');
@@ -196,15 +196,19 @@ const Index = () => {
     <div className={`min-h-screen flex flex-col ${background} dark:text-white transition-colors duration-500`}>
       <Header />
       
-      <main className="flex-grow w-full flex flex-col items-center justify-center p-4 pt-20 pb-16">
-      <div className="container max-w-4xl mx-auto flex flex-col items-center">
-          <SearchBar onSearch={handleSearch} />
+      <main className="flex-grow w-full flex flex-col items-center justify-center px-4 pt-20 pb-16">
+        <div className="container max-w-3xl mx-auto flex flex-col items-center">
+          <div className="w-full max-w-lg mb-4">
+            <SearchBar onSearch={handleSearch} />
+          </div>
           
-          <VerseCategories 
-            categories={categories} 
-            selectedCategory={selectedCategory} 
-            onSelectCategory={handleCategorySelect} 
-          />
+          <div className="w-full max-w-xl mb-5">
+            <VerseCategories 
+              categories={categories} 
+              selectedCategory={selectedCategory} 
+              onSelectCategory={handleCategorySelect} 
+            />
+          </div>
           
           <BibleVerseCard 
             verse={verse} 
@@ -214,9 +218,13 @@ const Index = () => {
             loading={loading}
           />
           
-          <RecentVerses 
-            verses={recentVerses}
-            onSelectVerse={handleSelectRecentVerse}
+          {!loading && verse && (
+            <SocialShareBar verse={verse} reference={reference} />
+          )}
+          
+          <CollapsibleRecentVerses 
+            verses={recentVerses} 
+            onSelectVerse={handleSelectRecentVerse} 
           />
         </div>
       </main>
