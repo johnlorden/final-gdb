@@ -34,7 +34,7 @@ const bibleVerses: BibleVerse[] = [
     reference: "Isaiah 40:31"
   },
   {
-    verse: "Jesus said to him, "I am the way, and the truth, and the life. No one comes to the Father except through me."",
+    verse: "Jesus said to him, \"I am the way, and the truth, and the life. No one comes to the Father except through me.\"",
     reference: "John 14:6"
   },
   {
