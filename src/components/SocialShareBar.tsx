@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Twitter, Facebook } from 'lucide-react';
+import { Copy, Twitter, Facebook, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface SocialShareBarProps {
@@ -13,18 +13,31 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference }) => 
   const { toast } = useToast();
   const verseText = `"${verse}" — ${reference}`;
   
+  // Create URL with verse parameter for sharing
+  const currentURL = new URL(window.location.href);
+  currentURL.pathname = '/';
+  currentURL.search = `?bibleverse=${encodeURIComponent(reference)}`;
+  const shareURL = currentURL.toString();
+  
   const shareToTwitter = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(verseText)}&hashtags=Bible,DailyVerse`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(verseText)}&url=${encodeURIComponent(shareURL)}&hashtags=Bible,DailyVerse`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
   
   const shareToFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(verseText)}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL)}&quote=${encodeURIComponent(verseText)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
   
+  const shareByEmail = () => {
+    const subject = `Bible Verse: ${reference}`;
+    const body = `${verseText}\n\nRead more: ${shareURL}`;
+    const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoUrl, '_blank', 'noopener,noreferrer');
+  };
+  
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(verseText).then(() => {
+    navigator.clipboard.writeText(verseText + '\n\n' + shareURL).then(() => {
       toast({
         title: "Copied to clipboard",
         description: "Verse has been copied to clipboard",
@@ -68,6 +81,15 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference }) => 
       >
         <Facebook className="h-4 w-4" />
         <span className="hidden sm:inline">Facebook</span>
+      </Button>
+      <Button 
+        onClick={shareByEmail} 
+        variant="outline" 
+        size="sm" 
+        className="flex items-center gap-1"
+      >
+        <Mail className="h-4 w-4" />
+        <span className="hidden sm:inline">Email</span>
       </Button>
     </div>
   );

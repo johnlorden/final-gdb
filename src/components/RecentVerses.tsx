@@ -15,11 +15,11 @@ interface RecentVersesProps {
 
 const RecentVerses: React.FC<RecentVersesProps> = ({ verses, onSelectVerse }) => {
   if (verses.length === 0) {
-    return <p className="text-sm text-gray-500">No recently viewed verses</p>;
+    return <p className="text-sm text-gray-500 text-center">No recently viewed verses</p>;
   }
 
   return (
-    <ScrollArea className="h-36">
+    <ScrollArea className="h-36 w-full">
       <div className="space-y-2">
         {verses.map((item, index) => (
           <div 

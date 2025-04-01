@@ -48,6 +48,18 @@ export const getRandomVerse = async (): Promise<BibleVerse> => {
   return verses[randomIndex];
 };
 
+export const findVerseByReference = async (reference: string): Promise<BibleVerse | null> => {
+  const verses = await loadVerses();
+  const normalizedSearch = reference.toLowerCase().replace(/\s+/g, '');
+  
+  const foundVerse = verses.find(verse => {
+    const normalizedRef = verse.reference.toLowerCase().replace(/\s+/g, '');
+    return normalizedRef === normalizedSearch || normalizedRef.includes(normalizedSearch);
+  });
+  
+  return foundVerse || null;
+};
+
 export const getVersesByCategory = async (category: string): Promise<BibleVerse[]> => {
   const verses = await loadVerses();
   if (category === 'All') {

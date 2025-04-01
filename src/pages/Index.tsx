@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import DonateFooter from '@/components/DonateFooter';
@@ -14,7 +13,8 @@ import {
   getVersesByCategory,
   searchVerses,
   storeRecentVerse,
-  getRecentVerses
+  getRecentVerses,
+  findVerseByReference
 } from '@/services/BibleVerseService';
 import { useToast } from '@/hooks/use-toast';
 import { applySecurityHeaders } from '@/utils/security';
@@ -33,6 +33,43 @@ const Index = () => {
   // Apply security headers on initial load
   useEffect(() => {
     applySecurityHeaders();
+  }, []);
+
+  // Check for verse parameter in URL
+  useEffect(() => {
+    const checkUrlParams = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const verseParam = urlParams.get('bibleverse');
+      
+      if (verseParam) {
+        try {
+          setLoading(true);
+          const foundVerse = await findVerseByReference(verseParam);
+          
+          if (foundVerse) {
+            setVerse(foundVerse.verse);
+            setReference(foundVerse.reference);
+            setCategory(foundVerse.category);
+            setBackground(getRandomBackground());
+            storeRecentVerse(foundVerse);
+            setRecentVerses(getRecentVerses());
+          } else {
+            // If verse not found, load random verse
+            loadNewVerse();
+          }
+        } catch (error) {
+          console.error('Error loading verse from URL:', error);
+          loadNewVerse();
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // No verse parameter, load random verse
+        loadNewVerse();
+      }
+    };
+    
+    checkUrlParams();
   }, []);
 
   // Load categories on initial render
@@ -65,6 +102,11 @@ const Index = () => {
       storeRecentVerse({ verse, reference, category });
       // Update recent verses
       setRecentVerses(getRecentVerses());
+      
+      // Update URL without page reload
+      const url = new URL(window.location.href);
+      url.search = `?bibleverse=${encodeURIComponent(reference)}`;
+      window.history.replaceState({}, '', url.toString());
     } catch (error) {
       console.error('Error loading verse:', error);
       toast({
@@ -171,6 +213,11 @@ const Index = () => {
     setReference(verseReference);
     const newBackground = getRandomBackground();
     setBackground(newBackground);
+    
+    // Update URL when selecting recent verse
+    const url = new URL(window.location.href);
+    url.search = `?bibleverse=${encodeURIComponent(verseReference)}`;
+    window.history.replaceState({}, '', url.toString());
     
     toast({
       title: "Verse selected",
