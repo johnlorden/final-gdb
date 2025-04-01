@@ -1,9 +1,10 @@
 
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, RefreshCw } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { Skeleton } from '@/components/ui/skeleton';
+import SocialShare from './SocialShare';
 
 interface BibleVerseCardProps {
   verse: string;
@@ -22,6 +23,7 @@ const BibleVerseCard: React.FC<BibleVerseCardProps> = ({
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleDownload = async () => {
     if (cardRef.current) {
@@ -51,12 +53,18 @@ const BibleVerseCard: React.FC<BibleVerseCardProps> = ({
     }
   };
 
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    onRefresh();
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
+
   return (
     <div 
       ref={cardRef}
-      className={`relative w-full max-w-2xl p-8 md:p-12 rounded-lg shadow-lg flex flex-col items-center text-center ${isCapturing ? background : ''}`}
+      className={`relative w-full max-w-2xl p-8 md:p-12 rounded-lg shadow-lg flex flex-col items-center text-center ${isCapturing ? background : ''} dark:text-white transition-all duration-300`}
     >
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">
         God's Daily Bread
       </h1>
       
@@ -70,12 +78,14 @@ const BibleVerseCard: React.FC<BibleVerseCardProps> = ({
           </>
         ) : (
           <>
-            <p className="text-xl md:text-2xl font-medium text-gray-700 italic mb-4">
+            <p className="text-xl md:text-2xl font-medium text-gray-700 dark:text-gray-200 italic mb-4">
               "{verse}"
             </p>
-            <p className="text-lg md:text-xl font-semibold text-gray-800">
+            <p className="text-lg md:text-xl font-semibold text-gray-800 dark:text-gray-100">
               — {reference}
             </p>
+            
+            {!isCapturing && <SocialShare verse={verse} reference={reference} />}
           </>
         )}
       </div>
@@ -85,16 +95,17 @@ const BibleVerseCard: React.FC<BibleVerseCardProps> = ({
           <Button 
             variant="outline" 
             onClick={handleDownload}
-            className="flex items-center gap-2 border-gray-300 hover:bg-gray-100"
+            className="flex items-center gap-2 border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 dark:text-white"
           >
             <Download size={18} />
             Save as Image
           </Button>
           
           <Button 
-            onClick={onRefresh}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={handleRefresh}
+            className={`bg-blue-600 hover:bg-blue-700 text-white ${isRefreshing ? 'animate-spin' : ''}`}
           >
+            <RefreshCw size={18} className={`mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             New Verse
           </Button>
         </div>

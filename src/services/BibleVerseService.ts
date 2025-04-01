@@ -1,103 +1,131 @@
-interface BibleVerse {
+import { DOMParser } from '@xmldom/xmldom';
+
+export interface BibleVerse {
   verse: string;
   reference: string;
+  category: string;
 }
 
-const backgroundColors = [
-  "bg-blue-100", "bg-green-100", "bg-indigo-100", "bg-purple-100", 
-  "bg-pink-100", "bg-yellow-100", "bg-red-100", "bg-orange-100",
-  "bg-emerald-100", "bg-teal-100", "bg-cyan-100", "bg-sky-100",
-  "bg-violet-100", "bg-fuchsia-100", "bg-rose-100", "bg-amber-100"
-];
-
-const gradients = [
-  "bg-gradient-to-r from-blue-200 to-cyan-200",
-  "bg-gradient-to-r from-violet-200 to-pink-200",
-  "bg-gradient-to-r from-yellow-200 to-orange-200",
-  "bg-gradient-to-r from-green-200 to-emerald-200",
-  "bg-gradient-to-r from-indigo-200 to-purple-200",
-  "bg-gradient-to-r from-rose-200 to-red-200",
-  "bg-gradient-to-r from-amber-200 to-yellow-200",
-  "bg-gradient-to-r from-teal-200 to-cyan-200",
-  "bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100",
-  "bg-gradient-to-br from-green-100 via-teal-100 to-blue-100",
-  "bg-gradient-to-bl from-pink-100 via-rose-100 to-amber-100",
-  "bg-gradient-to-bl from-indigo-100 via-purple-100 to-pink-100",
-  "bg-gradient-to-tr from-emerald-100 via-green-100 to-lime-100",
-  "bg-gradient-to-tr from-sky-100 via-blue-100 to-indigo-100",
-  "bg-gradient-to-tl from-amber-100 via-orange-100 to-red-100",
-  "bg-gradient-to-tl from-cyan-100 via-sky-100 to-blue-100"
-];
-
-let bibleVersesCache: BibleVerse[] | null = null;
-
-const parseXML = (xmlString: string): BibleVerse[] => {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-  const verseElements = xmlDoc.querySelectorAll("verse");
-  
-  const verses: BibleVerse[] = [];
-  
-  verseElements.forEach((verseElement) => {
-    const textElement = verseElement.querySelector("text");
-    const referenceElement = verseElement.querySelector("reference");
-    
-    if (textElement && referenceElement) {
-      verses.push({
-        verse: textElement.textContent || "",
-        reference: referenceElement.textContent || ""
-      });
-    }
-  });
-  
-  return verses;
-};
-
-const loadBibleVerses = async (): Promise<BibleVerse[]> => {
-  if (bibleVersesCache) {
-    return bibleVersesCache;
-  }
-  
+export const loadVerses = async (): Promise<BibleVerse[]> => {
   try {
     const response = await fetch('/data/bible-verses.xml');
-    if (!response.ok) {
-      throw new Error('Failed to load Bible verses');
+    const xmlText = await response.text();
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+    
+    const verseElements = xmlDoc.getElementsByTagName('verse');
+    const verses: BibleVerse[] = [];
+    
+    for (let i = 0; i < verseElements.length; i++) {
+      const verseElement = verseElements[i];
+      const textElement = verseElement.getElementsByTagName('text')[0];
+      const referenceElement = verseElement.getElementsByTagName('reference')[0];
+      const categoryElement = verseElement.getElementsByTagName('category')[0];
+      
+      if (textElement && referenceElement) {
+        verses.push({
+          verse: textElement.textContent || '',
+          reference: referenceElement.textContent || '',
+          category: categoryElement ? categoryElement.textContent || 'General' : 'General'
+        });
+      }
     }
     
-    const xmlString = await response.text();
-    const verses = parseXML(xmlString);
-    
-    // Cache the verses for future use
-    bibleVersesCache = verses;
     return verses;
   } catch (error) {
-    console.error('Error loading Bible verses:', error);
-    // Return an empty array if there's an error
-    return [];
+    console.error('Error loading verses:', error);
+    return [{
+      verse: 'For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.',
+      reference: 'John 3:16',
+      category: 'Faith'
+    }];
   }
 };
 
 export const getRandomVerse = async (): Promise<BibleVerse> => {
-  const verses = await loadBibleVerses();
-  if (verses.length === 0) {
-    // Return a default verse if no verses are available
-    return {
-      verse: "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.",
-      reference: "John 3:16"
-    };
-  }
-  
+  const verses = await loadVerses();
   const randomIndex = Math.floor(Math.random() * verses.length);
   return verses[randomIndex];
 };
 
+export const getVersesByCategory = async (category: string): Promise<BibleVerse[]> => {
+  const verses = await loadVerses();
+  if (category === 'All') {
+    return verses;
+  }
+  return verses.filter(verse => verse.category === category);
+};
+
+export const searchVerses = async (term: string): Promise<BibleVerse[]> => {
+  if (!term.trim()) {
+    return loadVerses();
+  }
+  
+  const verses = await loadVerses();
+  const searchTerm = term.toLowerCase().trim();
+  
+  return verses.filter(
+    verse => 
+      verse.verse.toLowerCase().includes(searchTerm) || 
+      verse.reference.toLowerCase().includes(searchTerm) ||
+      verse.category.toLowerCase().includes(searchTerm)
+  );
+};
+
+export const getCategories = async (): Promise<string[]> => {
+  const verses = await loadVerses();
+  const categoriesSet = new Set(verses.map(verse => verse.category));
+  return Array.from(categoriesSet).sort();
+};
+
 export const getRandomBackground = (): string => {
-  // Prioritize gradients as they look better
-  if (Math.random() > 0.2) { // 80% chance to get a gradient
-    const randomIndex = Math.floor(Math.random() * gradients.length);
-    return gradients[randomIndex];
-  } else {
-    const randomIndex = Math.floor(Math.random() * backgroundColors.length);
-    return backgroundColors[randomIndex];
+  const backgrounds = [
+    'bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-blue-900 dark:to-indigo-950',
+    'bg-gradient-to-br from-green-100 to-emerald-200 dark:from-green-900 dark:to-emerald-950',
+    'bg-gradient-to-br from-purple-100 to-pink-200 dark:from-purple-900 dark:to-pink-950',
+    'bg-gradient-to-br from-amber-100 to-yellow-200 dark:from-amber-900 dark:to-yellow-950',
+    'bg-gradient-to-br from-rose-100 to-red-200 dark:from-rose-900 dark:to-red-950',
+    'bg-gradient-to-br from-sky-100 to-cyan-200 dark:from-sky-900 dark:to-cyan-950',
+    'bg-gradient-to-br from-indigo-100 to-violet-200 dark:from-indigo-900 dark:to-violet-950',
+    'bg-gradient-to-br from-fuchsia-100 to-pink-200 dark:from-fuchsia-900 dark:to-pink-950',
+    'bg-gradient-to-br from-teal-100 to-emerald-200 dark:from-teal-900 dark:to-emerald-950',
+    'bg-gradient-to-br from-orange-100 to-amber-200 dark:from-orange-900 dark:to-amber-950'
+  ];
+  
+  const randomIndex = Math.floor(Math.random() * backgrounds.length);
+  return backgrounds[randomIndex];
+};
+
+export const storeRecentVerse = (verse: BibleVerse): void => {
+  try {
+    const recentVersesJSON = localStorage.getItem('recentVerses');
+    const recentVerses = recentVersesJSON ? JSON.parse(recentVersesJSON) : [];
+    
+    const verseWithTimestamp = {
+      ...verse,
+      timestamp: Date.now()
+    };
+    
+    const filteredVerses = recentVerses.filter(
+      (item: any) => item.reference !== verse.reference
+    );
+    
+    filteredVerses.unshift(verseWithTimestamp);
+    
+    const limitedVerses = filteredVerses.slice(0, 5);
+    
+    localStorage.setItem('recentVerses', JSON.stringify(limitedVerses));
+  } catch (error) {
+    console.error('Error storing recent verse:', error);
+  }
+};
+
+export const getRecentVerses = (): any[] => {
+  try {
+    const recentVersesJSON = localStorage.getItem('recentVerses');
+    return recentVersesJSON ? JSON.parse(recentVersesJSON) : [];
+  } catch (error) {
+    console.error('Error getting recent verses:', error);
+    return [];
   }
 };
