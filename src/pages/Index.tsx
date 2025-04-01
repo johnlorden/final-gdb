@@ -9,15 +9,29 @@ const Index = () => {
   const [verse, setVerse] = useState('');
   const [reference, setReference] = useState('');
   const [background, setBackground] = useState('');
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const loadNewVerse = () => {
-    const { verse, reference } = getRandomVerse();
-    const newBackground = getRandomBackground();
-    
-    setVerse(verse);
-    setReference(reference);
-    setBackground(newBackground);
+  const loadNewVerse = async () => {
+    setLoading(true);
+    try {
+      const { verse, reference } = await getRandomVerse();
+      const newBackground = getRandomBackground();
+      
+      setVerse(verse);
+      setReference(reference);
+      setBackground(newBackground);
+    } catch (error) {
+      console.error('Error loading verse:', error);
+      toast({
+        title: "Error loading verse",
+        description: "Please try again later",
+        variant: "destructive",
+        duration: 3000,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -41,6 +55,7 @@ const Index = () => {
           reference={reference} 
           onRefresh={handleRefresh}
           background={background}
+          loading={loading}
         />
       </div>
       <DonateFooter />

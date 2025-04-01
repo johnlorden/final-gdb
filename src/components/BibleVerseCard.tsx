@@ -3,19 +3,22 @@ import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface BibleVerseCardProps {
   verse: string;
   reference: string;
   onRefresh: () => void;
   background: string;
+  loading?: boolean;
 }
 
 const BibleVerseCard: React.FC<BibleVerseCardProps> = ({ 
   verse, 
   reference, 
   onRefresh,
-  background
+  background,
+  loading = false
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -57,16 +60,27 @@ const BibleVerseCard: React.FC<BibleVerseCardProps> = ({
         God's Daily Bread
       </h1>
       
-      <div className="my-8">
-        <p className="text-xl md:text-2xl font-medium text-gray-700 italic mb-4">
-          "{verse}"
-        </p>
-        <p className="text-lg md:text-xl font-semibold text-gray-800">
-          — {reference}
-        </p>
+      <div className="my-8 w-full">
+        {loading ? (
+          <>
+            <Skeleton className="h-6 w-full mb-2" />
+            <Skeleton className="h-6 w-5/6 mx-auto mb-2" />
+            <Skeleton className="h-6 w-4/6 mx-auto mb-4" />
+            <Skeleton className="h-4 w-1/3 mx-auto" />
+          </>
+        ) : (
+          <>
+            <p className="text-xl md:text-2xl font-medium text-gray-700 italic mb-4">
+              "{verse}"
+            </p>
+            <p className="text-lg md:text-xl font-semibold text-gray-800">
+              — {reference}
+            </p>
+          </>
+        )}
       </div>
       
-      {!isCapturing && (
+      {!isCapturing && !loading && (
         <div className="flex space-x-4 mt-6">
           <Button 
             variant="outline" 
