@@ -1,4 +1,3 @@
-
 interface BibleVerse {
   verse: string;
   reference: string;
@@ -84,6 +83,66 @@ const bibleVerses: BibleVerse[] = [
   {
     verse: "Love is patient and kind; love does not envy or boast; it is not arrogant or rude. It does not insist on its own way; it is not irritable or resentful; it does not rejoice at wrongdoing, but rejoices with the truth.",
     reference: "1 Corinthians 13:4-6"
+  },
+  {
+    verse: "The fear of the LORD is the beginning of wisdom, and the knowledge of the Holy One is insight.",
+    reference: "Proverbs 9:10"
+  },
+  {
+    verse: "For by grace you have been saved through faith. And this is not your own doing; it is the gift of God.",
+    reference: "Ephesians 2:8"
+  },
+  {
+    verse: "Every good gift and every perfect gift is from above, coming down from the Father of lights, with whom there is no variation or shadow due to change.",
+    reference: "James 1:17"
+  },
+  {
+    verse: "This is the day that the LORD has made; let us rejoice and be glad in it.",
+    reference: "Psalm 118:24"
+  },
+  {
+    verse: "Be still, and know that I am God. I will be exalted among the nations, I will be exalted in the earth!",
+    reference: "Psalm 46:10"
+  },
+  {
+    verse: "Greater love has no one than this, that someone lay down his life for his friends.",
+    reference: "John 15:13"
+  },
+  {
+    verse: "The name of the LORD is a strong tower; the righteous man runs into it and is safe.",
+    reference: "Proverbs 18:10"
+  },
+  {
+    verse: "Your word is a lamp to my feet and a light to my path.",
+    reference: "Psalm 119:105"
+  },
+  {
+    verse: "Let the word of Christ dwell in you richly, teaching and admonishing one another in all wisdom, singing psalms and hymns and spiritual songs, with thankfulness in your hearts to God.",
+    reference: "Colossians 3:16"
+  },
+  {
+    verse: "Cast your burden on the LORD, and he will sustain you; he will never permit the righteous to be moved.",
+    reference: "Psalm 55:22"
+  },
+  {
+    verse: "For I am sure that neither death nor life, nor angels nor rulers, nor things present nor things to come, nor powers, nor height nor depth, nor anything else in all creation, will be able to separate us from the love of God in Christ Jesus our Lord.",
+    reference: "Romans 8:38-39"
+  },
+  {
+    verse: "The grass withers, the flower fades, but the word of our God will stand forever.",
+    reference: "Isaiah 40:8"
+  },
+  {
+    verse: "Blessed are the pure in heart, for they shall see God.",
+    reference: "Matthew 5:8"
+  },
+  {
+    verse: "But the fruit of the Spirit is love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, self-control; against such things there is no law.",
+    reference: "Galatians 5:22-23"
+  },
+  {
+    verse: "Count it all joy, my brothers, when you meet trials of various kinds, for you know that the testing of your faith produces steadfastness.",
+    reference: "James 1:2-3"
   }
 ];
 
@@ -95,14 +154,22 @@ const backgroundColors = [
 ];
 
 const gradients = [
-  "bg-gradient-to-r from-blue-100 to-green-100",
-  "bg-gradient-to-r from-purple-100 to-pink-100",
-  "bg-gradient-to-r from-yellow-100 to-orange-100",
-  "bg-gradient-to-r from-green-100 to-teal-100",
-  "bg-gradient-to-r from-indigo-100 to-purple-100",
-  "bg-gradient-to-r from-red-100 to-pink-100",
-  "bg-gradient-to-r from-amber-100 to-yellow-100",
-  "bg-gradient-to-r from-teal-100 to-cyan-100"
+  "bg-gradient-to-r from-blue-200 to-cyan-200",
+  "bg-gradient-to-r from-violet-200 to-pink-200",
+  "bg-gradient-to-r from-yellow-200 to-orange-200",
+  "bg-gradient-to-r from-green-200 to-emerald-200",
+  "bg-gradient-to-r from-indigo-200 to-purple-200",
+  "bg-gradient-to-r from-rose-200 to-red-200",
+  "bg-gradient-to-r from-amber-200 to-yellow-200",
+  "bg-gradient-to-r from-teal-200 to-cyan-200",
+  "bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100",
+  "bg-gradient-to-br from-green-100 via-teal-100 to-blue-100",
+  "bg-gradient-to-bl from-pink-100 via-rose-100 to-amber-100",
+  "bg-gradient-to-bl from-indigo-100 via-purple-100 to-pink-100",
+  "bg-gradient-to-tr from-emerald-100 via-green-100 to-lime-100",
+  "bg-gradient-to-tr from-sky-100 via-blue-100 to-indigo-100",
+  "bg-gradient-to-tl from-amber-100 via-orange-100 to-red-100",
+  "bg-gradient-to-tl from-cyan-100 via-sky-100 to-blue-100"
 ];
 
 export const getRandomVerse = (): BibleVerse => {
@@ -111,13 +178,13 @@ export const getRandomVerse = (): BibleVerse => {
 };
 
 export const getRandomBackground = (): string => {
-  // Choose between solid colors and gradients
-  if (Math.random() > 0.5) {
-    const randomIndex = Math.floor(Math.random() * backgroundColors.length);
-    return backgroundColors[randomIndex];
-  } else {
+  // Prioritize gradients as they look better
+  if (Math.random() > 0.2) { // 80% chance to get a gradient
     const randomIndex = Math.floor(Math.random() * gradients.length);
     return gradients[randomIndex];
+  } else {
+    const randomIndex = Math.floor(Math.random() * backgroundColors.length);
+    return backgroundColors[randomIndex];
   }
 };
 
