@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import DonateFooter from '@/components/DonateFooter';
 import { getRandomVerse, getRandomBackground } from '@/services/BibleVerseService';
-import { toast } from '@/components/ui/use-toast';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
@@ -40,7 +39,8 @@ const Index = () => {
         <BibleVerseCard 
           verse={verse} 
           reference={reference} 
-          onRefresh={handleRefresh} 
+          onRefresh={handleRefresh}
+          background={background}
         />
       </div>
       <DonateFooter />
