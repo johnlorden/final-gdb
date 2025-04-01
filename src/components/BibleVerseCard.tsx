@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { useToast } from '@/hooks/use-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface BibleVerseCardProps {
   verse: string;
@@ -42,10 +43,13 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
   ({ verse, reference }, ref) => {
     const { toast } = useToast();
     const [gradientIndex, setGradientIndex] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [key, setKey] = useState(0);
     
     // Change gradient when verse or reference changes
     useEffect(() => {
       if (verse && reference) {
+        setKey(prev => prev + 1); // Force re-animation
         // Create a consistent but pseudo-random index based on the verse reference
         const sum = reference.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         setGradientIndex(sum % gradients.length);
@@ -53,7 +57,7 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
     }, [verse, reference]);
     
     const handleSaveImage = async () => {
-      // Check if ref exists and has a current property (it's a RefObject)
+      // Check if ref exists
       if (!ref) return;
       
       // Create a local variable to hold the element
@@ -76,6 +80,8 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
       
       // Ensure we have an element to capture
       if (!element) return;
+      
+      setIsLoading(true);
       
       try {
         const canvas = await html2canvas(element, {
@@ -102,6 +108,8 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
           variant: "destructive",
           duration: 2000,
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -112,29 +120,64 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
     
     return (
       <div className="relative w-full max-w-2xl">
-        <div 
-          ref={ref}
-          className={`relative w-full max-w-2xl ${gradientClasses} dark:text-gray-100 rounded-xl shadow-md overflow-hidden border dark:border-gray-800`}
-        >
-          <div className="px-6 py-8 sm:p-10">
-            <div className="text-center">
-              <p className="text-lg sm:text-xl leading-relaxed mb-4 font-serif">"{verse}"</p>
-              <p className="text-sm sm:text-base font-medium">— {reference}</p>
-            </div>
-          </div>
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={key}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 300, 
+              damping: 25 
+            }}
+          >
+            <motion.div 
+              ref={ref}
+              className={`relative w-full max-w-2xl ${gradientClasses} dark:text-gray-100 rounded-xl shadow-md overflow-hidden border dark:border-gray-800`}
+              whileHover={{ scale: 1.01, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            >
+              <div className="px-6 py-8 sm:p-10">
+                <div className="text-center">
+                  <motion.p 
+                    className="text-lg sm:text-xl leading-relaxed mb-4 font-serif"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                  >
+                    "{verse}"
+                  </motion.p>
+                  <motion.p 
+                    className="text-sm sm:text-base font-medium"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                  >
+                    — {reference}
+                  </motion.p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
         
-        <div className="absolute bottom-3 right-3">
+        <motion.div 
+          className="absolute bottom-3 right-3"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
           <Button 
             onClick={handleSaveImage}
             size="sm"
             variant="secondary"
-            className="rounded-full shadow-sm opacity-80 hover:opacity-100"
+            className="rounded-full shadow-sm opacity-80 hover:opacity-100 transition-all duration-200"
+            disabled={isLoading}
           >
-            <Download size={16} />
+            <Download size={16} className={isLoading ? "animate-pulse" : ""} />
             <span className="sr-only">Save Image</span>
           </Button>
-        </div>
+        </motion.div>
       </div>
     );
   }

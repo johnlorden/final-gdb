@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import SearchBar from '@/components/SearchBar';
 import VerseCategories from '@/components/VerseCategories';
@@ -7,6 +7,8 @@ import DonateFooter from '@/components/DonateFooter';
 import SocialShareBar from '@/components/SocialShareBar';
 import { useSearchParams } from 'react-router-dom';
 import BibleVerseService from '../services/BibleVerseService';
+import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
 
 interface IndexProps {
   addToRecentVerses: (verse: string, reference: string) => void;
@@ -19,25 +21,36 @@ interface IndexProps {
 const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
   const [searchParams] = useSearchParams();
   const cardRef = useRef<HTMLDivElement>(null);
-  const [verse, setVerse] = React.useState('');
-  const [reference, setReference] = React.useState('');
-  const [initialLoad, setInitialLoad] = React.useState(true);
+  const [verse, setVerse] = useState('');
+  const [reference, setReference] = useState('');
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState('All');
+  const [previousVerse, setPreviousVerse] = useState('');
+
+  // Preload verses for faster display
+  const verseCache = useRef<Map<string, { text: string, reference: string }[]>>(new Map());
 
   // Load verse from URL parameter on initial load
   useEffect(() => {
     const bibleVerse = searchParams.get('bibleverse');
     
     if (bibleVerse && initialLoad) {
+      setIsLoading(true);
       BibleVerseService.getVerseByReference(bibleVerse)
         .then((result) => {
           if (result) {
             setVerse(result.text);
             setReference(result.reference);
             addToRecentVerses(result.text, result.reference);
+            setPreviousVerse(result.reference);
           }
         })
         .catch(error => console.error('Error loading verse from URL:', error))
-        .finally(() => setInitialLoad(false));
+        .finally(() => {
+          setIsLoading(false);
+          setInitialLoad(false);
+        });
     } else if (initialLoad) {
       setInitialLoad(false);
       // Load random verse if no URL parameter
@@ -53,13 +66,36 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     }
   }, [currentVerse]);
 
+  // Preload verses for categories
+  useEffect(() => {
+    async function preloadCategoryVerses() {
+      const categories = BibleVerseService.getCategories();
+      for (const category of categories) {
+        if (!verseCache.current.has(category)) {
+          try {
+            const verses = await BibleVerseService.getVersesByCategory(category, 5);
+            if (verses && verses.length) {
+              verseCache.current.set(category, verses);
+            }
+          } catch (error) {
+            console.error(`Error preloading verses for category ${category}:`, error);
+          }
+        }
+      }
+    }
+    
+    preloadCategoryVerses();
+  }, []);
+
   const handleSearch = (query: string) => {
+    setIsLoading(true);
     BibleVerseService.getVerseByReference(query)
       .then((result) => {
         if (result) {
           setVerse(result.text);
           setReference(result.reference);
           addToRecentVerses(result.text, result.reference);
+          setPreviousVerse(result.reference);
           
           // Update URL when searching
           const url = new URL(window.location.href);
@@ -67,16 +103,44 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           window.history.pushState({}, '', url);
         }
       })
-      .catch(error => console.error('Error searching for verse:', error));
+      .catch(error => console.error('Error searching for verse:', error))
+      .finally(() => setIsLoading(false));
   };
 
   const handleCategorySelect = (category: string) => {
+    setIsLoading(true);
+    setCurrentCategory(category);
+    
+    // Try to get verse from cache first
+    if (category !== 'All' && verseCache.current.has(category)) {
+      const cachedVerses = verseCache.current.get(category)!;
+      // Find a verse that's different from the current one
+      const newVerse = cachedVerses.find(v => v.reference !== previousVerse);
+      
+      if (newVerse) {
+        setVerse(newVerse.text);
+        setReference(newVerse.reference);
+        addToRecentVerses(newVerse.text, newVerse.reference);
+        setPreviousVerse(newVerse.reference);
+        
+        // Update URL
+        const url = new URL(window.location.href);
+        url.searchParams.set('bibleverse', newVerse.reference);
+        window.history.pushState({}, '', url);
+        
+        setIsLoading(false);
+        return;
+      }
+    }
+    
+    // If cache miss or "All" category, fetch from service
     BibleVerseService.getVerseByCategory(category)
       .then((result) => {
         if (result) {
           setVerse(result.text);
           setReference(result.reference);
           addToRecentVerses(result.text, result.reference);
+          setPreviousVerse(result.reference);
           
           // Update URL when selecting category
           const url = new URL(window.location.href);
@@ -84,16 +148,19 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           window.history.pushState({}, '', url);
         }
       })
-      .catch(error => console.error('Error getting verse by category:', error));
+      .catch(error => console.error('Error getting verse by category:', error))
+      .finally(() => setIsLoading(false));
   };
 
   const handleRandomVerse = () => {
+    setIsLoading(true);
     BibleVerseService.getRandomVerse()
       .then((result) => {
         if (result) {
           setVerse(result.text);
           setReference(result.reference);
           addToRecentVerses(result.text, result.reference);
+          setPreviousVerse(result.reference);
           
           // Update URL when getting random verse
           const url = new URL(window.location.href);
@@ -101,28 +168,61 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           window.history.pushState({}, '', url);
         }
       })
-      .catch(error => console.error('Error getting random verse:', error));
+      .catch(error => console.error('Error getting random verse:', error))
+      .finally(() => setIsLoading(false));
   };
 
   return (
-    <div className="container px-4 pt-4 mx-auto max-w-4xl">
+    <motion.div 
+      className="container px-4 pt-4 mx-auto max-w-4xl"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="flex flex-col gap-6">
-        <section className="flex flex-col gap-4">
+        <motion.section 
+          className="flex flex-col gap-4"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+        >
           <SearchBar onSearch={handleSearch} />
           <VerseCategories onCategorySelect={handleCategorySelect} onRandomVerse={handleRandomVerse} />
-        </section>
+        </motion.section>
         
-        <section className="flex flex-col items-center">
-          <BibleVerseCard verse={verse} reference={reference} ref={cardRef} />
-        </section>
+        <motion.section 
+          className="flex flex-col items-center"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+        >
+          {isLoading ? (
+            <div className="w-full max-w-2xl">
+              <Skeleton className="h-[200px] w-full rounded-xl" />
+            </div>
+          ) : (
+            <BibleVerseCard verse={verse} reference={reference} ref={cardRef} />
+          )}
+        </motion.section>
         
-        <section className="w-full max-w-2xl mx-auto">
+        <motion.section 
+          className="w-full max-w-2xl mx-auto"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+        >
           <SocialShareBar verse={verse} reference={reference} cardRef={cardRef} />
-        </section>
+        </motion.section>
         
-        <DonateFooter />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
+          <DonateFooter />
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
