@@ -197,7 +197,7 @@ const Index = () => {
       <Header />
       
       <main className="flex-grow w-full flex flex-col items-center justify-center p-4 pt-20 pb-16">
-        <div className="container max-w-4xl mx-auto">
+      <div className="container max-w-4xl mx-auto flex flex-col items-center">
           <SearchBar onSearch={handleSearch} />
           
           <VerseCategories 
