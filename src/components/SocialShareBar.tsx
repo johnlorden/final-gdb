@@ -1,15 +1,17 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Twitter, Facebook, Mail } from 'lucide-react';
+import { Copy, Twitter, Facebook, Mail, Link } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import html2canvas from 'html2canvas';
 
 interface SocialShareBarProps {
   verse: string;
   reference: string;
+  cardRef?: React.RefObject<HTMLDivElement>;
 }
 
-const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference }) => {
+const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardRef }) => {
   const { toast } = useToast();
   const verseText = `"${verse}" — ${reference}`;
   
@@ -19,21 +21,62 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference }) => 
   currentURL.search = `?bibleverse=${encodeURIComponent(reference)}`;
   const shareURL = currentURL.toString();
   
-  const shareToTwitter = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(verseText)}&url=${encodeURIComponent(shareURL)}&hashtags=Bible,DailyVerse`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
-  
-  const shareToFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL)}&quote=${encodeURIComponent(verseText)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
-  
-  const shareByEmail = () => {
-    const subject = `Bible Verse: ${reference}`;
-    const body = `${verseText}\n\nRead more: ${shareURL}`;
-    const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoUrl, '_blank', 'noopener,noreferrer');
+  const shareWithImage = async (platform: 'twitter' | 'facebook' | 'email') => {
+    try {
+      let imageUrl = '';
+      
+      if (cardRef?.current) {
+        // Generate image from verse card
+        const canvas = await html2canvas(cardRef.current, { 
+          backgroundColor: null,
+          scale: 2 // Better quality
+        });
+        imageUrl = canvas.toDataURL('image/png');
+        
+        // Store image in local storage temporarily
+        localStorage.setItem('verse_image', imageUrl);
+      }
+      
+      // Share text with image and URL
+      const shareText = `${verseText}\n\n${shareURL}`;
+      
+      switch (platform) {
+        case 'twitter':
+          window.open(
+            `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&hashtags=Bible,DailyVerse`,
+            '_blank',
+            'noopener,noreferrer'
+          );
+          break;
+        case 'facebook':
+          // Facebook doesn't allow direct image sharing via URL parameters
+          // We use the Facebook Share Dialog API
+          window.open(
+            `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL)}&quote=${encodeURIComponent(verseText)}`,
+            '_blank',
+            'noopener,noreferrer'
+          );
+          break;
+        case 'email':
+          const subject = `Bible Verse: ${reference}`;
+          const body = `${verseText}\n\nRead more: ${shareURL}`;
+          const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+          window.open(mailtoUrl, '_blank', 'noopener,noreferrer');
+          break;
+      }
+    } catch (error) {
+      console.error('Error sharing with image:', error);
+      
+      // Fallback to regular sharing
+      const shareText = `${verseText}\n\n${shareURL}`;
+      const url = platform === 'twitter'
+        ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&hashtags=Bible,DailyVerse`
+        : platform === 'facebook'
+          ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL)}&quote=${encodeURIComponent(verseText)}`
+          : `mailto:?subject=${encodeURIComponent(`Bible Verse: ${reference}`)}&body=${encodeURIComponent(`${verseText}\n\nRead more: ${shareURL}`)}`;
+      
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
   
   const copyToClipboard = () => {
@@ -65,7 +108,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference }) => 
         <span className="hidden sm:inline">Copy</span>
       </Button>
       <Button 
-        onClick={shareToTwitter} 
+        onClick={() => shareWithImage('twitter')} 
         variant="outline" 
         size="sm" 
         className="flex items-center gap-1"
@@ -74,7 +117,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference }) => 
         <span className="hidden sm:inline">Twitter</span>
       </Button>
       <Button 
-        onClick={shareToFacebook} 
+        onClick={() => shareWithImage('facebook')} 
         variant="outline" 
         size="sm" 
         className="flex items-center gap-1"
@@ -83,7 +126,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference }) => 
         <span className="hidden sm:inline">Facebook</span>
       </Button>
       <Button 
-        onClick={shareByEmail} 
+        onClick={() => shareWithImage('email')} 
         variant="outline" 
         size="sm" 
         className="flex items-center gap-1"
