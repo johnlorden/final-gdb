@@ -108,6 +108,24 @@
     }
   }
   
+  .verse-text-focus {
+    animation: textFocus 1s ease-out;
+  }
+  
+  @keyframes textFocus {
+    0% {
+      letter-spacing: -0.5px;
+      opacity: 0.8;
+    }
+    40% {
+      letter-spacing: normal;
+      opacity: 1;
+    }
+    100% {
+      letter-spacing: normal;
+    }
+  }
+  
   .category-hover {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     will-change: transform, box-shadow;
@@ -116,6 +134,14 @@
   .category-hover:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .button-press {
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  
+  .button-press:active {
+    transform: scale(0.97);
   }
 
   .scrollbar-hide {
@@ -131,6 +157,22 @@
     transform: translateZ(0);
     backface-visibility: hidden;
   }
+  
+  /* Improved page transitions */
+  .page-transition-in {
+    animation: pageIn 0.4s ease forwards;
+  }
+  
+  @keyframes pageIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 /* Improved animation for category selection */
@@ -143,4 +185,10 @@
 .category-highlight {
   animation: highlight 0.5s ease-in-out;
   will-change: transform;
+}
+
+/* Add subtle focus styles for better accessibility */
+.focus-visible:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }

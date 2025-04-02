@@ -56,16 +56,16 @@ The project is built with:
 
 4. Open your browser and navigate to `http://localhost:8080`
 
-## Deploying to Vercel
+## Deploying to Production
 
-### Option 1: Deploy with Vercel CLI
+### Option 1: Deploy with CLI
 
-1. Install Vercel CLI globally
+1. Install the deployment CLI globally
    ```bash
    npm install -g vercel
    ```
 
-2. Login to your Vercel account
+2. Login to your account
    ```bash
    vercel login
    ```
@@ -80,26 +80,24 @@ The project is built with:
    vercel --prod
    ```
 
-### Option 2: Deploy via Vercel Dashboard (Recommended)
+### Option 2: Deploy via Dashboard (Recommended)
 
 1. Push your code to a GitHub repository
 
-2. Sign in to [Vercel](https://vercel.com)
+2. Sign in to your deployment platform
 
-3. Click "Add New..." > "Project"
+3. Import your GitHub repository
 
-4. Select your GitHub repository
-
-5. Configure your project:
+4. Configure your project:
    - Framework Preset: Select "Vite"
-   - Build Command: Leave as default (`npm run build`)
-   - Output Directory: Leave as default (`dist`)
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
    - Install Command: `npm install`
    - Development Command: `npm run dev`
 
-6. Click "Deploy"
+5. Click "Deploy"
 
-### Important Vercel Deployment Settings
+### Important Deployment Settings
 
 1. **Environment Variables**
    - No additional environment variables are required for this project
@@ -111,15 +109,13 @@ The project is built with:
    - Install Command: `npm install`
 
 3. **Optimizing for Production**
-   - Enable Auto Minify (on by default in Vercel)
-   - Use Vercel Edge Network for global CDN distribution
+   - Enable Auto Minify
+   - Use a CDN for global distribution
 
 4. **Custom Domain Setup**
-   - After deployment, go to your project settings in Vercel
-   - Navigate to "Domains"
-   - Add your custom domain and follow the DNS configuration instructions
+   - After deployment, add your custom domain in the project settings
 
-## Troubleshooting Vercel Deployments
+## Troubleshooting Deployments
 
 If you encounter issues during deployment, try these solutions:
 
@@ -132,10 +128,7 @@ If you encounter issues during deployment, try these solutions:
    - Ensure all files in the `public` directory are being properly included
    - The `bible-verses.xml` file must be in the `public/data` directory
 
-3. **API Routes Not Working**
-   - This app is fully client-side and doesn't require server-side API routes
-
-4. **Cache Issues**
+3. **Cache Issues**
    - If updates aren't showing, try deploying with cache cleared:
      ```bash
      vercel --prod --force
