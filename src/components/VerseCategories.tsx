@@ -8,7 +8,7 @@ import BibleVerseService from '@/services/BibleVerseService';
 
 interface CategoryProps {
   onCategorySelect: (category: string) => void;
-  onRandomVerse: () => void;
+  onRandomVerse: (category?: string) => void; // Modified to accept optional category
   currentCategory: string;
 }
 
@@ -56,6 +56,11 @@ const VerseCategories: React.FC<CategoryProps> = ({
     
     // Always generate a new verse when a category is clicked
     onCategorySelect(category);
+  };
+
+  const handleNewVerse = () => {
+    // Pass the current category to generate a verse from that category
+    onRandomVerse(currentCategory);
   };
 
   const handleScrollLeft = () => {
@@ -114,7 +119,7 @@ const VerseCategories: React.FC<CategoryProps> = ({
           whileTap={{ scale: 0.95 }}
         >
           <Button
-            onClick={onRandomVerse}
+            onClick={handleNewVerse}
             variant="outline"
             size="sm"
             className="rounded-full flex items-center gap-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 transition-all duration-300"

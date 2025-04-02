@@ -93,22 +93,52 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           addToRecentVerses(result.text, result.reference);
           setPreviousVerse(result.reference);
           
-          const url = new URL(window.location.href);
-          url.searchParams.set('bibleverse', result.reference);
-          window.history.pushState({}, '', url);
+          // Update URL
+          updateUrlWithVerse(result.reference);
+          
+          // Update category based on the verse's category if possible
+          if (result.categories && result.categories.length > 0) {
+            setCurrentCategory(result.categories[0]);
+          }
         }
       })
       .catch(error => console.error('Error searching for verse:', error))
       .finally(() => setIsLoading(false));
   };
 
+  // Update URL helper function
+  const updateUrlWithVerse = (verseReference: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('bibleverse', verseReference);
+    window.history.pushState({}, '', url);
+  };
+
   const handleCategorySelect = (category: string) => {
     setIsLoading(true);
     setCurrentCategory(category);
-    
-    // Always get a new verse whether clicking on the same category again or changing categories
     setLastClickedCategory(category);
     
+    // Always get a new verse when selecting a category
+    getVerseFromCategory(category);
+  };
+
+  const handleRandomVerse = (category?: string) => {
+    setIsLoading(true);
+    
+    // If category is provided, use it; otherwise, use 'All'
+    const categoryToUse = category || 'All';
+    
+    // If not 'All', update current category
+    if (category) {
+      setCurrentCategory(category);
+    }
+    
+    // Get a verse from the specified category (or random if 'All')
+    getVerseFromCategory(categoryToUse);
+  };
+  
+  // Helper function to get a verse from a category
+  const getVerseFromCategory = (category: string) => {
     if (category !== 'All' && verseCache.current.has(category)) {
       const cachedVerses = verseCache.current.get(category)!;
       
@@ -124,10 +154,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
         addToRecentVerses(newVerse.text, newVerse.reference);
         setPreviousVerse(newVerse.reference);
         
-        const url = new URL(window.location.href);
-        url.searchParams.set('bibleverse', newVerse.reference);
-        window.history.pushState({}, '', url);
-        
+        updateUrlWithVerse(newVerse.reference);
         setIsLoading(false);
         return;
       }
@@ -142,33 +169,10 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           addToRecentVerses(result.text, result.reference);
           setPreviousVerse(result.reference);
           
-          const url = new URL(window.location.href);
-          url.searchParams.set('bibleverse', result.reference);
-          window.history.pushState({}, '', url);
+          updateUrlWithVerse(result.reference);
         }
       })
       .catch(error => console.error('Error getting verse by category:', error))
-      .finally(() => setIsLoading(false));
-  };
-
-  const handleRandomVerse = () => {
-    setIsLoading(true);
-    setCurrentCategory('All');
-    
-    BibleVerseService.getRandomVerse()
-      .then((result) => {
-        if (result) {
-          setVerse(result.text);
-          setReference(result.reference);
-          addToRecentVerses(result.text, result.reference);
-          setPreviousVerse(result.reference);
-          
-          const url = new URL(window.location.href);
-          url.searchParams.set('bibleverse', result.reference);
-          window.history.pushState({}, '', url);
-        }
-      })
-      .catch(error => console.error('Error getting random verse:', error))
       .finally(() => setIsLoading(false));
   };
 

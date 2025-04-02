@@ -17,9 +17,10 @@ class BibleVerseService {
     'Encouragement'
   ];
   
-  // Cache the XML document once it's loaded
+  // Cache the XML document and verses for better performance
   private static xmlDocPromise: Promise<Document> | null = null;
   private static verseCache: Map<string, VerseResult[]> = new Map();
+  private static allVersesCache: VerseResult[] | null = null;
 
   // Get the XML document, loading it only once
   private static async getXmlDoc(): Promise<Document> {
@@ -42,22 +43,40 @@ class BibleVerseService {
     return this.xmlDocPromise;
   }
 
-  static async getRandomVerse(): Promise<VerseResult | null> {
+  // Parse all verses once and cache them
+  private static async getAllVerses(): Promise<VerseResult[]> {
+    if (this.allVersesCache) {
+      return this.allVersesCache;
+    }
+    
     try {
       const xmlDoc = await this.getXmlDoc();
+      const verses = Array.from(xmlDoc.getElementsByTagName('verse'));
       
-      const verses = xmlDoc.getElementsByTagName('verse');
-      if (verses.length === 0) return null;
+      this.allVersesCache = verses.map(verse => {
+        const text = verse.getElementsByTagName('text')[0]?.textContent || '';
+        const reference = verse.getElementsByTagName('reference')[0]?.textContent || '';
+        const categoriesNode = verse.getElementsByTagName('categories')[0]?.textContent || 
+                              verse.getElementsByTagName('category')[0]?.textContent || '';
+        const categories = categoriesNode.split(',').map(c => c.trim()).filter(c => c);
+        
+        return { text, reference, categories };
+      });
       
-      const randomIndex = Math.floor(Math.random() * verses.length);
-      const verseElement = verses[randomIndex];
+      return this.allVersesCache;
+    } catch (error) {
+      console.error('Error parsing all verses:', error);
+      return [];
+    }
+  }
+
+  static async getRandomVerse(): Promise<VerseResult | null> {
+    try {
+      const allVerses = await this.getAllVerses();
+      if (allVerses.length === 0) return null;
       
-      const text = verseElement.getElementsByTagName('text')[0]?.textContent || '';
-      const reference = verseElement.getElementsByTagName('reference')[0]?.textContent || '';
-      const categoriesNode = verseElement.getElementsByTagName('categories')[0]?.textContent || '';
-      const categories = categoriesNode.split(',').map(c => c.trim()).filter(c => c);
-      
-      return { text, reference, categories };
+      const randomIndex = Math.floor(Math.random() * allVerses.length);
+      return allVerses[randomIndex];
     } catch (error) {
       console.error('Error fetching random verse:', error);
       return null;
@@ -70,25 +89,15 @@ class BibleVerseService {
     }
     
     try {
-      const xmlDoc = await this.getXmlDoc();
-      
-      const verses = Array.from(xmlDoc.getElementsByTagName('verse'));
-      const matchingVerses = verses.filter(verse => {
-        const categories = verse.getElementsByTagName('categories')[0]?.textContent || '';
-        return categories.toLowerCase().includes(category.toLowerCase());
-      });
+      const allVerses = await this.getAllVerses();
+      const matchingVerses = allVerses.filter(verse => 
+        verse.categories?.some(c => c.toLowerCase() === category.toLowerCase())
+      );
       
       if (matchingVerses.length === 0) return null;
       
       const randomIndex = Math.floor(Math.random() * matchingVerses.length);
-      const verseElement = matchingVerses[randomIndex];
-      
-      const text = verseElement.getElementsByTagName('text')[0]?.textContent || '';
-      const reference = verseElement.getElementsByTagName('reference')[0]?.textContent || '';
-      const categoriesNode = verseElement.getElementsByTagName('categories')[0]?.textContent || '';
-      const categories = categoriesNode.split(',').map(c => c.trim()).filter(c => c);
-      
-      return { text, reference, categories };
+      return matchingVerses[randomIndex];
     } catch (error) {
       console.error(`Error fetching verse by category '${category}':`, error);
       return null;
@@ -107,13 +116,10 @@ class BibleVerseService {
     }
     
     try {
-      const xmlDoc = await this.getXmlDoc();
-      
-      const verses = Array.from(xmlDoc.getElementsByTagName('verse'));
-      const matchingVerses = verses.filter(verse => {
-        const categories = verse.getElementsByTagName('categories')[0]?.textContent || '';
-        return categories.toLowerCase().includes(category.toLowerCase());
-      });
+      const allVerses = await this.getAllVerses();
+      const matchingVerses = allVerses.filter(verse => 
+        verse.categories?.some(c => c.toLowerCase() === category.toLowerCase())
+      );
       
       if (matchingVerses.length === 0) return null;
       
@@ -122,18 +128,10 @@ class BibleVerseService {
       // Get subset of verses
       const selectedVerses = shuffled.slice(0, Math.min(count, shuffled.length));
       
-      const results = selectedVerses.map(verse => {
-        const text = verse.getElementsByTagName('text')[0]?.textContent || '';
-        const reference = verse.getElementsByTagName('reference')[0]?.textContent || '';
-        const categoriesNode = verse.getElementsByTagName('categories')[0]?.textContent || '';
-        const categories = categoriesNode.split(',').map(c => c.trim()).filter(c => c);
-        return { text, reference, categories };
-      });
-      
       // Store in cache
-      this.verseCache.set(category, results);
+      this.verseCache.set(category, selectedVerses);
       
-      return results;
+      return selectedVerses;
     } catch (error) {
       console.error(`Error fetching multiple verses by category '${category}':`, error);
       return null;
@@ -142,27 +140,19 @@ class BibleVerseService {
   
   static async getVerseByReference(reference: string): Promise<VerseResult | null> {
     try {
-      const xmlDoc = await this.getXmlDoc();
-      
-      const verses = Array.from(xmlDoc.getElementsByTagName('verse'));
+      const allVerses = await this.getAllVerses();
       
       // Normalize the search reference
       const searchRef = reference.trim().toLowerCase();
       
       // Find the verse by matching reference
-      const matchingVerse = verses.find(verse => {
-        const verseRef = verse.getElementsByTagName('reference')[0]?.textContent || '';
-        return verseRef.toLowerCase().includes(searchRef);
-      });
+      const matchingVerse = allVerses.find(verse => 
+        verse.reference.toLowerCase().includes(searchRef)
+      );
       
       if (!matchingVerse) return null;
       
-      const text = matchingVerse.getElementsByTagName('text')[0]?.textContent || '';
-      const actualReference = matchingVerse.getElementsByTagName('reference')[0]?.textContent || '';
-      const categoriesNode = matchingVerse.getElementsByTagName('categories')[0]?.textContent || '';
-      const categories = categoriesNode.split(',').map(c => c.trim()).filter(c => c);
-      
-      return { text, reference: actualReference, categories };
+      return matchingVerse;
     } catch (error) {
       console.error(`Error fetching verse by reference '${reference}':`, error);
       return null;
@@ -177,7 +167,7 @@ class BibleVerseService {
   // Method to preload all verses for faster access
   static async preloadAllVerses(): Promise<void> {
     try {
-      await this.getXmlDoc();
+      await this.getAllVerses();
       
       // Preload verses for each category
       for (const category of this.categories) {
@@ -193,6 +183,7 @@ class BibleVerseService {
   // Clear cache if needed
   static clearCache(): void {
     this.verseCache.clear();
+    this.allVersesCache = null;
     this.xmlDocPromise = null;
   }
 }

@@ -28,10 +28,21 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
         const clonedElement = cardRef.current.cloneNode(true) as HTMLElement;
         document.body.appendChild(clonedElement);
         
-        // Apply export styles to the clone
-        clonedElement.style.padding = '30px';
+        // Apply export styles to the clone - remove rounded corners and reduce padding
+        clonedElement.style.padding = '20px';
         clonedElement.style.borderRadius = '0px';
         clonedElement.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
+        
+        // Remove any rounded corners from inner elements
+        const innerElements = clonedElement.querySelectorAll('*');
+        innerElements.forEach(el => {
+          if (el instanceof HTMLElement) {
+            const style = window.getComputedStyle(el);
+            if (parseInt(style.borderRadius) > 0) {
+              el.style.borderRadius = '0px';
+            }
+          }
+        });
         
         // Generate image from verse card
         const canvas = await html2canvas(clonedElement, { 
