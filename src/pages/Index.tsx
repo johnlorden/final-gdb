@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import SearchBar from '@/components/SearchBar';
@@ -26,6 +27,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentCategory, setCurrentCategory] = useState('All');
   const [previousVerse, setPreviousVerse] = useState('');
+  const [lastClickedCategory, setLastClickedCategory] = useState<string | null>(null);
 
   const verseCache = useRef<Map<string, { text: string, reference: string }[]>>(new Map());
 
@@ -119,10 +121,15 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     setIsLoading(true);
     setCurrentCategory(category);
     
+    // If clicking on the same category again or changing categories, always get a new verse
+    const isSameCategory = category === lastClickedCategory;
+    setLastClickedCategory(category);
+    
     if (category !== 'All' && verseCache.current.has(category)) {
       const cachedVerses = verseCache.current.get(category)!;
       
-      const filteredVerses = cachedVerses.filter(v => v.reference !== previousVerse);
+      // Filter out the current verse to ensure we get a different one
+      const filteredVerses = cachedVerses.filter(v => v.reference !== reference);
       
       if (filteredVerses.length > 0) {
         const randomIndex = Math.floor(Math.random() * filteredVerses.length);
