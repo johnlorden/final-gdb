@@ -22,6 +22,7 @@ const VerseCategories: React.FC<CategoryProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const [clickedButton, setClickedButton] = useState<string | null>(null);
   
   // Get categories from service
   const categories = ['All', ...BibleVerseService.getCategories()];
@@ -49,6 +50,11 @@ const VerseCategories: React.FC<CategoryProps> = ({
   }, []);
   
   const handleCategorySelect = (category: string) => {
+    // Visual feedback - highlight the button temporarily
+    setClickedButton(category);
+    setTimeout(() => setClickedButton(null), 300);
+    
+    // Always generate a new verse when a category is clicked
     onCategorySelect(category);
   };
 
@@ -144,6 +150,8 @@ const VerseCategories: React.FC<CategoryProps> = ({
                 key={category}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                animate={clickedButton === category ? { scale: [1, 1.1, 1] } : {}}
+                transition={{ duration: 0.3 }}
               >
                 <Button
                   onClick={() => handleCategorySelect(category)}

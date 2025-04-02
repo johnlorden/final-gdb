@@ -24,11 +24,17 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
   const generateImage = async () => {
     try {
       if (cardRef?.current) {
-        // Add padding for better export
-        cardRef.current.classList.add('export-padding');
+        // Create a clone of the element for export to avoid modifying the original
+        const clonedElement = cardRef.current.cloneNode(true) as HTMLElement;
+        document.body.appendChild(clonedElement);
+        
+        // Apply export styles to the clone
+        clonedElement.style.padding = '30px';
+        clonedElement.style.borderRadius = '0px';
+        clonedElement.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
         
         // Generate image from verse card
-        const canvas = await html2canvas(cardRef.current, { 
+        const canvas = await html2canvas(clonedElement, { 
           backgroundColor: null,
           scale: 3, // Better quality
           useCORS: true,
@@ -36,8 +42,8 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           logging: false
         });
         
-        // Remove padding class
-        cardRef.current.classList.remove('export-padding');
+        // Remove the clone
+        document.body.removeChild(clonedElement);
         
         const imageUrl = canvas.toDataURL('image/png');
         

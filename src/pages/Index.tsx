@@ -83,21 +83,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     preloadCategoryVerses();
   }, []);
 
-  useEffect(() => {
-    const styleElement = document.createElement('style');
-    styleElement.textContent = `
-      .export-padding {
-        padding: 40px !important;
-      }
-    `;
-    
-    document.head.appendChild(styleElement);
-    
-    return () => {
-      document.head.removeChild(styleElement);
-    };
-  }, []);
-
   const handleSearch = (query: string) => {
     setIsLoading(true);
     BibleVerseService.getVerseByReference(query)
@@ -121,8 +106,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     setIsLoading(true);
     setCurrentCategory(category);
     
-    // If clicking on the same category again or changing categories, always get a new verse
-    const isSameCategory = category === lastClickedCategory;
+    // Always get a new verse whether clicking on the same category again or changing categories
     setLastClickedCategory(category);
     
     if (category !== 'All' && verseCache.current.has(category)) {
@@ -149,6 +133,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
       }
     }
     
+    // If cache doesn't have the verse or it's "All" category, get a new verse from the service
     BibleVerseService.getVerseByCategory(category)
       .then((result) => {
         if (result) {

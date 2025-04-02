@@ -76,10 +76,16 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
       setIsLoading(true);
       
       try {
-        // Add padding for export only
-        element.classList.add('export-padding');
+        // Create a clone of the element for export to avoid modifying the original
+        const clonedElement = element.cloneNode(true) as HTMLElement;
+        document.body.appendChild(clonedElement);
         
-        const canvas = await html2canvas(element, {
+        // Apply export styles to the clone
+        clonedElement.style.padding = '30px'; // Reduced padding from 40px to 30px
+        clonedElement.style.borderRadius = '0px'; // Remove rounded corners for export
+        clonedElement.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
+        
+        const canvas = await html2canvas(clonedElement, {
           backgroundColor: null,
           scale: 3, // Higher quality
           useCORS: true,
@@ -87,8 +93,8 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
           logging: false
         });
         
-        // Remove export padding
-        element.classList.remove('export-padding');
+        // Remove the clone
+        document.body.removeChild(clonedElement);
         
         const image = canvas.toDataURL('image/png');
         const link = document.createElement('a');
