@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import SearchBar from '@/components/SearchBar';
@@ -28,10 +27,8 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
   const [currentCategory, setCurrentCategory] = useState('All');
   const [previousVerse, setPreviousVerse] = useState('');
 
-  // Preload verses for faster display
   const verseCache = useRef<Map<string, { text: string, reference: string }[]>>(new Map());
 
-  // Load verse from URL parameter on initial load
   useEffect(() => {
     const bibleVerse = searchParams.get('bibleverse');
     
@@ -53,12 +50,10 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
         });
     } else if (initialLoad) {
       setInitialLoad(false);
-      // Load random verse if no URL parameter
       handleRandomVerse();
     }
   }, [searchParams, initialLoad]);
 
-  // Handle changes from currentVerse prop
   useEffect(() => {
     if (currentVerse.verse && currentVerse.reference) {
       setVerse(currentVerse.verse);
@@ -66,7 +61,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     }
   }, [currentVerse]);
 
-  // Preload verses for categories
   useEffect(() => {
     async function preloadCategoryVerses() {
       const categories = BibleVerseService.getCategories();
@@ -87,21 +81,19 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     preloadCategoryVerses();
   }, []);
 
-  // Add padding class for image export
   useEffect(() => {
-    const addExportStyles = () => {
-      // Add CSS for export styling
-      const styleElement = document.createElement('style');
-      styleElement.textContent = `
-        .export-padding {
-          padding: 40px !important;
-        }
-      `;
-      document.head.appendChild(styleElement);
-      return () => document.head.removeChild(styleElement);
-    };
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      .export-padding {
+        padding: 40px !important;
+      }
+    `;
     
-    return addExportStyles();
+    document.head.appendChild(styleElement);
+    
+    return () => {
+      document.head.removeChild(styleElement);
+    };
   }, []);
 
   const handleSearch = (query: string) => {
@@ -114,7 +106,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           addToRecentVerses(result.text, result.reference);
           setPreviousVerse(result.reference);
           
-          // Update URL when searching
           const url = new URL(window.location.href);
           url.searchParams.set('bibleverse', result.reference);
           window.history.pushState({}, '', url);
@@ -128,15 +119,12 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     setIsLoading(true);
     setCurrentCategory(category);
     
-    // Always get a new verse when selecting a category
     if (category !== 'All' && verseCache.current.has(category)) {
       const cachedVerses = verseCache.current.get(category)!;
       
-      // Find a verse that's different from the current one
       const filteredVerses = cachedVerses.filter(v => v.reference !== previousVerse);
       
       if (filteredVerses.length > 0) {
-        // Get a random verse from filtered list
         const randomIndex = Math.floor(Math.random() * filteredVerses.length);
         const newVerse = filteredVerses[randomIndex];
         
@@ -145,7 +133,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
         addToRecentVerses(newVerse.text, newVerse.reference);
         setPreviousVerse(newVerse.reference);
         
-        // Update URL
         const url = new URL(window.location.href);
         url.searchParams.set('bibleverse', newVerse.reference);
         window.history.pushState({}, '', url);
@@ -155,7 +142,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
       }
     }
     
-    // If cache miss or "All" category, fetch from service
     BibleVerseService.getVerseByCategory(category)
       .then((result) => {
         if (result) {
@@ -164,7 +150,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           addToRecentVerses(result.text, result.reference);
           setPreviousVerse(result.reference);
           
-          // Update URL when selecting category
           const url = new URL(window.location.href);
           url.searchParams.set('bibleverse', result.reference);
           window.history.pushState({}, '', url);
@@ -176,7 +161,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
 
   const handleRandomVerse = () => {
     setIsLoading(true);
-    // Reset category when getting a random verse
     setCurrentCategory('All');
     
     BibleVerseService.getRandomVerse()
@@ -187,7 +171,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           addToRecentVerses(result.text, result.reference);
           setPreviousVerse(result.reference);
           
-          // Update URL when getting random verse
           const url = new URL(window.location.href);
           url.searchParams.set('bibleverse', result.reference);
           window.history.pushState({}, '', url);
