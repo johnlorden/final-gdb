@@ -73,7 +73,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
       for (const category of categories) {
         if (!verseCache.current.has(category)) {
           try {
-            const verses = await BibleVerseService.getVersesByCategory(category, 5);
+            const verses = await BibleVerseService.getVersesByCategory(category, 10);
             if (verses && verses.length) {
               verseCache.current.set(category, verses);
             }
@@ -85,6 +85,23 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     }
     
     preloadCategoryVerses();
+  }, []);
+
+  // Add padding class for image export
+  useEffect(() => {
+    const addExportStyles = () => {
+      // Add CSS for export styling
+      const styleElement = document.createElement('style');
+      styleElement.textContent = `
+        .export-padding {
+          padding: 40px !important;
+        }
+      `;
+      document.head.appendChild(styleElement);
+      return () => document.head.removeChild(styleElement);
+    };
+    
+    return addExportStyles();
   }, []);
 
   const handleSearch = (query: string) => {
@@ -111,13 +128,18 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     setIsLoading(true);
     setCurrentCategory(category);
     
-    // Try to get verse from cache first
+    // Always get a new verse when selecting a category
     if (category !== 'All' && verseCache.current.has(category)) {
       const cachedVerses = verseCache.current.get(category)!;
-      // Find a verse that's different from the current one
-      const newVerse = cachedVerses.find(v => v.reference !== previousVerse);
       
-      if (newVerse) {
+      // Find a verse that's different from the current one
+      const filteredVerses = cachedVerses.filter(v => v.reference !== previousVerse);
+      
+      if (filteredVerses.length > 0) {
+        // Get a random verse from filtered list
+        const randomIndex = Math.floor(Math.random() * filteredVerses.length);
+        const newVerse = filteredVerses[randomIndex];
+        
         setVerse(newVerse.text);
         setReference(newVerse.reference);
         addToRecentVerses(newVerse.text, newVerse.reference);
@@ -154,6 +176,9 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
 
   const handleRandomVerse = () => {
     setIsLoading(true);
+    // Reset category when getting a random verse
+    setCurrentCategory('All');
+    
     BibleVerseService.getRandomVerse()
       .then((result) => {
         if (result) {
@@ -187,7 +212,11 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           transition={{ delay: 0.1, duration: 0.4 }}
         >
           <SearchBar onSearch={handleSearch} />
-          <VerseCategories onCategorySelect={handleCategorySelect} onRandomVerse={handleRandomVerse} />
+          <VerseCategories 
+            onCategorySelect={handleCategorySelect} 
+            onRandomVerse={handleRandomVerse}
+            currentCategory={currentCategory}
+          />
         </motion.section>
         
         <motion.section 
@@ -201,7 +230,12 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
               <Skeleton className="h-[200px] w-full rounded-xl" />
             </div>
           ) : (
-            <BibleVerseCard verse={verse} reference={reference} ref={cardRef} />
+            <BibleVerseCard 
+              verse={verse} 
+              reference={reference} 
+              category={currentCategory} 
+              ref={cardRef} 
+            />
           )}
         </motion.section>
         

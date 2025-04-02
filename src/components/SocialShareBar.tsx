@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Twitter, Facebook, Mail, Link } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -21,61 +21,92 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
   currentURL.search = `?bibleverse=${encodeURIComponent(reference)}`;
   const shareURL = currentURL.toString();
   
-  const shareWithImage = async (platform: 'twitter' | 'facebook' | 'email') => {
+  const generateImage = async () => {
     try {
-      let imageUrl = '';
-      
       if (cardRef?.current) {
+        // Add padding for better export
+        cardRef.current.classList.add('export-padding');
+        
         // Generate image from verse card
         const canvas = await html2canvas(cardRef.current, { 
           backgroundColor: null,
-          scale: 2 // Better quality
+          scale: 3, // Better quality
+          useCORS: true,
+          allowTaint: true,
+          logging: false
         });
-        imageUrl = canvas.toDataURL('image/png');
         
-        // Store image in local storage temporarily
+        // Remove padding class
+        cardRef.current.classList.remove('export-padding');
+        
+        const imageUrl = canvas.toDataURL('image/png');
+        
+        // Store image in local storage
         localStorage.setItem('verse_image', imageUrl);
+        return imageUrl;
       }
+      return null;
+    } catch (error) {
+      console.error('Error generating image:', error);
+      return null;
+    }
+  };
+  
+  const shareWithImage = async (platform: 'twitter' | 'facebook' | 'email') => {
+    try {
+      // Generate and save the image first
+      const imageUrl = await generateImage();
       
-      // Share text with image and URL
-      const shareText = `${verseText}\n\n${shareURL}`;
+      // Share text with URL
+      const shareText = `${verseText}`;
+      const appUrl = shareURL;
       
       switch (platform) {
         case 'twitter':
           window.open(
-            `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&hashtags=Bible,DailyVerse`,
+            `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(appUrl)}&hashtags=Bible,DailyVerse`,
             '_blank',
             'noopener,noreferrer'
           );
           break;
         case 'facebook':
-          // Facebook doesn't allow direct image sharing via URL parameters
-          // We use the Facebook Share Dialog API
+          // Facebook sharing API
           window.open(
-            `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL)}&quote=${encodeURIComponent(verseText)}`,
+            `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(appUrl)}&quote=${encodeURIComponent(shareText)}`,
             '_blank',
             'noopener,noreferrer'
           );
           break;
         case 'email':
           const subject = `Bible Verse: ${reference}`;
-          const body = `${verseText}\n\nRead more: ${shareURL}`;
+          const body = `${shareText}\n\nRead more: ${appUrl}`;
           const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
           window.open(mailtoUrl, '_blank', 'noopener,noreferrer');
           break;
       }
+      
+      toast({
+        title: `Shared on ${platform === 'email' ? 'Email' : platform === 'twitter' ? 'Twitter' : 'Facebook'}`,
+        description: "Your verse has been shared successfully!",
+        duration: 2000,
+      });
     } catch (error) {
-      console.error('Error sharing with image:', error);
+      console.error('Error sharing:', error);
       
       // Fallback to regular sharing
-      const shareText = `${verseText}\n\n${shareURL}`;
+      const shareText = `${verseText}`;
       const url = platform === 'twitter'
-        ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&hashtags=Bible,DailyVerse`
+        ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareURL)}&hashtags=Bible,DailyVerse`
         : platform === 'facebook'
-          ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL)}&quote=${encodeURIComponent(verseText)}`
-          : `mailto:?subject=${encodeURIComponent(`Bible Verse: ${reference}`)}&body=${encodeURIComponent(`${verseText}\n\nRead more: ${shareURL}`)}`;
+          ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL)}&quote=${encodeURIComponent(shareText)}`
+          : `mailto:?subject=${encodeURIComponent(`Bible Verse: ${reference}`)}&body=${encodeURIComponent(`${shareText}\n\nRead more: ${shareURL}`)}`;
       
       window.open(url, '_blank', 'noopener,noreferrer');
+      toast({
+        title: "Shared using fallback method",
+        description: "We used a simpler sharing method",
+        duration: 2000,
+      });
     }
   };
   

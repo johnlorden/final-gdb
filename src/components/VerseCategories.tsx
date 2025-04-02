@@ -1,50 +1,92 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RefreshCw, ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import BibleVerseService from '@/services/BibleVerseService';
 
 interface CategoryProps {
   onCategorySelect: (category: string) => void;
   onRandomVerse: () => void;
+  currentCategory: string;
 }
 
 const VerseCategories: React.FC<CategoryProps> = ({ 
   onCategorySelect,
-  onRandomVerse
+  onRandomVerse,
+  currentCategory
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [scrollPosition, setScrollPosition] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
   
-  // Define a list of categories
-  const categories = [
-    'Encouragement', 
-    'Faith', 
-    'Hope', 
-    'Love', 
-    'Peace', 
-    'Wisdom', 
-    'Strength',
-    'Forgiveness',
-    'Gratitude',
-    'Prayer'
-  ];
+  // Get categories from service
+  const categories = ['All', ...BibleVerseService.getCategories()];
+  
+  // Update scroll buttons visibility based on scroll position
+  useEffect(() => {
+    const checkScrollPosition = () => {
+      if (scrollContainerRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+        setShowLeftArrow(scrollLeft > 0);
+        setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+      }
+    };
+    
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', checkScrollPosition);
+      // Initial check
+      checkScrollPosition();
+      
+      return () => {
+        scrollContainer.removeEventListener('scroll', checkScrollPosition);
+      };
+    }
+  }, []);
   
   const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
     onCategorySelect(category);
   };
 
   const handleScrollLeft = () => {
-    if (scrollPosition > 0) {
-      setScrollPosition(scrollPosition - 200);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
     }
   };
 
   const handleScrollRight = () => {
-    setScrollPosition(scrollPosition + 200);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+    }
   };
+
+  // Scroll to the selected category button
+  useEffect(() => {
+    const scrollToSelectedCategory = () => {
+      if (scrollRef.current && scrollContainerRef.current) {
+        const selectedButton = scrollRef.current.querySelector(`[data-category="${currentCategory}"]`) as HTMLElement;
+        
+        if (selectedButton) {
+          // Calculate position to scroll the category to the center
+          const scrollContainer = scrollContainerRef.current;
+          const scrollContainerWidth = scrollContainer.offsetWidth;
+          const buttonOffsetLeft = selectedButton.offsetLeft;
+          const buttonWidth = selectedButton.offsetWidth;
+          const centerPosition = buttonOffsetLeft - (scrollContainerWidth / 2) + (buttonWidth / 2);
+          
+          scrollContainer.scrollTo({ left: centerPosition, behavior: 'smooth' });
+        }
+      }
+    };
+    
+    // Small delay to ensure DOM is ready
+    const timerId = setTimeout(scrollToSelectedCategory, 100);
+    return () => clearTimeout(timerId);
+  }, [currentCategory]);
 
   return (
     <motion.div 
@@ -77,30 +119,26 @@ const VerseCategories: React.FC<CategoryProps> = ({
         </motion.div>
       </div>
       <div className="relative">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm"
-          onClick={handleScrollLeft}
-        >
-          <ChevronLeft size={18} />
-        </Button>
-        <ScrollArea className="w-full pb-2 px-8">
-          <div 
-            className="flex space-x-2 pb-1 transition-transform duration-300" 
-            style={{ transform: `translateX(-${scrollPosition}px)` }}
+        {showLeftArrow && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm"
+            onClick={handleScrollLeft}
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                onClick={() => handleCategorySelect('All')}
-                variant={selectedCategory === 'All' ? "default" : "outline"}
-                size="sm"
-                className="rounded-full transition-all duration-300"
-              >
-                All
-              </Button>
-            </motion.div>
-            
+            <ChevronLeft size={18} />
+          </Button>
+        )}
+        <div 
+          className="overflow-auto py-1 px-1 scrollbar-hide" 
+          ref={scrollContainerRef}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          <div 
+            className="flex space-x-2 pb-1"
+            ref={scrollRef}
+            style={{ minWidth: 'max-content' }}
+          >
             {categories.map((category) => (
               <motion.div 
                 key={category}
@@ -109,35 +147,31 @@ const VerseCategories: React.FC<CategoryProps> = ({
               >
                 <Button
                   onClick={() => handleCategorySelect(category)}
-                  variant={selectedCategory === category ? "default" : "outline"}
+                  variant={currentCategory === category ? "default" : "outline"}
                   size="sm"
-                  className="rounded-full whitespace-nowrap transition-all duration-300"
+                  data-category={category}
+                  className={`rounded-full whitespace-nowrap transition-all duration-300 ${
+                    currentCategory === category 
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600' 
+                      : ''
+                  }`}
                 >
                   {category}
                 </Button>
               </motion.div>
             ))}
-            
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                onClick={onRandomVerse}
-                variant="outline"
-                size="sm"
-                className="rounded-full whitespace-nowrap bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
-              >
-                Random Verse
-              </Button>
-            </motion.div>
           </div>
-        </ScrollArea>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm"
-          onClick={handleScrollRight}
-        >
-          <ChevronRight size={18} />
-        </Button>
+        </div>
+        {showRightArrow && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm"
+            onClick={handleScrollRight}
+          >
+            <ChevronRight size={18} />
+          </Button>
+        )}
       </div>
     </motion.div>
   );

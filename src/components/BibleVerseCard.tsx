@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface BibleVerseCardProps {
   verse: string;
   reference: string;
+  category?: string;
 }
 
 // Array of gradient backgrounds
@@ -40,7 +41,7 @@ const darkGradients = [
 ];
 
 const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
-  ({ verse, reference }, ref) => {
+  ({ verse, reference, category }, ref) => {
     const { toast } = useToast();
     const [gradientIndex, setGradientIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -57,43 +58,46 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
     }, [verse, reference]);
     
     const handleSaveImage = async () => {
-      // Check if ref exists
       if (!ref) return;
       
-      // Create a local variable to hold the element
-      let element: HTMLElement | null = null;
+      // Check if ref is RefObject or function
+      const element = typeof ref === 'function' ? null : ref.current;
       
-      // Check if ref is a RefObject (has .current) or a function
-      if (typeof ref === 'function') {
-        // We cannot directly access the DOM element with a callback ref
+      if (!element) {
         toast({
           title: "Error",
-          description: "Unable to save image with this ref type.",
+          description: "Unable to save image.",
           variant: "destructive",
           duration: 2000,
         });
         return;
-      } else if (ref.current) {
-        // It's a RefObject
-        element = ref.current;
       }
-      
-      // Ensure we have an element to capture
-      if (!element) return;
       
       setIsLoading(true);
       
       try {
+        // Add padding for export only
+        element.classList.add('export-padding');
+        
         const canvas = await html2canvas(element, {
           backgroundColor: null,
-          scale: 2 // Better quality
+          scale: 3, // Higher quality
+          useCORS: true,
+          allowTaint: true,
+          logging: false
         });
+        
+        // Remove export padding
+        element.classList.remove('export-padding');
         
         const image = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = image;
         link.download = `bible-verse-${reference.replace(/\s+/g, '-').replace(/:/g, '-')}.png`;
         link.click();
+        
+        // Store in localStorage for sharing
+        localStorage.setItem('verse_image', image);
         
         toast({
           title: "Image Saved",
@@ -138,10 +142,15 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
               whileHover={{ scale: 1.01, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
-              <div className="px-6 py-8 sm:p-10">
+              {category && category !== 'All' && (
+                <div className="absolute top-3 left-3 bg-white/70 dark:bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium">
+                  {category}
+                </div>
+              )}
+              <div className="px-8 py-12 sm:p-12">
                 <div className="text-center">
                   <motion.p 
-                    className="text-lg sm:text-xl leading-relaxed mb-4 font-serif"
+                    className="text-lg sm:text-xl leading-relaxed mb-6 font-serif"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
