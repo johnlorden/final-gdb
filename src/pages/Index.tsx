@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import EnhancedSearchBar from '@/components/EnhancedSearchBar';
@@ -10,6 +9,7 @@ import BibleVerseService from '../services/BibleVerseService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 interface IndexProps {
   addToRecentVerses: (verse: string, reference: string) => void;
@@ -45,7 +45,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
   const verseCache = useRef<Map<string, VerseResult[]>>(new Map());
 
   useEffect(() => {
-    // Set language in BibleVerseService
     BibleVerseService.setLanguage(language);
   }, [language]);
 
@@ -128,12 +127,10 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
           displayVerse(result);
           return null;
         } else {
-          // If no exact reference match, try keyword search
           return BibleVerseService.searchVerses(query);
         }
       })
       .then((results) => {
-        // This will be undefined if the first promise resolved successfully
         if (results && results.length > 0) {
           displayVerse(results[0]);
         } else if (results && results.length === 0) {
