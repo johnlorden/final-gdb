@@ -12,32 +12,32 @@
     <category>Guidance</category>
   </verse>
   <verse>
-    <text>Lahat ng bagay ay aking magagawa sa pamamagitan niyaong nagpapalakas sa akin.</text>
+    <text>Magagawa ko ang lahat ng mga bagay sa pamamagitan niya na nagpapalakas sa akin.</text>
     <reference>Filipos 4:13</reference>
     <category>Courage</category>
   </verse>
   <verse>
-    <text>Sapagkat nalalaman ko ang mga panukala ko sa inyo, sabi ng Panginoon, mga panukala ng kapayapaan, at hindi ng kasamaan, upang bigyan kayo ng pag-asa sa inyong huling wakas.</text>
+    <text>Sapagka't nalalaman ko ang mga pagiisip na aking iniisip sa inyo, sabi ng Panginoon, mga pagiisip na tungkol sa kapayapaan, at hindi tungkol sa kasamaan, upang bigyan kayo ng pag-asa sa inyong huling wakas.</text>
     <reference>Jeremias 29:11</reference>
     <category>Hope</category>
   </verse>
   <verse>
-    <text>Ang Panginoon ay aking pastol; hindi ako mangangailangan. Pinahihiga niya ako sa sariwang pastulan; Pinapatnubayan niya ako sa tabi ng mga tubig na pahingahan.</text>
-    <reference>Awit 23:1-2</reference>
+    <text>Ang Panginoon ay aking pastol; hindi ako mangangailangan. Sa tabi ng mga tubig na pahingahan ay pinapatnubayan niya ako. Inaalagaan niya ang aking kaluluwa.</text>
+    <reference>Awit 23:1-3</reference>
     <category>Comfort</category>
   </verse>
   <verse>
-    <text>Nguni't silang nangaghihintay sa Panginoon ay mangagbabagong lakas; sila'y paiilanlang na may mga pakpak na parang mga agila; sila'y magsisitakbo, at hindi mangapapagod; sila'y magsisilakad, at hindi mangaghihimagod.</text>
+    <text>Ngunit silang nangaghihintay sa Panginoon ay mangagbabagong lakas; sila'y pailanglang na may mga pakpak na parang mga agila; sila'y magsisitakbo, at hindi mangapapagod; sila'y magsisilakad, at hindi mangahihimatay.</text>
     <reference>Isaias 40:31</reference>
     <category>Hope</category>
   </verse>
   <verse>
-    <text>Ikaw ay magpakalakas at magpakatapang; huwag kang matakot, o manglupaypay man; sapagka't ang Panginoon mong Dios ay sumasa iyo saan ka man pumaroon.</text>
+    <text>Magpakalakas ka at magpakatapang; huwag kang matakot, ni manglupaypay; sapagka't ang Panginoon mong Dios ay sumasaiyo saan ka man pumaroon.</text>
     <reference>Deuteronomio 31:6</reference>
     <category>Courage</category>
   </verse>
   <verse>
-    <text>Magsiparito sa akin, kayong lahat na nangapapagal at nangabibigatang lubha, at kayo'y aking papagpapahingahin.</text>
+    <text>Magsiparito kayo sa akin, kayong lahat na nangapapagal at nangabibigatang lubha, at kayo'y aking papagpapahingahin.</text>
     <reference>Mateo 11:28</reference>
     <category>Comfort</category>
   </verse>
@@ -47,8 +47,8 @@
     <category>Salvation</category>
   </verse>
   <verse>
-    <text>Ang pag-ibig ay mapagpahinuhod, at magandang-loob; ang pag-ibig ay hindi nananaghili; ang pag-ibig ay hindi nagmamapuri, hindi mapagpalalo, hindi naguugaling mahalay, hindi hinahanap ang kaniyang sarili, hindi nagagalit, hindi inaalumana ang masama.</text>
-    <reference>1 Corinto 13:4-5</reference>
+    <text>Ang pag-ibig ay mapagpahinuhod, at magandang-loob; ang pag-ibig ay hindi nananaghili; ang pag-ibig ay hindi nagmamapuri, hindi nagpapalalo, hindi naguugaling mahalay, hindi hinahanap ang kaniyang sarili, hindi nagagalit, hindi inaalumana ang masama.</text>
+    <reference>1 Corinto 13:4-6</reference>
     <category>Love</category>
   </verse>
   <verse>
@@ -67,13 +67,339 @@
     <category>Faith</category>
   </verse>
   <verse>
-    <text>Huwag kayong mabalisa sa anumang bagay; kundi sa lahat ng mga bagay sa pamamagitan ng panalangin at daing na may pagpapasalamat ay ipaalam ninyo ang inyong mga kahilingan sa Dios. At ang kapayapaan ng Dios, na di masayod ng pag-iisip, ay mag-iingat ng inyong mga puso at ng inyong mga pag-iisip kay Cristo Jesus.</text>
+    <text>Huwag kayong mabalisa sa anumang bagay; kundi sa lahat ng mga bagay sa pamamagitan ng panalangin at daing na may pagpapasalamat ay ipakilala ninyo ang inyong mga kahilingan sa Dios. At ang kapayapaan ng Dios na di masayod ng pag-iisip, ay magiingat ng inyong mga puso at inyong mga pagiisip kay Cristo Jesus.</text>
     <reference>Filipos 4:6-7</reference>
     <category>Peace</category>
   </verse>
   <verse>
-    <text>Ang takot sa Panginoon ay pasimula ng karunungan; at ang pagkakilala sa Banal ay pagkaunawa.</text>
+    <text>Ang takot sa Panginoon ay pasimula ng karunungan: at ang pagkakilala sa Banal ay pagkaunawa.</text>
     <reference>Kawikaan 9:10</reference>
     <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Kung ating ipahayag ang ating mga kasalanan, siya'y tapat at banal, na tayo'y patatawarin niya sa ating mga kasalanan, at tayo'y lilinisin sa lahat ng kalikuan.</text>
+    <reference>1 Juan 1:9</reference>
+    <category>Salvation</category>
+  </verse>
+  <verse>
+    <text>At mangagmagandang-loob kayo sa isa't isa, mga mahabagin, na mangagpatawaran kayo sa isa't isa, na gaya naman ng pagpapatawad sa inyo ng Dios kay Cristo.</text>
+    <reference>Efeso 4:32</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Sapagka't natitiyak ko, na kahit ang kamatayan man, kahit ang buhay, kahit ang mga anghel, kahit ang mga pamunuan, kahit ang mga bagay na kasalukuyan, kahit ang mga bagay na darating, kahit ang mga kapangyarihan, kahit ang kataasan, kahit ang kababaan, kahit ang alin mang ibang nilalang, ay hindi makapaghihiwalay sa atin sa pagibig ng Dios, na nasa kay Cristo Jesus na Panginoon natin.</text>
+    <reference>Roma 8:38-39</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Datapuwa't hanapin muna ninyo ang kaharian niya, at ang kaniyang katuwiran; at ang lahat ng mga bagay na ito ay pawang idaragdag sa inyo.</text>
+    <reference>Mateo 6:33</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Ang Panginoon ay aking liwanag at aking kaligtasan; kanino ako matatakot? Ang Panginoon ay katibayan ng aking buhay; kanino ako masisindak?</text>
+    <reference>Awit 27:1</reference>
+    <category>Courage</category>
+  </verse>
+  <verse>
+    <text>Ngayon, ang Dios ng pagasa ay punuin nawa kayo ng buong kagalakan at kapayapaan sa pananampalataya, upang kayo'y managana sa pagasa, sa kapangyarihan ng Espiritu Santo.</text>
+    <reference>Roma 15:13</reference>
+    <category>Hope</category>
+  </verse>
+  <verse>
+    <text>Nguni't tungkol sa akin at sa aking sangbahayan ay maglilingkod kami sa Panginoon.</text>
+    <reference>Josue 24:15</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Sapagka't ang kabayaran ng kasalanan ay kamatayan; datapuwa't ang kaloob na walang bayad ng Dios ay buhay na walang hanggan kay Cristo Jesus na Panginoon natin.</text>
+    <reference>Roma 6:23</reference>
+    <category>Salvation</category>
+  </verse>
+  <verse>
+    <text>Pagpalain ka nawa ng Panginoon, at ingatan ka: Pasilangin nawa ng Panginoon ang kaniyang mukha sa iyo, at maawa sa iyo: Itanaw nawa ng Panginoon ang kaniyang mukha sa iyo, at bigyan ka ng kapayapaan.</text>
+    <reference>Mga Bilang 6:24-26</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>Ang iyong salita ay ilawan sa aking mga paa, at liwanag sa aking landas.</text>
+    <reference>Awit 119:105</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>Mapalad ang taong hindi lumalakad sa payo ng masama, ni tumatayo man sa daan ng mga makasalanan, ni nauupo man sa upuan ng mga manglilibak: Kundi ang kaniyang kasayahan ay nasa kautusan ng Panginoon; at sa kaniyang kautusan nagbubulay siya araw at gabi.</text>
+    <reference>Awit 1:1-2</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Mangagalak kayong lagi; magsipanalangin kayong walang patid; magpasalamat kayo sa lahat ng mga bagay: sapagka't ito ang kalooban ng Dios kay Cristo Jesus sa inyo.</text>
+    <reference>1 Tesalonica 5:16-18</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>Ang damo ay natutuyo, ang bulaklak ay nalalanta; nguni't ang salita ng ating Dios ay mananatili magpakailan man.</text>
+    <reference>Isaias 40:8</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Ang bawa't mabuting kaloob at ang bawa't sakdal na kaloob ay pawang buhat sa itaas, na bumababa mula sa Ama ng mga ilaw, na walang pagbabago ni kahit anumang pagbabago.</text>
+    <reference>Santiago 1:17</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Datapuwa't ipinakita ng Dios ang kaniyang pag-ibig sa atin, na nang tayo'y mga makasalanan pa, si Cristo ay namatay dahil sa atin.</text>
+    <reference>Roma 5:8</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Pasasalamatan kita; sapagka't ginawa mo akong kakilakilabot at kagilagilalas. Kagilagilalas ang iyong mga gawa; at nalalamang mabuti ng aking kaluluwa.</text>
+    <reference>Awit 139:14</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>Lumiwanag na gayon ang inyong ilaw sa harap ng mga tao; upang mangakita nila ang inyong mabubuting gawa, at kanilang luwalhatiin ang inyong Ama na nasa langit.</text>
+    <reference>Mateo 5:16</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Humingi kayo, at kayo'y bibigyan; humanap kayo, at kayo'y makakasumpong; tumuktok kayo, at kayo'y bubuksan.</text>
+    <reference>Mateo 7:7</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>Ang magnanakaw ay hindi pumaparito, kundi upang magnakaw, at pumatay, at pumuksa: ako'y naparito upang sila'y magkaroon ng buhay, at magkaroon ng kasaganaan nito.</text>
+    <reference>Juan 10:10</reference>
+    <category>Life</category>
+  </verse>
+  <verse>
+    <text>Ako ang puno ng ubas, kayo ang mga sanga: Ang nananatili sa akin, at ako'y sa kaniya, ay siyang nagbubunga ng marami: sapagka't kung kayo'y hiwalay sa akin ay wala kayong magagawa.</text>
+    <reference>Juan 15:5</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Ang malubay na sagot ay nakapapawi ng poot: ngunit ang mabigat na salita ay humihila ng galit.</text>
+    <reference>Kawikaan 15:1</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Mapapalad ang mga mapagpayapa: sapagka't sila'y tatawaging mga anak ng Dios.</text>
+    <reference>Mateo 5:9</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>Walang may lalong dakilang pagibig kay sa rito, na ibigay ng isang tao ang kaniyang buhay dahil sa kaniyang mga kaibigan.</text>
+    <reference>Juan 15:13</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Mga anak ko, huwag tayong mangagibig ng salita, ni ng dila man; kundi ng gawa at katotohanan.</text>
+    <reference>1 Juan 3:18</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Sapagka't sa ganang akin ang mabuhay ay si Cristo, at ang mamatay ay pakinabang.</text>
+    <reference>Filipos 1:21</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Ilagak ninyo ang inyong pagiisip sa mga bagay na nangasa itaas, huwag sa mga bagay na nangasa ibabaw ng lupa.</text>
+    <reference>Colosas 3:2</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Datapuwa't ang bunga ng Espiritu ay pagibig, katuwaan, kapayapaan, pagpapahinuhod, kagandahang-loob, kabutihan, pagtatapat, kaamuan, pagpipigil; laban sa mga gayong bagay ay walang kautusan.</text>
+    <reference>Galacia 5:22-23</reference>
+    <category>Spiritual Growth</category>
+  </verse>
+  <verse>
+    <text>At kung walang pananampalataya ay hindi maaaring maging kalugodlugod sa kaniya; sapagka't ang lumalapit sa Dios ay dapat sumampalatayang may Dios, at siya ang tagapagbigay ganti sa mga sa kaniya'y nagsisihanap.</text>
+    <reference>Hebreo 11:6</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Kayo'y magsitigil, at kilalanin ninyo na ako'y Dios: ako'y matataas sa mga bansa, ako'y matataas sa lupa.</text>
+    <reference>Awit 46:10</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>Ang buong kasulatan ay kinasihan ng Dios, at mapapakinabangan sa pagtuturo, sa pagsansala, sa pagsaway, sa ikatututo na nasa katuwiran.</text>
+    <reference>2 Timoteo 3:16</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Sapagka't nagsisilakad tayo sa pamamagitan ng pananampalataya, hindi sa pamamagitan ng paningin.</text>
+    <reference>2 Corinto 5:7</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Datapuwa't hanapin muna ninyo ang kaniyang kaharian, at ang kaniyang katuwiran; at ang lahat ng mga bagay na ito ay pawang idaragdag sa inyo.</text>
+    <reference>Mateo 6:33</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>Aking ipaaalam sa iyo at aking ituturo sa iyo ang daan na iyong lalakaran: papayuhan kita na ang aking mata ay nakapanood sa iyo.</text>
+    <reference>Awit 32:8</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>Ang pangalan ng Panginoon ay matibay na moog; tinatakbuhan ng matuwid, at naliligtasan.</text>
+    <reference>Kawikaan 18:10</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>Magalak ka nga sa Panginoon; at ibibigay niya sa iyo ang mga nasa ng iyong puso.</text>
+    <reference>Awit 37:4</reference>
+    <category>Joy</category>
+  </verse>
+  <verse>
+    <text>Makikipagbaka para sa inyo ang Panginoon, at kayo'y tatahimik.</text>
+    <reference>Exodo 14:14</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>Sa kapayapaan ay hihiga ako, at matutulog din: sapagka't ikaw lamang, Panginoon, ang nagpapahinga sa akin na may katiwasayan.</text>
+    <reference>Awit 4:8</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>Manahan nawang sagana sa inyo ang salita ni Cristo; na kayo'y magturo at mangagpaalaala sa isa't isa sa buong karunungan, na kayo'y magsiawit ng mga salmo at mga himno at mga awit na ukol sa espiritu, na may biyaya sa inyong mga puso sa Dios.</text>
+    <reference>Colosas 3:16</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>Magpakalakas kayo sa Panginoon, at sa kapangyarihan ng kaniyang kalakasan.</text>
+    <reference>Efeso 6:10</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>Ang bawa't mabuting kaloob at ang bawa't sakdal na kaloob ay pawang buhat sa itaas, na bumababa mula sa Ama ng mga ilaw, na sa kaniya'y walang pagbabago, ni kahit anino man ng pagiiba.</text>
+    <reference>Santiago 1:17</reference>
+    <category>Gratitude</category>
+  </verse>
+  <verse>
+    <text>Ang isang kaibigan ay umiibig sa lahat ng panahon; at ang isang kapatid ay ipinanganak sa kapighatian.</text>
+    <reference>Kawikaan 17:17</reference>
+    <category>Friendship</category>
+  </verse>
+  <verse>
+    <text>Masdan, iniibig ng Ama sa isang pagibig na napakagayon tayo, na tayo'y mangatawag na mga anak ng Dios; at tayo nga ay gayon.</text>
+    <reference>Hebreo 10:23</reference>
+    <category>Hope</category>
+  </verse>
+  <verse>
+    <text>Ariin ninyong buong kagalakan, mga kapatid ko, kung kayo'y mangahulog sa sarisaring tukso; Yamang nalalaman na ang pagsubok sa inyong pananampalataya ay gumagawa ng pagtitiis.</text>
+    <reference>Santiago 1:2-3</reference>
+    <category>Perseverance</category>
+  </verse>
+  <verse>
+    <text>Ang mga kagandahang-loob ng Panginoon ay hindi nagmamaliw, sapagka't ang kaniyang mga kaawaan kailanma'y hindi nagkukulang. Sila'y bago tuwing umaga; dakila ang iyong pagtatapat.</text>
+    <reference>Panaghoy 3:22-23</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Ipinakilala niya sa iyo, Oh tao, kung ano ang mabuti; at ano ang hinihingi ng Panginoon sa iyo, kundi ang gumawa na may kaganapan, at ang ibigin ang kaawaan, at ang lumakad na may kababaan na kasama ng iyong Dios?</text>
+    <reference>Mikas 6:8</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Ang Dios ay ating ampun at kalakasan, katulong na handang masumpungan sa kabagabagan.</text>
+    <reference>Awit 46:1</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>Ilagak mo sa Panginoon ang iyong pasanin, at aalalayan ka niya: hindi niya titiising makilos ang matuwid.</text>
+    <reference>Awit 55:22</reference>
+    <category>Comfort</category>
+  </verse>
+  <verse>
+    <text>At narito, ako'y sumasa inyo sa lahat ng mga araw, hanggang sa katapusan ng sanglibutan.</text>
+    <reference>Mateo 28:20</reference>
+    <category>Encouragement</category>
+  </verse>
+  <verse>
+    <text>Sapagka't akong Panginoon mong Dios ay hahawak ng iyong kanang kamay, na magsasabi sa iyo, Huwag kang matakot; aking tutulungan ka.</text>
+    <reference>Isaias 41:13</reference>
+    <category>Courage</category>
+  </verse>
+  <verse>
+    <text>Kaniyang ginawa ang lahat ng bagay na maganda sa kaniyang kapanahunan: inilagay din naman niya ang walang hanggan sa kanilang puso, na anopa't hindi matalos ng tao ang gawa na ginawa ng Dios mula sa pasimula hanggang sa wakas.</text>
+    <reference>Eclesiastes 3:11</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>At huwag tayong mangapagod sa paggawa ng mabuti: sapagka't sa kapanahunan ay magsisiani tayo, kung hindi tayo manganghinahina.</text>
+    <reference>Galacia 6:9</reference>
+    <category>Perseverance</category>
+  </verse>
+  <verse>
+    <text>Huwag kang matakot, sapagka't ako'y sumasaiyo; huwag kang manglupaypay, sapagka't ako'y iyong Dios; palalakasin kita; oo, tutulungan kita; oo, aalalayan kita ng kanang kamay ng aking katuwiran.</text>
+    <reference>Isaias 41:10</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>Ngunit silang naghihintay sa Panginoon ay magbabago ng lakas; sila'y pailanglang na may pakpak na parang mga agila; sila'y tatakbo at hindi mapapagod; sila'y lalakad at hindi manghihina.</text>
+    <reference>Isaias 40:31</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>At nalalaman natin na ang lahat ng mga bagay ay nagkakalakip-lakip na gumagawa sa ikabubuti ng mga nagsisiibig sa Dios, sa makatuwid baga'y niyaong mga tinawag alinsunod sa kaniyang pakay.</text>
+    <reference>Roma 8:28</reference>
+    <category>Hope</category>
+  </verse>
+  <verse>
+    <text>Magsiparito sa akin, kayong lahat na nangapapagal at nangabibigatang lubha, at kayo'y aking papagpapahingahin. Pasanin ninyo ang aking pamatok, at mag-aral kayo sa akin; sapagka't ako'y maamo at mapagpakumbabang puso: at masusumpungan ninyo ang kapahingahan ng inyong mga kaluluwa.</text>
+    <reference>Mateo 11:28-29</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>Ang pangalan ng Panginoon ay matibay na moog; tinatakbuhan ng matuwid, at naliligtasan.</text>
+    <reference>Kawikaan 18:10</reference>
+    <category>Protection</category>
+  </verse>
+  <verse>
+    <text>Ang mga bagay na ito ay sinalita ko sa inyo, upang kayo'y magkaroon sa akin ng kapayapaan. Sa sanglibutan ay mayroon kayong kapighatian: nguni't laksan ninyo ang loob; aking dinaig ang sanglibutan.</text>
+    <reference>Juan 16:33</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>Nguni't ang karunungang buhat sa itaas ay unang-una ay malinis saka mapayapa, banayad, madaling panaingan, puspos ng kahabagan at ng mabubuting bunga, walang inaayunan, walang pagpapaimbabaw.</text>
+    <reference>Santiago 3:17</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Sa lahat ng mga bagay ay magpasalamat kayo; sapagka't ito ang kalooban ng Dios sa inyo kay Cristo Jesus.</text>
+    <reference>1 Tesalonica 5:18</reference>
+    <category>Gratitude</category>
+  </verse>
+  <verse>
+    <text>Datapuwa't ang bunga ng Espiritu ay pagibig, katuwaan, kapayapaan, pagpapahinuhod, kagandahang-loob, kabutihan, pagtatapat, kaamuan, pagpipigil; laban sa mga gayong bagay ay walang kautusan.</text>
+    <reference>Galacia 5:22-23</reference>
+    <category>Spiritual Growth</category>
+  </verse>
+  <verse>
+    <text>Kung paanong ang ama ay nahahabag sa kaniyang mga anak, gayon nahahabag ang Panginoon sa kanilang nangatatakot sa kaniya.</text>
+    <reference>Awit 103:13</reference>
+    <category>Love</category>
+  </verse>
+  <!-- Newly added verses below -->
+  <verse>
+    <text>Inihahayag ng mga kalangitan ang kaluwalhatian ng Dios; at ipinakikilala ng kalawakan ang gawa ng kaniyang mga kamay.</text>
+    <reference>Awit 19:1</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>Dinirinig ng aking mga tupa ang aking tinig, at sila'y aking nakikilala, at sila'y nagsisisunod sa akin: At sila'y binibigyan ko ng walang hanggang buhay; at kailan ma'y hindi sila malilipol, at hindi sila aagawin ng sinoman sa aking kamay.</text>
+    <reference>Juan 10:27-28</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>At ang lahat ng mga bagay na inyong hihingin sa panalangin, na may pananampalataya, ay inyong tatanggapin.</text>
+    <reference>Mateo 21:22</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>Ang nagkukubli ng kaniyang mga pagsalangsang ay hindi giginhawa: nguni't ang nagpapahayag at nagiiwan ng mga yaon ay magtatamo ng kahabagan.</text>
+    <reference>Kawikaan 28:13</reference>
+    <category>Salvation</category>
   </verse>
 </bibleVerses>
