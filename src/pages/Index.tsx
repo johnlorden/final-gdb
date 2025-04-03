@@ -1,7 +1,6 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
-import SearchBar from '@/components/SearchBar';
+import EnhancedSearchBar from '@/components/EnhancedSearchBar';
 import VerseCategories from '@/components/VerseCategories';
 import DonateFooter from '@/components/DonateFooter';
 import SocialShareBar from '@/components/SocialShareBar';
@@ -211,7 +210,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.4 }}
         >
-          <SearchBar onSearch={handleSearch} />
+          <EnhancedSearchBar onSearch={handleSearch} />
           <VerseCategories 
             onCategorySelect={handleCategorySelect} 
             onRandomVerse={handleRandomVerse}

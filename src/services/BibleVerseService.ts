@@ -14,7 +14,7 @@ class BibleVerseService {
     'Forgiveness', 'Peace', 'Salvation', 'Strength',
     'Comfort', 'Guidance', 'Joy', 'Gratitude', 'Humility',
     'Perseverance', 'Courage', 'Patience', 'Righteousness',
-    'Encouragement'
+    'Encouragement', 'Protection', 'Spiritual Growth'
   ];
   
   private static xmlDocPromise: Promise<Document> | null = null;
@@ -205,7 +205,6 @@ class BibleVerseService {
       const allVerses = await this.getAllVerses();
       const searchTerm = query.trim().toLowerCase();
       
-      // Score-based search results
       const results = allVerses.map(verse => {
         let score = 0;
         
@@ -216,16 +215,33 @@ class BibleVerseService {
         // Partial reference match
         else if (verse.reference.toLowerCase().includes(searchTerm)) {
           score += 50;
+          
+          // Beginning of reference match (higher priority)
+          if (verse.reference.toLowerCase().startsWith(searchTerm)) {
+            score += 20;
+          }
         }
         
         // Text content match
-        if (verse.text.toLowerCase().includes(searchTerm)) {
+        const textLower = verse.text.toLowerCase();
+        if (textLower === searchTerm) {
+          score += 50; // Exact text match (very unlikely)
+        } else if (textLower.includes(searchTerm)) {
           score += 30;
+          
+          // Word boundary match (higher priority)
+          const words = textLower.split(/\s+/);
+          if (words.some(word => word === searchTerm)) {
+            score += 15;
+          }
         }
         
         // Category match
         if (verse.categories && 
-            verse.categories.some(cat => cat.toLowerCase().includes(searchTerm))) {
+            verse.categories.some(cat => {
+              const catLower = cat.toLowerCase();
+              return catLower === searchTerm || catLower.includes(searchTerm);
+            })) {
           score += 20;
         }
         
@@ -260,7 +276,7 @@ class BibleVerseService {
   }
   
   static getCategories(): string[] {
-    return this.categories;
+    return [...new Set(this.categories)];
   }
   
   static async preloadAllVerses(): Promise<void> {
