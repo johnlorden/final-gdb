@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Copy, Twitter, Facebook, Mail, Link } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
+import BookmarkVerse from './BookmarkVerse';
 
 interface SocialShareBarProps {
   verse: string;
   reference: string;
   cardRef?: React.RefObject<HTMLDivElement>;
+  category?: string;
 }
 
-const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardRef }) => {
+const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardRef, category }) => {
   const { toast } = useToast();
   const verseText = `"${verse}" — ${reference}`;
   
@@ -146,6 +148,11 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
   
   return (
     <div className="flex justify-center gap-2 my-4 w-full max-w-2xl mx-auto">
+      <BookmarkVerse 
+        verse={verse} 
+        reference={reference} 
+        category={category}
+      />
       <Button 
         onClick={copyToClipboard} 
         variant="outline" 

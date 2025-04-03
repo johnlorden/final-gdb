@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import EnhancedSearchBar from '@/components/EnhancedSearchBar';
@@ -248,7 +249,12 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.4 }}
         >
-          <SocialShareBar verse={verse} reference={reference} cardRef={cardRef} />
+          <SocialShareBar 
+            verse={verse} 
+            reference={reference} 
+            cardRef={cardRef} 
+            category={verseCategory || currentCategory}
+          />
         </motion.section>
         
         <motion.div

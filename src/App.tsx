@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import NotFound from './pages/NotFound';
+import Bookmarks from './pages/Bookmarks';
 import Header from './components/Header';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
@@ -83,6 +84,7 @@ const App = () => {
                   />
                 } 
               />
+              <Route path="/bookmarks" element={<Bookmarks />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

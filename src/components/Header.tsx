@@ -2,7 +2,7 @@
 import React from 'react';
 import ThemeToggle from './ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { Home, BookOpen, Clock } from 'lucide-react';
+import { Home, BookOpen, Clock, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   DropdownMenu,
@@ -35,6 +35,12 @@ const Header: React.FC<HeaderProps> = ({ recentVerses, onSelectVerse }) => {
           <h1 className="text-lg sm:text-xl font-bold truncate">God's Daily Bread</h1>
         </div>
         <div className="flex items-center space-x-2">
+          <Link to="/bookmarks">
+            <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+              <Bookmark className="h-4 w-4" />
+              <span className="hidden sm:inline">Bookmarks</span>
+            </Button>
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="flex items-center space-x-1">
