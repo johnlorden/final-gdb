@@ -94,6 +94,11 @@ class BibleVerseService {
       const xmlDoc = await this.getXmlDoc(lang);
       const verses = Array.from(xmlDoc.getElementsByTagName('verse'));
       
+      if (verses.length === 0) {
+        console.warn(`No verses found in XML document for language: ${lang}`);
+        return [];
+      }
+      
       this.allVersesCaches[lang] = verses.map(verse => {
         const text = verse.getElementsByTagName('text')[0]?.textContent || '';
         const reference = verse.getElementsByTagName('reference')[0]?.textContent || '';
@@ -141,7 +146,10 @@ class BibleVerseService {
     
     try {
       const allVerses = await this.getAllVerses(lang);
-      if (allVerses.length === 0) return null;
+      if (allVerses.length === 0) {
+        console.warn('No verses available for random selection');
+        return null;
+      }
       
       const randomVerse = this.getRandomVerseFromArray(allVerses);
       return randomVerse;
@@ -167,11 +175,19 @@ class BibleVerseService {
       }
       
       const allVerses = await this.getAllVerses(lang);
+      if (allVerses.length === 0) {
+        console.warn('No verses available for category selection');
+        return null;
+      }
+      
       const matchingVerses = allVerses.filter(verse => 
         verse.categories?.some(c => c.toLowerCase() === category.toLowerCase())
       );
       
-      if (matchingVerses.length === 0) return null;
+      if (matchingVerses.length === 0) {
+        console.warn(`No verses found for category: ${category}, falling back to random verse`);
+        return this.getRandomVerse(lang);
+      }
       
       this.verseCaches[lang].set(category, matchingVerses);
       

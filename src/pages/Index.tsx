@@ -192,7 +192,53 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
     
     const categoryToUse = category || currentCategory;
     
-    getVerseFromCategory(categoryToUse);
+    BibleVerseService.getVerseByCategory(categoryToUse)
+      .then((result) => {
+        if (result) {
+          setVerse(result.text);
+          setReference(result.reference);
+          addToRecentVerses(result.text, result.reference);
+          setPreviousVerse(result.reference);
+          
+          if (categoryToUse === 'All' && result.category) {
+            setVerseCategory(result.category);
+          } else if (result.categories && result.categories.length > 0) {
+            setVerseCategory(result.categories[0]);
+          } else {
+            setVerseCategory(categoryToUse);
+          }
+          
+          updateUrlWithVerse(result.reference);
+        } else {
+          return BibleVerseService.getRandomVerse();
+        }
+        return null;
+      })
+      .then((randomResult) => {
+        if (randomResult) {
+          setVerse(randomResult.text);
+          setReference(randomResult.reference);
+          addToRecentVerses(randomResult.text, randomResult.reference);
+          setPreviousVerse(randomResult.reference);
+          
+          if (randomResult.category) {
+            setVerseCategory(randomResult.category);
+          }
+          
+          updateUrlWithVerse(randomResult.reference);
+        }
+      })
+      .catch(error => {
+        console.error('Error getting verse:', error);
+        setHasError(true);
+        toast({
+          title: "Error loading verse",
+          description: "Could not load a Bible verse. Please check your connection and try again.",
+          variant: "destructive",
+          duration: 3000,
+        });
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const getVerseFromCategory = (category: string) => {
@@ -235,7 +281,22 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
           
           updateUrlWithVerse(result.reference);
         } else {
-          throw new Error(`No verse found for category: ${category}`);
+          return BibleVerseService.getRandomVerse();
+        }
+        return null;
+      })
+      .then((randomResult) => {
+        if (randomResult) {
+          setVerse(randomResult.text);
+          setReference(randomResult.reference);
+          addToRecentVerses(randomResult.text, randomResult.reference);
+          setPreviousVerse(randomResult.reference);
+          
+          if (randomResult.category) {
+            setVerseCategory(randomResult.category);
+          }
+          
+          updateUrlWithVerse(randomResult.reference);
         }
       })
       .catch(error => {
@@ -243,10 +304,26 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
         setHasError(true);
         toast({
           title: "Error loading verse",
-          description: "Could not load a verse from the selected category.",
+          description: "Could not load a verse from the selected category. Trying a random verse instead.",
           variant: "destructive",
           duration: 3000,
         });
+        
+        BibleVerseService.getRandomVerse()
+          .then((result) => {
+            if (result) {
+              setVerse(result.text);
+              setReference(result.reference);
+              addToRecentVerses(result.text, result.reference);
+              setPreviousVerse(result.reference);
+              if (result.category) {
+                setVerseCategory(result.category);
+              }
+              updateUrlWithVerse(result.reference);
+            }
+          })
+          .catch(() => {
+          });
       })
       .finally(() => setIsLoading(false));
   };
