@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import SearchBar from '@/components/SearchBar';
