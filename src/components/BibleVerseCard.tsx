@@ -1,4 +1,3 @@
-
 import React, { forwardRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Palette } from 'lucide-react';
@@ -17,7 +16,7 @@ interface BibleVerseCardProps {
   category?: string;
 }
 
-// Enhanced collection of gradient backgrounds
+// Enhanced collection of gradient backgrounds for light mode
 const gradients = [
   // Original gradients
   'bg-gradient-to-br from-blue-100 to-indigo-200',
@@ -43,30 +42,39 @@ const gradients = [
   'bg-gradient-to-r from-orange-100 to-rose-200',
 ];
 
-// Darker gradient versions for dark mode
+// Enhanced dark mode gradients with vibrant and pastel options
 const darkGradients = [
-  // Original dark gradients
-  'dark:bg-gradient-to-br dark:from-blue-900 dark:to-indigo-800',
-  'dark:bg-gradient-to-br dark:from-green-900 dark:to-emerald-800',
-  'dark:bg-gradient-to-br dark:from-yellow-900 dark:to-amber-800',
-  'dark:bg-gradient-to-br dark:from-pink-900 dark:to-rose-800',
-  'dark:bg-gradient-to-br dark:from-purple-900 dark:to-violet-800',
-  'dark:bg-gradient-to-br dark:from-sky-900 dark:to-cyan-800',
-  'dark:bg-gradient-to-br dark:from-red-900 dark:to-orange-800',
-  'dark:bg-gradient-to-br dark:from-teal-900 dark:to-emerald-800',
-  'dark:bg-gradient-to-br dark:from-indigo-900 dark:to-purple-800',
-  'dark:bg-gradient-to-br dark:from-amber-900 dark:to-yellow-800',
-  // New enhanced dark gradients
-  'dark:bg-gradient-to-br dark:from-fuchsia-900 dark:to-pink-800',
-  'dark:bg-gradient-to-br dark:from-violet-900 dark:to-indigo-800',
-  'dark:bg-gradient-to-br dark:from-cyan-900 dark:to-blue-800',
-  'dark:bg-gradient-to-br dark:from-emerald-900 dark:to-teal-800',
-  'dark:bg-gradient-to-br dark:from-rose-900 dark:to-red-800',
-  'dark:bg-gradient-to-br dark:from-amber-900 dark:to-orange-800',
-  'dark:bg-gradient-to-tl dark:from-blue-900 dark:to-purple-800', // Direction variants
-  'dark:bg-gradient-to-tr dark:from-green-900 dark:to-blue-800',
-  'dark:bg-gradient-to-bl dark:from-pink-900 dark:to-purple-800',
-  'dark:bg-gradient-to-r dark:from-orange-900 dark:to-rose-800',
+  // Vibrant dark gradients with depth
+  'dark:bg-gradient-to-br dark:from-blue-950 dark:to-indigo-900',
+  'dark:bg-gradient-to-br dark:from-emerald-950 dark:to-green-900',
+  'dark:bg-gradient-to-br dark:from-amber-950 dark:to-yellow-900',
+  'dark:bg-gradient-to-br dark:from-rose-950 dark:to-pink-900',
+  'dark:bg-gradient-to-br dark:from-violet-950 dark:to-purple-900',
+  'dark:bg-gradient-to-br dark:from-cyan-950 dark:to-sky-900',
+  'dark:bg-gradient-to-br dark:from-orange-950 dark:to-red-900',
+  'dark:bg-gradient-to-br dark:from-emerald-950 dark:to-teal-900',
+  'dark:bg-gradient-to-br dark:from-purple-950 dark:to-indigo-900',
+  'dark:bg-gradient-to-br dark:from-yellow-950 dark:to-amber-900',
+  // Pastel dark gradients
+  'dark:bg-gradient-to-br dark:from-pink-900/90 dark:to-fuchsia-800/90',
+  'dark:bg-gradient-to-br dark:from-indigo-900/90 dark:to-violet-800/90',
+  'dark:bg-gradient-to-br dark:from-blue-900/90 dark:to-cyan-800/90',
+  'dark:bg-gradient-to-br dark:from-teal-900/90 dark:to-emerald-800/90',
+  'dark:bg-gradient-to-br dark:from-red-900/90 dark:to-rose-800/90',
+  'dark:bg-gradient-to-br dark:from-orange-900/90 dark:to-amber-800/90',
+  'dark:bg-gradient-to-tl dark:from-purple-900/90 dark:to-blue-800/90', // Direction variants
+  'dark:bg-gradient-to-tr dark:from-blue-900/90 dark:to-green-800/90',
+  'dark:bg-gradient-to-bl dark:from-purple-900/90 dark:to-pink-800/90',
+  'dark:bg-gradient-to-r dark:from-rose-900/90 dark:to-orange-800/90',
+];
+
+// Alternative texture-based dark mode backgrounds
+const textureDarkBgs = [
+  'dark:bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] dark:from-gray-900 dark:via-purple-900 dark:to-violet-900',
+  'dark:bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] dark:from-blue-900 dark:via-blue-950 dark:to-gray-900',
+  'dark:bg-[linear-gradient(to_right_bottom,_var(--tw-gradient-stops))] dark:from-gray-900 dark:via-purple-900 dark:to-blue-900',
+  'dark:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] dark:from-gray-900 dark:to-gray-800',
+  'dark:bg-[linear-gradient(to_left_bottom,_var(--tw-gradient-stops))] dark:from-indigo-900 dark:via-gray-900 dark:to-gray-800',
 ];
 
 // Font family options for verse text
@@ -87,6 +95,8 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
     const [isLoading, setIsLoading] = useState(false);
     const [key, setKey] = useState(0);
     const [showControls, setShowControls] = useState(false);
+    const [useTextureStyle, setUseTextureStyle] = useState(false);
+    const [darkStyleIndex, setDarkStyleIndex] = useState(0);
     
     // Change gradient when verse or reference changes
     useEffect(() => {
@@ -95,6 +105,7 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
         // Create a consistent but pseudo-random index based on the verse reference
         const sum = reference.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         setGradientIndex(sum % gradients.length);
+        setDarkStyleIndex(sum % textureDarkBgs.length);
       }
     }, [verse, reference]);
     
@@ -175,6 +186,13 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
 
     const handleGradientChange = (index: number) => {
       setGradientIndex(index);
+      setUseTextureStyle(false);
+      setKey(prev => prev + 1); // Force re-animation
+    };
+
+    const handleTextureChange = (index: number) => {
+      setUseTextureStyle(true);
+      setDarkStyleIndex(index);
       setKey(prev => prev + 1); // Force re-animation
     };
 
@@ -185,8 +203,14 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
 
     if (!verse) return null;
     
-    // Combine light and dark mode gradients
-    const gradientClasses = `${gradients[gradientIndex]} ${darkGradients[gradientIndex]}`;
+    // Choose the correct background class based on settings
+    let backgroundClass;
+    
+    if (useTextureStyle) {
+      backgroundClass = `${gradients[gradientIndex]} ${textureDarkBgs[darkStyleIndex]}`;
+    } else {
+      backgroundClass = `${gradients[gradientIndex]} ${darkGradients[gradientIndex]}`;
+    }
     
     return (
       <div className="relative w-full max-w-2xl" onMouseEnter={() => setShowControls(true)} onMouseLeave={() => setShowControls(false)}>
@@ -204,7 +228,7 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
           >
             <motion.div 
               ref={ref}
-              className={`relative w-full max-w-2xl ${gradientClasses} dark:text-gray-100 rounded-xl shadow-md overflow-hidden border dark:border-gray-800`}
+              className={`relative w-full max-w-2xl ${backgroundClass} dark:text-gray-100 rounded-xl shadow-md overflow-hidden border dark:border-gray-800`}
               whileHover={{ scale: 1.01, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
@@ -260,35 +284,37 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
                 <PopoverContent className="w-64 p-2" side="top">
                   <div className="space-y-4">
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Background Style</h4>
+                      <h4 className="text-sm font-medium mb-2">Light Mode Style</h4>
                       <div className="grid grid-cols-5 gap-1">
                         {gradients.slice(0, 10).map((_, index) => (
                           <button
                             key={index}
                             className={`w-full aspect-square rounded-md ${gradients[index]} hover:scale-110 transition-transform ${
-                              gradientIndex === index ? 'ring-2 ring-primary' : ''
+                              gradientIndex === index && !useTextureStyle ? 'ring-2 ring-primary' : ''
                             }`}
                             onClick={() => handleGradientChange(index)}
                             aria-label={`Gradient style ${index + 1}`}
                           />
                         ))}
                       </div>
-                      <div className="grid grid-cols-5 gap-1 mt-1">
-                        {gradients.slice(10, 20).map((_, index) => {
-                          const actualIndex = index + 10;
-                          return (
-                            <button
-                              key={actualIndex}
-                              className={`w-full aspect-square rounded-md ${gradients[actualIndex]} hover:scale-110 transition-transform ${
-                                gradientIndex === actualIndex ? 'ring-2 ring-primary' : ''
-                              }`}
-                              onClick={() => handleGradientChange(actualIndex)}
-                              aria-label={`Gradient style ${actualIndex + 1}`}
-                            />
-                          );
-                        })}
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Dark Mode Style</h4>
+                      <div className="grid grid-cols-5 gap-1">
+                        {textureDarkBgs.map((_, index) => (
+                          <button
+                            key={`texture-${index}`}
+                            className={`w-full aspect-square rounded-md ${textureDarkBgs[index]} hover:scale-110 transition-transform ${
+                              darkStyleIndex === index && useTextureStyle ? 'ring-2 ring-primary' : ''
+                            }`}
+                            onClick={() => handleTextureChange(index)}
+                            aria-label={`Dark texture style ${index + 1}`}
+                          />
+                        ))}
                       </div>
                     </div>
+                    
                     <div>
                       <h4 className="text-sm font-medium mb-2">Font Style</h4>
                       <div className="flex flex-col space-y-1">

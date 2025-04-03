@@ -7,6 +7,8 @@ import Bookmarks from './pages/Bookmarks';
 import Header from './components/Header';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
+import BibleVerseService from './services/BibleVerseService';
+import OfflineVerseService from './services/OfflineVerseService';
 
 interface VerseItem {
   verse: string;
@@ -15,6 +17,7 @@ interface VerseItem {
 }
 
 const App = () => {
+  // State management
   const [recentVerses, setRecentVerses] = useState<VerseItem[]>(() => {
     const saved = localStorage.getItem('recentVerses');
     return saved ? JSON.parse(saved) : [];
@@ -24,11 +27,43 @@ const App = () => {
     verse: '',
     reference: ''
   });
-
+  
+  const [language, setLanguage] = useState<string>(() => {
+    const savedLanguage = localStorage.getItem('app_language');
+    return savedLanguage || 'en';
+  });
+  
+  const [isOfflineMode, setIsOfflineMode] = useState<boolean>(() => {
+    const savedOfflineMode = localStorage.getItem('offline_mode');
+    return savedOfflineMode === 'true';
+  });
+  
+  // Set language in the Bible service whenever it changes
+  useEffect(() => {
+    BibleVerseService.setLanguage(language);
+    localStorage.setItem('app_language', language);
+  }, [language]);
+  
   // Save recent verses to localStorage when updated
   useEffect(() => {
     localStorage.setItem('recentVerses', JSON.stringify(recentVerses));
   }, [recentVerses]);
+  
+  // Save offline mode preference
+  useEffect(() => {
+    localStorage.setItem('offline_mode', isOfflineMode.toString());
+  }, [isOfflineMode]);
+  
+  // Initialize offline cache if it's not valid
+  useEffect(() => {
+    const checkOfflineCache = async () => {
+      if (isOfflineMode && !OfflineVerseService.isCacheValid()) {
+        await OfflineVerseService.cacheVerses(100);
+      }
+    };
+    
+    checkOfflineCache();
+  }, [isOfflineMode]);
 
   // Handle selecting a verse from the dropdown
   const handleSelectVerse = (verse: string, reference: string) => {
@@ -64,6 +99,17 @@ const App = () => {
       }
     });
   };
+  
+  // Handle language switch
+  const handleLanguageChange = (newLanguage: string) => {
+    setLanguage(newLanguage);
+    BibleVerseService.setLanguage(newLanguage);
+  };
+  
+  // Toggle offline mode
+  const toggleOfflineMode = () => {
+    setIsOfflineMode(prev => !prev);
+  };
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -71,7 +117,11 @@ const App = () => {
         <div className="flex flex-col min-h-screen">
           <Header 
             recentVerses={recentVerses} 
-            onSelectVerse={handleSelectVerse} 
+            onSelectVerse={handleSelectVerse}
+            currentLanguage={language}
+            onLanguageChange={handleLanguageChange}
+            isOfflineMode={isOfflineMode}
+            toggleOfflineMode={toggleOfflineMode}
           />
           <div className="flex-1 mt-16">
             <Routes>
@@ -81,6 +131,8 @@ const App = () => {
                   <Index 
                     addToRecentVerses={addToRecentVerses}
                     currentVerse={currentVerse}
+                    language={language}
+                    isOfflineMode={isOfflineMode}
                   />
                 } 
               />
