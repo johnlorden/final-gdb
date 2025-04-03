@@ -43,6 +43,7 @@ class BibleVerseService {
   static setLanguage(language: string): void {
     if (language === 'en' || language === 'fil') {
       this.currentLanguage = language;
+      this.clearCache(language);
     }
   }
 
@@ -54,10 +55,14 @@ class BibleVerseService {
     const lang = language === 'fil' ? 'fil' : 'en';
     
     if (!this.xmlDocPromises[lang]) {
-      this.xmlDocPromises[lang] = fetch(`/data/bible-verses-${lang}.xml`)
+      const filePath = lang === 'fil' ? 'bible-verses-fil.xml' : 'bible-verses.xml';
+      const url = `/data/${filePath}`;
+      
+      console.log(`Attempting to load XML from: ${url}`);
+      
+      this.xmlDocPromises[lang] = fetch(url)
         .then(response => {
           if (!response.ok) {
-            // If Filipino version not found, fallback to English
             if (lang === 'fil') {
               console.warn('Filipino Bible verses not found, falling back to English');
               return fetch('/data/bible-verses.xml');
@@ -67,15 +72,30 @@ class BibleVerseService {
           return response.text();
         })
         .then(xmlText => {
+          if (!xmlText || xmlText.trim() === '') {
+            throw new Error('Empty XML content received');
+          }
+          
+          if (xmlText.includes('<!DOCTYPE html>')) {
+            throw new Error('Received HTML instead of XML, check server configuration');
+          }
+          
           try {
-            return this.parser.parseFromString(xmlText, 'text/xml');
+            const parsedDoc = this.parser.parseFromString(xmlText, 'text/xml');
+            const verses = parsedDoc.getElementsByTagName('verse');
+            if (verses.length === 0) {
+              console.warn(`No verses found in parsed XML document for language: ${lang}`);
+            } else {
+              console.log(`Successfully loaded ${verses.length} verses for language: ${lang}`);
+            }
+            return parsedDoc;
           } catch (parseError) {
             console.error('Error parsing XML:', parseError);
             throw parseError;
           }
         })
         .catch(error => {
-          console.error('Error loading XML document:', error);
+          console.error(`Error loading XML document for ${lang}:`, error);
           this.xmlDocPromises[lang] = null;
           throw error;
         });
@@ -86,7 +106,7 @@ class BibleVerseService {
   private static async getAllVerses(language?: string): Promise<VerseResult[]> {
     const lang = language || this.currentLanguage;
     
-    if (this.allVersesCaches[lang]) {
+    if (this.allVersesCaches[lang] && this.allVersesCaches[lang]!.length > 0) {
       return this.allVersesCaches[lang]!;
     }
     
@@ -96,6 +116,12 @@ class BibleVerseService {
       
       if (verses.length === 0) {
         console.warn(`No verses found in XML document for language: ${lang}`);
+        
+        if (lang === 'fil') {
+          console.log('Falling back to English verses');
+          return this.getAllVerses('en');
+        }
+        
         return [];
       }
       
@@ -116,6 +142,12 @@ class BibleVerseService {
       return this.allVersesCaches[lang]!;
     } catch (error) {
       console.error('Error parsing all verses:', error);
+      
+      if (lang === 'fil') {
+        console.log('Error with Filipino verses, falling back to English');
+        return this.getAllVerses('en');
+      }
+      
       return [];
     }
   }
@@ -270,35 +302,29 @@ class BibleVerseService {
       const results = allVerses.map(verse => {
         let score = 0;
         
-        // Exact reference match (highest priority)
         if (verse.reference.toLowerCase() === searchTerm) {
           score += 100;
         } 
-        // Partial reference match
         else if (verse.reference.toLowerCase().includes(searchTerm)) {
           score += 50;
           
-          // Beginning of reference match (higher priority)
           if (verse.reference.toLowerCase().startsWith(searchTerm)) {
             score += 20;
           }
         }
         
-        // Text content match
         const textLower = verse.text.toLowerCase();
         if (textLower === searchTerm) {
-          score += 50; // Exact text match (very unlikely)
+          score += 50;
         } else if (textLower.includes(searchTerm)) {
           score += 30;
           
-          // Word boundary match (higher priority)
           const words = textLower.split(/\s+/);
           if (words.some(word => word === searchTerm)) {
             score += 15;
           }
         }
         
-        // Category match
         if (verse.categories && 
             verse.categories.some(cat => {
               const catLower = cat.toLowerCase();
@@ -347,11 +373,15 @@ class BibleVerseService {
     const lang = language || this.currentLanguage;
     
     try {
-      await this.getAllVerses(lang);
+      console.log(`Preloading verses for language: ${lang}`);
+      const verses = await this.getAllVerses(lang);
+      console.log(`Preloaded ${verses.length} verses for language: ${lang}`);
       
-      for (const category of this.categories) {
-        if (!this.verseCaches[lang].has(category)) {
-          await this.getVersesByCategory(category, 25, lang);
+      if (verses.length > 0) {
+        for (const category of this.categories) {
+          if (!this.verseCaches[lang].has(category)) {
+            await this.getVersesByCategory(category, 25, lang);
+          }
         }
       }
     } catch (error) {
@@ -371,6 +401,7 @@ class BibleVerseService {
 }
 
 setTimeout(() => {
+  console.log('Starting Bible verse preload');
   BibleVerseService.preloadAllVerses();
 }, 1000);
 
