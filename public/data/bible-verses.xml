@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <bibleVerses>
   <verse>
@@ -75,5 +74,776 @@
     <text>The fear of the LORD is the beginning of wisdom, and the knowledge of the Holy One is insight.</text>
     <reference>Proverbs 9:10</reference>
     <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>If we confess our sins, he is faithful and just to forgive us our sins and to cleanse us from all unrighteousness.</text>
+    <reference>1 John 1:9</reference>
+    <category>Salvation</category>
+  </verse>
+  <verse>
+    <text>Be kind to one another, tenderhearted, forgiving one another, as God in Christ forgave you.</text>
+    <reference>Ephesians 4:32</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>For I am sure that neither death nor life, nor angels nor rulers, nor things present nor things to come, nor powers, nor height nor depth, nor anything else in all creation, will be able to separate us from the love of God in Christ Jesus our Lord.</text>
+    <reference>Romans 8:38-39</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>But seek first the kingdom of God and his righteousness, and all these things will be added to you.</text>
+    <reference>Matthew 6:33</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>The LORD is my light and my salvation; whom shall I fear? The LORD is the stronghold of my life; of whom shall I be afraid?</text>
+    <reference>Psalm 27:1</reference>
+    <category>Courage</category>
+  </verse>
+  <verse>
+    <text>May the God of hope fill you with all joy and peace in believing, so that by the power of the Holy Spirit you may abound in hope.</text>
+    <reference>Romans 15:13</reference>
+    <category>Hope</category>
+  </verse>
+  <verse>
+    <text>But as for me and my house, we will serve the LORD.</text>
+    <reference>Joshua 24:15</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>For the wages of sin is death, but the free gift of God is eternal life in Christ Jesus our Lord.</text>
+    <reference>Romans 6:23</reference>
+    <category>Salvation</category>
+  </verse>
+  <verse>
+    <text>The LORD bless you and keep you; the LORD make his face to shine upon you and be gracious to you; the LORD lift up his countenance upon you and give you peace.</text>
+    <reference>Numbers 6:24-26</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>Your word is a lamp to my feet and a light to my path.</text>
+    <reference>Psalm 119:105</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>Blessed is the man who walks not in the counsel of the wicked, nor stands in the way of sinners, nor sits in the seat of scoffers; but his delight is in the law of the LORD, and on his law he meditates day and night.</text>
+    <reference>Psalm 1:1-2</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Rejoice always, pray without ceasing, give thanks in all circumstances; for this is the will of God in Christ Jesus for you.</text>
+    <reference>1 Thessalonians 5:16-18</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>The grass withers, the flower fades, but the word of our God will stand forever.</text>
+    <reference>Isaiah 40:8</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Every good gift and every perfect gift is from above, coming down from the Father of lights, with whom there is no variation or shadow due to change.</text>
+    <reference>James 1:17</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>But God shows his love for us in that while we were still sinners, Christ died for us.</text>
+    <reference>Romans 5:8</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>I praise you, for I am fearfully and wonderfully made. Wonderful are your works; my soul knows it very well.</text>
+    <reference>Psalm 139:14</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>Let your light shine before others, so that they may see your good works and give glory to your Father who is in heaven.</text>
+    <reference>Matthew 5:16</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Ask, and it will be given to you; seek, and you will find; knock, and it will be opened to you.</text>
+    <reference>Matthew 7:7</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>The thief comes only to steal and kill and destroy. I came that they may have life and have it abundantly.</text>
+    <reference>John 10:10</reference>
+    <category>Life</category>
+  </verse>
+  <verse>
+    <text>I am the vine; you are the branches. Whoever abides in me and I in him, he it is that bears much fruit, for apart from me you can do nothing.</text>
+    <reference>John 15:5</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>A soft answer turns away wrath, but a harsh word stirs up anger.</text>
+    <reference>Proverbs 15:1</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Blessed are the peacemakers, for they shall be called sons of God.</text>
+    <reference>Matthew 5:9</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>Greater love has no one than this, that someone lay down his life for his friends.</text>
+    <reference>John 15:13</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Let us not love in word or talk but in deed and in truth.</text>
+    <reference>1 John 3:18</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>For to me to live is Christ, and to die is gain.</text>
+    <reference>Philippians 1:21</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Set your minds on things that are above, not on things that are on earth.</text>
+    <reference>Colossians 3:2</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>But the fruit of the Spirit is love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, self-control; against such things there is no law.</text>
+    <reference>Galatians 5:22-23</reference>
+    <category>Spiritual Growth</category>
+  </verse>
+  <verse>
+    <text>And without faith it is impossible to please him, for whoever would draw near to God must believe that he exists and that he rewards those who seek him.</text>
+    <reference>Hebrews 11:6</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Be still, and know that I am God. I will be exalted among the nations, I will be exalted in the earth!</text>
+    <reference>Psalm 46:10</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>All Scripture is breathed out by God and profitable for teaching, for reproof, for correction, and for training in righteousness.</text>
+    <reference>2 Timothy 3:16</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>For we walk by faith, not by sight.</text>
+    <reference>2 Corinthians 5:7</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Seek first the kingdom of God and his righteousness, and all these things will be added to you.</text>
+    <reference>Matthew 6:33</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>I will instruct you and teach you in the way you should go; I will counsel you with my eye upon you.</text>
+    <reference>Psalm 32:8</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>The name of the LORD is a strong tower; the righteous man runs into it and is safe.</text>
+    <reference>Proverbs 18:10</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>Delight yourself in the LORD, and he will give you the desires of your heart.</text>
+    <reference>Psalm 37:4</reference>
+    <category>Joy</category>
+  </verse>
+  <verse>
+    <text>The LORD will fight for you, and you have only to be silent.</text>
+    <reference>Exodus 14:14</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>In peace I will both lie down and sleep; for you alone, O LORD, make me dwell in safety.</text>
+    <reference>Psalm 4:8</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>Let the word of Christ dwell in you richly, teaching and admonishing one another in all wisdom, singing psalms and hymns and spiritual songs, with thankfulness in your hearts to God.</text>
+    <reference>Colossians 3:16</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>Be strong in the Lord and in the strength of his might.</text>
+    <reference>Ephesians 6:10</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>Every good gift and every perfect gift is from above, coming down from the Father of lights with whom there is no variation or shadow due to change.</text>
+    <reference>James 1:17</reference>
+    <category>Gratitude</category>
+  </verse>
+  <verse>
+    <text>A friend loves at all times, and a brother is born for adversity.</text>
+    <reference>Proverbs 17:17</reference>
+    <category>Friendship</category>
+  </verse>
+  <verse>
+    <text>Let us hold fast the confession of our hope without wavering, for he who promised is faithful.</text>
+    <reference>Hebrews 10:23</reference>
+    <category>Hope</category>
+  </verse>
+  <verse>
+    <text>Count it all joy, my brothers, when you meet trials of various kinds, for you know that the testing of your faith produces steadfastness.</text>
+    <reference>James 1:2-3</reference>
+    <category>Perseverance</category>
+  </verse>
+  <verse>
+    <text>The steadfast love of the LORD never ceases; his mercies never come to an end; they are new every morning; great is your faithfulness.</text>
+    <reference>Lamentations 3:22-23</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>He has told you, O man, what is good; and what does the LORD require of you but to do justice, and to love kindness, and to walk humbly with your God?</text>
+    <reference>Micah 6:8</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>God is our refuge and strength, a very present help in trouble.</text>
+    <reference>Psalm 46:1</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>Cast your burden on the LORD, and he will sustain you; he will never permit the righteous to be moved.</text>
+    <reference>Psalm 55:22</reference>
+    <category>Comfort</category>
+  </verse>
+  <verse>
+    <text>Behold, I am with you always, to the end of the age.</text>
+    <reference>Matthew 28:20</reference>
+    <category>Encouragement</category>
+  </verse>
+  <verse>
+    <text>For I, the LORD your God, hold your right hand; it is I who say to you, "Fear not, I am the one who helps you."</text>
+    <reference>Isaiah 41:13</reference>
+    <category>Courage</category>
+  </verse>
+  <verse>
+    <text>He has made everything beautiful in its time. Also, he has put eternity into man's heart, yet so that he cannot find out what God has done from the beginning to the end.</text>
+    <reference>Ecclesiastes 3:11</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>And let us not grow weary of doing good, for in due season we will reap, if we do not give up.</text>
+    <reference>Galatians 6:9</reference>
+    <category>Perseverance</category>
+  </verse>
+  <verse>
+    <text>Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand.</text>
+    <reference>Isaiah 41:10</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>But they who wait for the LORD shall renew their strength; they shall mount up with wings like eagles; they shall run and not be weary; they shall walk and not faint.</text>
+    <reference>Isaiah 40:31</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>And we know that for those who love God all things work together for good, for those who are called according to his purpose.</text>
+    <reference>Romans 8:28</reference>
+    <category>Hope</category>
+  </verse>
+  <verse>
+    <text>Come to me, all who labor and are heavy laden, and I will give you rest. Take my yoke upon you, and learn from me, for I am gentle and lowly in heart, and you will find rest for your souls.</text>
+    <reference>Matthew 11:28-29</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>The name of the LORD is a strong tower; the righteous man runs into it and is safe.</text>
+    <reference>Proverbs 18:10</reference>
+    <category>Protection</category>
+  </verse>
+  <verse>
+    <text>I have said these things to you, that in me you may have peace. In the world you will have tribulation. But take heart; I have overcome the world.</text>
+    <reference>John 16:33</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>But the wisdom from above is first pure, then peaceable, gentle, open to reason, full of mercy and good fruits, impartial and sincere.</text>
+    <reference>James 3:17</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Give thanks in all circumstances; for this is the will of God in Christ Jesus for you.</text>
+    <reference>1 Thessalonians 5:18</reference>
+    <category>Gratitude</category>
+  </verse>
+  <verse>
+    <text>But the fruit of the Spirit is love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, self-control; against such things there is no law.</text>
+    <reference>Galatians 5:22-23</reference>
+    <category>Spiritual Growth</category>
+  </verse>
+  <verse>
+    <text>As a father shows compassion to his children, so the LORD shows compassion to those who fear him.</text>
+    <reference>Psalm 103:13</reference>
+    <category>Love</category>
+  </verse>
+  <!-- Newly added verses below -->
+  <verse>
+    <text>The heavens declare the glory of God, and the sky above proclaims his handiwork.</text>
+    <reference>Psalm 19:1</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>My sheep hear my voice, and I know them, and they follow me. I give them eternal life, and they will never perish, and no one will snatch them out of my hand.</text>
+    <reference>John 10:27-28</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>And whatever you ask in prayer, you will receive, if you have faith.</text>
+    <reference>Matthew 21:22</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>Whoever conceals his transgressions will not prosper, but he who confesses and forsakes them will obtain mercy.</text>
+    <reference>Proverbs 28:13</reference>
+    <category>Salvation</category>
+  </verse>
+  <verse>
+    <text>A joyful heart is good medicine, but a crushed spirit dries up the bones.</text>
+    <reference>Proverbs 17:22</reference>
+    <category>Joy</category>
+  </verse>
+  <verse>
+    <text>Blessed are those who mourn, for they shall be comforted.</text>
+    <reference>Matthew 5:4</reference>
+    <category>Comfort</category>
+  </verse>
+  <verse>
+    <text>In the beginning was the Word, and the Word was with God, and the Word was God.</text>
+    <reference>John 1:1</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Humble yourselves, therefore, under the mighty hand of God so that at the proper time he may exalt you, casting all your anxieties on him, because he cares for you.</text>
+    <reference>1 Peter 5:6-7</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>I will sing to the LORD, because he has dealt bountifully with me.</text>
+    <reference>Psalm 13:6</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>For the LORD gives wisdom; from his mouth come knowledge and understanding.</text>
+    <reference>Proverbs 2:6</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Iron sharpens iron, and one man sharpens another.</text>
+    <reference>Proverbs 27:17</reference>
+    <category>Friendship</category>
+  </verse>
+  <verse>
+    <text>The LORD is near to the brokenhearted and saves the crushed in spirit.</text>
+    <reference>Psalm 34:18</reference>
+    <category>Comfort</category>
+  </verse>
+  <verse>
+    <text>Then you will call upon me and come and pray to me, and I will hear you.</text>
+    <reference>Jeremiah 29:12</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>Blessed are the pure in heart, for they shall see God.</text>
+    <reference>Matthew 5:8</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Wait for the LORD; be strong, and let your heart take courage; wait for the LORD!</text>
+    <reference>Psalm 27:14</reference>
+    <category>Courage</category>
+  </verse>
+  <verse>
+    <text>So faith comes from hearing, and hearing through the word of Christ.</text>
+    <reference>Romans 10:17</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>The steps of a man are established by the LORD, when he delights in his way.</text>
+    <reference>Psalm 37:23</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>Peace I leave with you; my peace I give to you. Not as the world gives do I give to you. Let not your hearts be troubled, neither let them be afraid.</text>
+    <reference>John 14:27</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>This is the day that the LORD has made; let us rejoice and be glad in it.</text>
+    <reference>Psalm 118:24</reference>
+    <category>Joy</category>
+  </verse>
+  <verse>
+    <text>Therefore, confess your sins to one another and pray for one another, that you may be healed. The prayer of a righteous person has great power as it is working.</text>
+    <reference>James 5:16</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>If any of you lacks wisdom, let him ask God, who gives generously to all without reproach, and it will be given him.</text>
+    <reference>James 1:5</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>But as it is written, "What no eye has seen, nor ear heard, nor the heart of man imagined, what God has prepared for those who love him."</text>
+    <reference>1 Corinthians 2:9</reference>
+    <category>Hope</category>
+  </verse>
+  <verse>
+    <text>But he said to me, "My grace is sufficient for you, for my power is made perfect in weakness." Therefore I will boast all the more gladly of my weaknesses, so that the power of Christ may rest upon me.</text>
+    <reference>2 Corinthians 12:9</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>Blessed is the man who remains steadfast under trial, for when he has stood the test he will receive the crown of life, which God has promised to those who love him.</text>
+    <reference>James 1:12</reference>
+    <category>Perseverance</category>
+  </verse>
+  <verse>
+    <text>The LORD your God is in your midst, a mighty one who will save; he will rejoice over you with gladness; he will quiet you by his love; he will exult over you with loud singing.</text>
+    <reference>Zephaniah 3:17</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Oh, taste and see that the LORD is good! Blessed is the man who takes refuge in him!</text>
+    <reference>Psalm 34:8</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Now faith is the assurance of things hoped for, the conviction of things not seen.</text>
+    <reference>Hebrews 11:1</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Whoever pursues righteousness and kindness will find life, righteousness, and honor.</text>
+    <reference>Proverbs 21:21</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>He will wipe away every tear from their eyes, and death shall be no more, neither shall there be mourning, nor crying, nor pain anymore, for the former things have passed away.</text>
+    <reference>Revelation 21:4</reference>
+    <category>Comfort</category>
+  </verse>
+  <verse>
+    <text>And whatever you do, in word or deed, do everything in the name of the Lord Jesus, giving thanks to God the Father through him.</text>
+    <reference>Colossians 3:17</reference>
+    <category>Gratitude</category>
+  </verse>
+  <verse>
+    <text>For the word of God is living and active, sharper than any two-edged sword, piercing to the division of soul and of spirit, of joints and of marrow, and discerning the thoughts and intentions of the heart.</text>
+    <reference>Hebrews 4:12</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Blessed are those who hunger and thirst for righteousness, for they shall be satisfied.</text>
+    <reference>Matthew 5:6</reference>
+    <category>Spiritual Growth</category>
+  </verse>
+  <verse>
+    <text>I can do nothing on my own. As I hear, I judge, and my judgment is just, because I seek not my own will but the will of him who sent me.</text>
+    <reference>John 5:30</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>But he was pierced for our transgressions; he was crushed for our iniquities; upon him was the chastisement that brought us peace, and with his wounds we are healed.</text>
+    <reference>Isaiah 53:5</reference>
+    <category>Salvation</category>
+  </verse>
+  <verse>
+    <text>Let no corrupting talk come out of your mouths, but only such as is good for building up, as fits the occasion, that it may give grace to those who hear.</text>
+    <reference>Ephesians 4:29</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Bear one another's burdens, and so fulfill the law of Christ.</text>
+    <reference>Galatians 6:2</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Call to me and I will answer you, and will tell you great and hidden things that you have not known.</text>
+    <reference>Jeremiah 33:3</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>And my God will supply every need of yours according to his riches in glory in Christ Jesus.</text>
+    <reference>Philippians 4:19</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>The LORD upholds all who are falling and raises up all who are bowed down.</text>
+    <reference>Psalm 145:14</reference>
+    <category>Comfort</category>
+  </verse>
+  <verse>
+    <text>Commit your work to the LORD, and your plans will be established.</text>
+    <reference>Proverbs 16:3</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>Above all, keep loving one another earnestly, since love covers a multitude of sins.</text>
+    <reference>1 Peter 4:8</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Make a joyful noise to the LORD, all the earth! Serve the LORD with gladness! Come into his presence with singing!</text>
+    <reference>Psalm 100:1-2</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>The LORD will keep you from all evil; he will keep your life. The LORD will keep your going out and your coming in from this time forth and forevermore.</text>
+    <reference>Psalm 121:7-8</reference>
+    <category>Protection</category>
+  </verse>
+  <verse>
+    <text>Jesus said to him, "I am the way, and the truth, and the life. No one comes to the Father except through me."</text>
+    <reference>John 14:6</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Therefore, my beloved brothers, be steadfast, immovable, always abounding in the work of the Lord, knowing that in the Lord your labor is not in vain.</text>
+    <reference>1 Corinthians 15:58</reference>
+    <category>Perseverance</category>
+  </verse>
+  <verse>
+    <text>May the God of endurance and encouragement grant you to live in such harmony with one another, in accord with Christ Jesus.</text>
+    <reference>Romans 15:5</reference>
+    <category>Encouragement</category>
+  </verse>
+  <verse>
+    <text>Whoever walks with the wise becomes wise, but the companion of fools will suffer harm.</text>
+    <reference>Proverbs 13:20</reference>
+    <category>Friendship</category>
+  </verse>
+  <verse>
+    <text>The LORD is good, a stronghold in the day of trouble; he knows those who take refuge in him.</text>
+    <reference>Nahum 1:7</reference>
+    <category>Protection</category>
+  </verse>
+  <verse>
+    <text>Submit yourselves therefore to God. Resist the devil, and he will flee from you.</text>
+    <reference>James 4:7</reference>
+    <category>Spiritual Growth</category>
+  </verse>
+  <verse>
+    <text>Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me; your rod and your staff, they comfort me.</text>
+    <reference>Psalm 23:4</reference>
+    <category>Courage</category>
+  </verse>
+  <verse>
+    <text>Rejoice in hope, be patient in tribulation, be constant in prayer.</text>
+    <reference>Romans 12:12</reference>
+    <category>Hope</category>
+  </verse>
+  <verse>
+    <text>For God gave us a spirit not of fear but of power and love and self-control.</text>
+    <reference>2 Timothy 1:7</reference>
+    <category>Courage</category>
+  </verse>
+  <verse>
+    <text>The heart of man plans his way, but the LORD establishes his steps.</text>
+    <reference>Proverbs 16:9</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>And I am sure of this, that he who began a good work in you will bring it to completion at the day of Jesus Christ.</text>
+    <reference>Philippians 1:6</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Blessed are the merciful, for they shall receive mercy.</text>
+    <reference>Matthew 5:7</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>So now faith, hope, and love abide, these three; but the greatest of these is love.</text>
+    <reference>1 Corinthians 13:13</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>But they who seek the LORD shall not lack any good thing.</text>
+    <reference>Psalm 34:10</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>And this is the confidence that we have toward him, that if we ask anything according to his will he hears us.</text>
+    <reference>1 John 5:14</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>Blessed are those whose strength is in you, in whose heart are the highways to Zion.</text>
+    <reference>Psalm 84:5</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>See what kind of love the Father has given to us, that we should be called children of God; and so we are.</text>
+    <reference>1 John 3:1</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>For everyone who asks receives, and the one who seeks finds, and to the one who knocks it will be opened.</text>
+    <reference>Matthew 7:8</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>Create in me a clean heart, O God, and renew a right spirit within me.</text>
+    <reference>Psalm 51:10</reference>
+    <category>Spiritual Growth</category>
+  </verse>
+  <verse>
+    <text>The LORD is righteous in all his ways and kind in all his works.</text>
+    <reference>Psalm 145:17</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Finally, brothers, whatever is true, whatever is honorable, whatever is just, whatever is pure, whatever is lovely, whatever is commendable, if there is any excellence, if there is anything worthy of praise, think about these things.</text>
+    <reference>Philippians 4:8</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Great is the LORD, and greatly to be praised, and his greatness is unsearchable.</text>
+    <reference>Psalm 145:3</reference>
+    <category>Praise</category>
+  </verse>
+  <verse>
+    <text>Teach me to do your will, for you are my God! Let your good Spirit lead me on level ground!</text>
+    <reference>Psalm 143:10</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>My soul finds rest in God alone; my salvation comes from him.</text>
+    <reference>Psalm 62:1</reference>
+    <category>Peace</category>
+  </verse>
+  <verse>
+    <text>Do nothing from selfish ambition or conceit, but in humility count others more significant than yourselves.</text>
+    <reference>Philippians 2:3</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Give, and it will be given to you. Good measure, pressed down, shaken together, running over, will be put into your lap. For with the measure you use it will be measured back to you.</text>
+    <reference>Luke 6:38</reference>
+    <category>Generosity</category>
+  </verse>
+  <verse>
+    <text>Blessed are those who keep his testimonies, who seek him with their whole heart.</text>
+    <reference>Psalm 119:2</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>A new commandment I give to you, that you love one another: just as I have loved you, you also are to love one another.</text>
+    <reference>John 13:34</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>In all toil there is profit, but mere talk tends only to poverty.</text>
+    <reference>Proverbs 14:23</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>He restores my soul. He leads me in paths of righteousness for his name's sake.</text>
+    <reference>Psalm 23:3</reference>
+    <category>Guidance</category>
+  </verse>
+  <verse>
+    <text>You make known to me the path of life; in your presence there is fullness of joy; at your right hand are pleasures forevermore.</text>
+    <reference>Psalm 16:11</reference>
+    <category>Joy</category>
+  </verse>
+  <verse>
+    <text>The blessing of the LORD makes rich, and he adds no sorrow with it.</text>
+    <reference>Proverbs 10:22</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>Therefore welcome one another as Christ has welcomed you, for the glory of God.</text>
+    <reference>Romans 15:7</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Blessed is the one who considers the poor! In the day of trouble the LORD delivers him.</text>
+    <reference>Psalm 41:1</reference>
+    <category>Generosity</category>
+  </verse>
+  <verse>
+    <text>I waited patiently for the LORD; he inclined to me and heard my cry.</text>
+    <reference>Psalm 40:1</reference>
+    <category>Perseverance</category>
+  </verse>
+  <verse>
+    <text>The LORD is gracious and merciful, slow to anger and abounding in steadfast love.</text>
+    <reference>Psalm 145:8</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Watch and pray that you may not enter into temptation. The spirit indeed is willing, but the flesh is weak.</text>
+    <reference>Matthew 26:41</reference>
+    <category>Spiritual Growth</category>
+  </verse>
+  <verse>
+    <text>For his anger is but for a moment, and his favor is for a lifetime. Weeping may tarry for the night, but joy comes with the morning.</text>
+    <reference>Psalm 30:5</reference>
+    <category>Hope</category>
+  </verse>
+  <verse>
+    <text>Look at the birds of the air: they neither sow nor reap nor gather into barns, and yet your heavenly Father feeds them. Are you not of more value than they?</text>
+    <reference>Matthew 6:26</reference>
+    <category>Comfort</category>
+  </verse>
+  <verse>
+    <text>For the moment all discipline seems painful rather than pleasant, but later it yields the peaceful fruit of righteousness to those who have been trained by it.</text>
+    <reference>Hebrews 12:11</reference>
+    <category>Spiritual Growth</category>
+  </verse>
+  <verse>
+    <text>Humble yourselves before the Lord, and he will exalt you.</text>
+    <reference>James 4:10</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Do not be overcome by evil, but overcome evil with good.</text>
+    <reference>Romans 12:21</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>The LORD is my strength and my shield; in him my heart trusts, and I am helped; my heart exults, and with my song I give thanks to him.</text>
+    <reference>Psalm 28:7</reference>
+    <category>Strength</category>
+  </verse>
+  <verse>
+    <text>Pray without ceasing.</text>
+    <reference>1 Thessalonians 5:17</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>By this we know love, that he laid down his life for us, and we ought to lay down our lives for the brothers.</text>
+    <reference>1 John 3:16</reference>
+    <category>Love</category>
+  </verse>
+  <verse>
+    <text>Therefore, whether you eat or drink, or whatever you do, do all to the glory of God.</text>
+    <reference>1 Corinthians 10:31</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>For the eyes of the LORD run to and fro throughout the whole earth, to give strong support to those whose heart is blameless toward him.</text>
+    <reference>2 Chronicles 16:9</reference>
+    <category>Faith</category>
+  </verse>
+  <verse>
+    <text>A gentle answer turns away wrath, but a harsh word stirs up anger.</text>
+    <reference>Proverbs 15:1</reference>
+    <category>Wisdom</category>
+  </verse>
+  <verse>
+    <text>Let us therefore come boldly to the throne of grace, that we may obtain mercy and find grace to help in time of need.</text>
+    <reference>Hebrews 4:16</reference>
+    <category>Prayer</category>
+  </verse>
+  <verse>
+    <text>The name of the LORD is a strong tower; the righteous run to it and are safe.</text>
+    <reference>Proverbs 18:10</reference>
+    <category>Protection</category>
   </verse>
 </bibleVerses>
