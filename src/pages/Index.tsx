@@ -17,6 +17,13 @@ interface IndexProps {
   };
 }
 
+interface VerseResult {
+  text: string;
+  reference: string;
+  categories?: string[];
+  category?: string;
+}
+
 const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
   const [searchParams] = useSearchParams();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -29,7 +36,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
   const [lastClickedCategory, setLastClickedCategory] = useState<string | null>(null);
   const [verseCategory, setVerseCategory] = useState<string | null>(null);
 
-  const verseCache = useRef<Map<string, { text: string, reference: string, category: string }[]>>(new Map());
+  const verseCache = useRef<Map<string, VerseResult[]>>(new Map());
 
   useEffect(() => {
     const bibleVerse = searchParams.get('bibleverse');
@@ -93,10 +100,8 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           addToRecentVerses(result.text, result.reference);
           setPreviousVerse(result.reference);
           
-          // Update URL
           updateUrlWithVerse(result.reference);
           
-          // Update category based on the verse's category if possible
           if (result.categories && result.categories.length > 0) {
             setCurrentCategory(result.categories[0]);
             setVerseCategory(result.categories[0]);
@@ -120,25 +125,21 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     setCurrentCategory(category);
     setLastClickedCategory(category);
     
-    // Always get a new verse when selecting a category
     getVerseFromCategory(category);
   };
 
   const handleRandomVerse = (category?: string) => {
     setIsLoading(true);
     
-    // If category is provided, use it; otherwise, use current category
     const categoryToUse = category || currentCategory;
     
-    // Get a verse from the specified category (or random if 'All')
     getVerseFromCategory(categoryToUse);
   };
-  
+
   const getVerseFromCategory = (category: string) => {
     if (category !== 'All' && verseCache.current.has(category)) {
       const cachedVerses = verseCache.current.get(category)!;
       
-      // Filter out the current verse to ensure we get a different one
       const filteredVerses = cachedVerses.filter(v => v.reference !== reference);
       
       if (filteredVerses.length > 0) {
@@ -147,7 +148,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
         
         setVerse(newVerse.text);
         setReference(newVerse.reference);
-        setVerseCategory(newVerse.category);
+        setVerseCategory(newVerse.category || category);
         addToRecentVerses(newVerse.text, newVerse.reference);
         setPreviousVerse(newVerse.reference);
         
@@ -157,7 +158,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
       }
     }
     
-    // If cache doesn't have the verse or it's "All" category, get a new verse from the service
     BibleVerseService.getVerseByCategory(category)
       .then((result) => {
         if (result) {
@@ -166,7 +166,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           addToRecentVerses(result.text, result.reference);
           setPreviousVerse(result.reference);
           
-          // If we are in "All" category, display the verse's original category
           if (category === 'All' && result.category) {
             setVerseCategory(result.category);
           } else if (result.categories && result.categories.length > 0) {
