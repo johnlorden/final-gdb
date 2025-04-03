@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Twitter, Facebook, Mail, Link, Instagram, Linkedin, Share2, Smartphone } from 'lucide-react';
@@ -17,6 +16,12 @@ interface SocialShareBarProps {
 const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardRef, category }) => {
   const { toast } = useToast();
   const [template, setTemplate] = useState<ShareTemplate>('default');
+  
+  // Don't try to share if no verse is loaded
+  if (!verse || !reference) {
+    return null;
+  }
+  
   const verseText = `"${verse}" — ${reference}`;
   
   // Create URL with verse parameter for sharing

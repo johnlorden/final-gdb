@@ -18,7 +18,6 @@ interface BibleVerseCardProps {
 
 // Enhanced collection of gradient backgrounds for light mode
 const gradients = [
-  // Original gradients
   'bg-gradient-to-br from-blue-100 to-indigo-200',
   'bg-gradient-to-br from-green-100 to-emerald-200',
   'bg-gradient-to-br from-yellow-100 to-amber-200',
@@ -29,14 +28,13 @@ const gradients = [
   'bg-gradient-to-br from-teal-100 to-emerald-200',
   'bg-gradient-to-br from-indigo-100 to-purple-200',
   'bg-gradient-to-br from-amber-100 to-yellow-200',
-  // New enhanced gradients
   'bg-gradient-to-br from-fuchsia-100 to-pink-200',
   'bg-gradient-to-br from-violet-100 to-indigo-200',
   'bg-gradient-to-br from-cyan-100 to-blue-200',
   'bg-gradient-to-br from-emerald-100 to-teal-200',
   'bg-gradient-to-br from-rose-100 to-red-200',
   'bg-gradient-to-br from-amber-100 to-orange-200',
-  'bg-gradient-to-tl from-blue-100 to-purple-200', // Direction variants
+  'bg-gradient-to-tl from-blue-100 to-purple-200',
   'bg-gradient-to-tr from-green-100 to-blue-200',
   'bg-gradient-to-bl from-pink-100 to-purple-200',
   'bg-gradient-to-r from-orange-100 to-rose-200',
@@ -44,7 +42,6 @@ const gradients = [
 
 // Enhanced dark mode gradients with vibrant and pastel options
 const darkGradients = [
-  // Vibrant dark gradients with depth
   'dark:bg-gradient-to-br dark:from-blue-950 dark:to-indigo-900',
   'dark:bg-gradient-to-br dark:from-emerald-950 dark:to-green-900',
   'dark:bg-gradient-to-br dark:from-amber-950 dark:to-yellow-900',
@@ -55,14 +52,13 @@ const darkGradients = [
   'dark:bg-gradient-to-br dark:from-emerald-950 dark:to-teal-900',
   'dark:bg-gradient-to-br dark:from-purple-950 dark:to-indigo-900',
   'dark:bg-gradient-to-br dark:from-yellow-950 dark:to-amber-900',
-  // Pastel dark gradients
   'dark:bg-gradient-to-br dark:from-pink-900/90 dark:to-fuchsia-800/90',
   'dark:bg-gradient-to-br dark:from-indigo-900/90 dark:to-violet-800/90',
   'dark:bg-gradient-to-br dark:from-blue-900/90 dark:to-cyan-800/90',
   'dark:bg-gradient-to-br dark:from-teal-900/90 dark:to-emerald-800/90',
   'dark:bg-gradient-to-br dark:from-red-900/90 dark:to-rose-800/90',
   'dark:bg-gradient-to-br dark:from-orange-900/90 dark:to-amber-800/90',
-  'dark:bg-gradient-to-tl dark:from-purple-900/90 dark:to-blue-800/90', // Direction variants
+  'dark:bg-gradient-to-tl dark:from-purple-900/90 dark:to-blue-800/90',
   'dark:bg-gradient-to-tr dark:from-blue-900/90 dark:to-green-800/90',
   'dark:bg-gradient-to-bl dark:from-purple-900/90 dark:to-pink-800/90',
   'dark:bg-gradient-to-r dark:from-rose-900/90 dark:to-orange-800/90',
@@ -98,11 +94,9 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
     const [useTextureStyle, setUseTextureStyle] = useState(false);
     const [darkStyleIndex, setDarkStyleIndex] = useState(0);
     
-    // Change gradient when verse or reference changes
     useEffect(() => {
       if (verse && reference) {
-        setKey(prev => prev + 1); // Force re-animation
-        // Create a consistent but pseudo-random index based on the verse reference
+        setKey(prev => prev + 1);
         const sum = reference.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         setGradientIndex(sum % gradients.length);
         setDarkStyleIndex(sum % textureDarkBgs.length);
@@ -112,7 +106,6 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
     const handleSaveImage = async () => {
       if (!ref) return;
       
-      // Check if ref is RefObject or function
       const element = typeof ref === 'function' ? null : ref.current;
       
       if (!element) {
@@ -128,16 +121,13 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
       setIsLoading(true);
       
       try {
-        // Create a clone of the element for export to avoid modifying the original
         const clonedElement = element.cloneNode(true) as HTMLElement;
         document.body.appendChild(clonedElement);
         
-        // Apply export styles to the clone
-        clonedElement.style.padding = '30px'; // Reduced padding
-        clonedElement.style.borderRadius = '0px'; // Remove rounded corners for export
+        clonedElement.style.padding = '30px';
+        clonedElement.style.borderRadius = '0px';
         clonedElement.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
         
-        // Find and style the category badge for the export if it exists
         const categoryBadge = clonedElement.querySelector('.category-badge') as HTMLElement;
         if (categoryBadge) {
           categoryBadge.style.position = 'absolute';
@@ -148,13 +138,12 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
         
         const canvas = await html2canvas(clonedElement, {
           backgroundColor: null,
-          scale: 3, // Higher quality
+          scale: 3,
           useCORS: true,
           allowTaint: true,
           logging: false
         });
         
-        // Remove the clone
         document.body.removeChild(clonedElement);
         
         const image = canvas.toDataURL('image/png');
@@ -163,7 +152,6 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
         link.download = `bible-verse-${reference.replace(/\s+/g, '-').replace(/:/g, '-')}.png`;
         link.click();
         
-        // Store in localStorage for sharing
         localStorage.setItem('verse_image', image);
         
         toast({
@@ -187,23 +175,28 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
     const handleGradientChange = (index: number) => {
       setGradientIndex(index);
       setUseTextureStyle(false);
-      setKey(prev => prev + 1); // Force re-animation
+      setKey(prev => prev + 1);
     };
 
     const handleTextureChange = (index: number) => {
       setUseTextureStyle(true);
       setDarkStyleIndex(index);
-      setKey(prev => prev + 1); // Force re-animation
+      setKey(prev => prev + 1);
     };
 
     const handleFontChange = (font: string) => {
       setFontFamily(font);
-      setKey(prev => prev + 1); // Force re-animation
+      setKey(prev => prev + 1);
     };
 
-    if (!verse) return null;
+    if (!verse || !reference) {
+      return (
+        <div className="w-full max-w-2xl p-8 text-center bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+          <p className="text-gray-500 dark:text-gray-400">No verse to display</p>
+        </div>
+      );
+    }
     
-    // Choose the correct background class based on settings
     let backgroundClass;
     
     if (useTextureStyle) {

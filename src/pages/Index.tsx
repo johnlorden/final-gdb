@@ -9,6 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 import BibleVerseService from '../services/BibleVerseService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '@/hooks/use-toast';
 
 interface IndexProps {
   addToRecentVerses: (verse: string, reference: string) => void;
@@ -16,6 +17,8 @@ interface IndexProps {
     verse: string;
     reference: string;
   };
+  language?: string;
+  isOfflineMode?: boolean;
 }
 
 interface VerseResult {
@@ -25,7 +28,7 @@ interface VerseResult {
   category?: string;
 }
 
-const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
+const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language = 'en', isOfflineMode = false }) => {
   const [searchParams] = useSearchParams();
   const cardRef = useRef<HTMLDivElement>(null);
   const [verse, setVerse] = useState('');
@@ -36,14 +39,22 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
   const [previousVerse, setPreviousVerse] = useState('');
   const [lastClickedCategory, setLastClickedCategory] = useState<string | null>(null);
   const [verseCategory, setVerseCategory] = useState<string | null>(null);
+  const [hasError, setHasError] = useState(false);
+  const { toast } = useToast();
 
   const verseCache = useRef<Map<string, VerseResult[]>>(new Map());
+
+  useEffect(() => {
+    // Set language in BibleVerseService
+    BibleVerseService.setLanguage(language);
+  }, [language]);
 
   useEffect(() => {
     const bibleVerse = searchParams.get('bibleverse');
     
     if (bibleVerse && initialLoad) {
       setIsLoading(true);
+      setHasError(false);
       BibleVerseService.getVerseByReference(bibleVerse)
         .then((result) => {
           if (result) {
@@ -51,9 +62,24 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
             setReference(result.reference);
             addToRecentVerses(result.text, result.reference);
             setPreviousVerse(result.reference);
+            if (result.category) {
+              setVerseCategory(result.category);
+            }
+          } else {
+            throw new Error(`Verse not found: ${bibleVerse}`);
           }
         })
-        .catch(error => console.error('Error loading verse from URL:', error))
+        .catch(error => {
+          console.error('Error loading verse from URL:', error);
+          setHasError(true);
+          toast({
+            title: "Error loading verse",
+            description: "Could not load the requested verse. Trying a random verse instead.",
+            variant: "destructive",
+            duration: 3000,
+          });
+          handleRandomVerse();
+        })
         .finally(() => {
           setIsLoading(false);
           setInitialLoad(false);
@@ -62,7 +88,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
       setInitialLoad(false);
       handleRandomVerse();
     }
-  }, [searchParams, initialLoad]);
+  }, [searchParams, initialLoad, language]);
 
   useEffect(() => {
     if (currentVerse.verse && currentVerse.reference) {
@@ -89,16 +115,18 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     }
     
     preloadCategoryVerses();
-  }, []);
+  }, [language]);
 
   const handleSearch = (query: string) => {
     if (!query.trim()) return;
     
     setIsLoading(true);
+    setHasError(false);
     BibleVerseService.getVerseByReference(query)
       .then((result) => {
         if (result) {
           displayVerse(result);
+          return null;
         } else {
           // If no exact reference match, try keyword search
           return BibleVerseService.searchVerses(query);
@@ -108,9 +136,25 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
         // This will be undefined if the first promise resolved successfully
         if (results && results.length > 0) {
           displayVerse(results[0]);
+        } else if (results && results.length === 0) {
+          toast({
+            title: "No verses found",
+            description: `No verses match "${query}". Try a different search.`,
+            variant: "destructive",
+            duration: 3000,
+          });
         }
       })
-      .catch(error => console.error('Error searching for verse:', error))
+      .catch(error => {
+        console.error('Error searching for verse:', error);
+        setHasError(true);
+        toast({
+          title: "Search error",
+          description: "An error occurred while searching. Please try again.",
+          variant: "destructive",
+          duration: 3000,
+        });
+      })
       .finally(() => setIsLoading(false));
   };
 
@@ -140,12 +184,14 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
     setIsLoading(true);
     setCurrentCategory(category);
     setLastClickedCategory(category);
+    setHasError(false);
     
     getVerseFromCategory(category);
   };
 
   const handleRandomVerse = (category?: string) => {
     setIsLoading(true);
+    setHasError(false);
     
     const categoryToUse = category || currentCategory;
     
@@ -191,9 +237,20 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           }
           
           updateUrlWithVerse(result.reference);
+        } else {
+          throw new Error(`No verse found for category: ${category}`);
         }
       })
-      .catch(error => console.error('Error getting verse by category:', error))
+      .catch(error => {
+        console.error('Error getting verse by category:', error);
+        setHasError(true);
+        toast({
+          title: "Error loading verse",
+          description: "Could not load a verse from the selected category.",
+          variant: "destructive",
+          duration: 3000,
+        });
+      })
       .finally(() => setIsLoading(false));
   };
 
@@ -221,7 +278,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
         
         <AnimatePresence mode="wait">
           <motion.section 
-            key={reference || 'loading'}
+            key={reference || 'loading' || 'error'}
             className="flex flex-col items-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -232,30 +289,56 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
               <div className="w-full max-w-2xl">
                 <Skeleton className="h-[200px] w-full rounded-xl" />
               </div>
-            ) : (
+            ) : hasError ? (
+              <div className="w-full max-w-2xl p-8 text-center bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-200 dark:border-red-900">
+                <h3 className="text-lg font-medium text-red-800 dark:text-red-300 mb-2">Could not load Bible verse</h3>
+                <p className="text-red-600 dark:text-red-400 mb-4">
+                  There was an error loading the verse. This could be due to network issues or the language file not being available.
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="bg-white dark:bg-gray-800" 
+                  onClick={() => handleRandomVerse('All')}
+                >
+                  Try Again
+                </Button>
+              </div>
+            ) : verse ? (
               <BibleVerseCard 
                 verse={verse} 
                 reference={reference} 
                 category={verseCategory || currentCategory} 
                 ref={cardRef} 
               />
+            ) : (
+              <div className="w-full max-w-2xl p-8 text-center bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-900">
+                <h3 className="text-lg font-medium text-amber-800 dark:text-amber-300 mb-2">No verse loaded</h3>
+                <p className="text-amber-600 dark:text-amber-400 mb-4">
+                  We couldn't find a verse to display. Please try searching or selecting a category.
+                </p>
+                <Button onClick={() => handleRandomVerse('All')}>
+                  Get Random Verse
+                </Button>
+              </div>
             )}
           </motion.section>
         </AnimatePresence>
         
-        <motion.section 
-          className="w-full max-w-2xl mx-auto"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.4 }}
-        >
-          <SocialShareBar 
-            verse={verse} 
-            reference={reference} 
-            cardRef={cardRef} 
-            category={verseCategory || currentCategory}
-          />
-        </motion.section>
+        {verse && reference && (
+          <motion.section 
+            className="w-full max-w-2xl mx-auto"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.4 }}
+          >
+            <SocialShareBar 
+              verse={verse} 
+              reference={reference} 
+              cardRef={cardRef} 
+              category={verseCategory || currentCategory}
+            />
+          </motion.section>
+        )}
         
         <motion.div
           initial={{ opacity: 0 }}
