@@ -21,6 +21,7 @@ class BibleVerseService {
   private static verseCache: Map<string, VerseResult[]> = new Map();
   private static allVersesCache: VerseResult[] | null = null;
   private static categoryLastVerseIndex: Map<string, number> = new Map();
+  private static searchCache: Map<string, VerseResult[]> = new Map();
 
   private static async getXmlDoc(): Promise<Document> {
     if (!this.xmlDocPromise) {
@@ -192,6 +193,56 @@ class BibleVerseService {
     }
   }
   
+  static async searchVerses(query: string): Promise<VerseResult[]> {
+    if (!query || query.trim().length < 2) return [];
+    
+    const cacheKey = query.trim().toLowerCase();
+    if (this.searchCache.has(cacheKey)) {
+      return this.searchCache.get(cacheKey)!;
+    }
+    
+    try {
+      const allVerses = await this.getAllVerses();
+      const searchTerm = query.trim().toLowerCase();
+      
+      // Score-based search results
+      const results = allVerses.map(verse => {
+        let score = 0;
+        
+        // Exact reference match (highest priority)
+        if (verse.reference.toLowerCase() === searchTerm) {
+          score += 100;
+        } 
+        // Partial reference match
+        else if (verse.reference.toLowerCase().includes(searchTerm)) {
+          score += 50;
+        }
+        
+        // Text content match
+        if (verse.text.toLowerCase().includes(searchTerm)) {
+          score += 30;
+        }
+        
+        // Category match
+        if (verse.categories && 
+            verse.categories.some(cat => cat.toLowerCase().includes(searchTerm))) {
+          score += 20;
+        }
+        
+        return { verse, score };
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.verse);
+      
+      this.searchCache.set(cacheKey, results);
+      return results;
+    } catch (error) {
+      console.error(`Error searching verses by query '${query}':`, error);
+      return [];
+    }
+  }
+  
   static async searchVersesByText(query: string): Promise<VerseResult[]> {
     if (!query || query.trim().length < 2) return [];
     
@@ -231,6 +282,7 @@ class BibleVerseService {
     this.allVersesCache = null;
     this.xmlDocPromise = null;
     this.categoryLastVerseIndex.clear();
+    this.searchCache.clear();
   }
 }
 

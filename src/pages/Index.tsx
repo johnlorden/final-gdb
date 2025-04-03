@@ -8,7 +8,7 @@ import SocialShareBar from '@/components/SocialShareBar';
 import { useSearchParams } from 'react-router-dom';
 import BibleVerseService from '../services/BibleVerseService';
 import { Skeleton } from '@/components/ui/skeleton';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface IndexProps {
   addToRecentVerses: (verse: string, reference: string) => void;
@@ -92,27 +92,42 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
   }, []);
 
   const handleSearch = (query: string) => {
+    if (!query.trim()) return;
+    
     setIsLoading(true);
     BibleVerseService.getVerseByReference(query)
       .then((result) => {
         if (result) {
-          setVerse(result.text);
-          setReference(result.reference);
-          addToRecentVerses(result.text, result.reference);
-          setPreviousVerse(result.reference);
-          
-          updateUrlWithVerse(result.reference);
-          
-          if (result.categories && result.categories.length > 0) {
-            setCurrentCategory(result.categories[0]);
-            setVerseCategory(result.categories[0]);
-          } else if (result.category) {
-            setVerseCategory(result.category);
-          }
+          displayVerse(result);
+        } else {
+          // If no exact reference match, try keyword search
+          return BibleVerseService.searchVerses(query);
+        }
+      })
+      .then((results) => {
+        // This will be undefined if the first promise resolved successfully
+        if (results && results.length > 0) {
+          displayVerse(results[0]);
         }
       })
       .catch(error => console.error('Error searching for verse:', error))
       .finally(() => setIsLoading(false));
+  };
+
+  const displayVerse = (result: VerseResult) => {
+    setVerse(result.text);
+    setReference(result.reference);
+    addToRecentVerses(result.text, result.reference);
+    setPreviousVerse(result.reference);
+    
+    updateUrlWithVerse(result.reference);
+    
+    if (result.categories && result.categories.length > 0) {
+      setCurrentCategory(result.categories[0]);
+      setVerseCategory(result.categories[0]);
+    } else if (result.category) {
+      setVerseCategory(result.category);
+    }
   };
 
   const updateUrlWithVerse = (verseReference: string) => {
@@ -204,25 +219,29 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           />
         </motion.section>
         
-        <motion.section 
-          className="flex flex-col items-center"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.4 }}
-        >
-          {isLoading ? (
-            <div className="w-full max-w-2xl">
-              <Skeleton className="h-[200px] w-full rounded-xl" />
-            </div>
-          ) : (
-            <BibleVerseCard 
-              verse={verse} 
-              reference={reference} 
-              category={verseCategory || currentCategory} 
-              ref={cardRef} 
-            />
-          )}
-        </motion.section>
+        <AnimatePresence mode="wait">
+          <motion.section 
+            key={reference || 'loading'}
+            className="flex flex-col items-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+          >
+            {isLoading ? (
+              <div className="w-full max-w-2xl">
+                <Skeleton className="h-[200px] w-full rounded-xl" />
+              </div>
+            ) : (
+              <BibleVerseCard 
+                verse={verse} 
+                reference={reference} 
+                category={verseCategory || currentCategory} 
+                ref={cardRef} 
+              />
+            )}
+          </motion.section>
+        </AnimatePresence>
         
         <motion.section 
           className="w-full max-w-2xl mx-auto"
