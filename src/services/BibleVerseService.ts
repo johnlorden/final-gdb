@@ -1,10 +1,10 @@
-
 import { DOMParser } from '@xmldom/xmldom';
 
 interface VerseResult {
   text: string;
   reference: string;
   categories?: string[];
+  category?: string;
 }
 
 class BibleVerseService {
@@ -17,13 +17,11 @@ class BibleVerseService {
     'Encouragement'
   ];
   
-  // Cache the XML document and verses for better performance
   private static xmlDocPromise: Promise<Document> | null = null;
   private static verseCache: Map<string, VerseResult[]> = new Map();
   private static allVersesCache: VerseResult[] | null = null;
   private static categoryLastVerseIndex: Map<string, number> = new Map();
 
-  // Get the XML document, loading it only once
   private static async getXmlDoc(): Promise<Document> {
     if (!this.xmlDocPromise) {
       this.xmlDocPromise = fetch('/data/bible-verses.xml')
@@ -43,7 +41,6 @@ class BibleVerseService {
         })
         .catch(error => {
           console.error('Error loading XML document:', error);
-          // Reset promise so it can try again
           this.xmlDocPromise = null;
           throw error;
         });
@@ -51,7 +48,6 @@ class BibleVerseService {
     return this.xmlDocPromise;
   }
 
-  // Parse all verses once and cache them
   private static async getAllVerses(): Promise<VerseResult[]> {
     if (this.allVersesCache) {
       return this.allVersesCache;
@@ -64,11 +60,15 @@ class BibleVerseService {
       this.allVersesCache = verses.map(verse => {
         const text = verse.getElementsByTagName('text')[0]?.textContent || '';
         const reference = verse.getElementsByTagName('reference')[0]?.textContent || '';
-        const categoriesNode = verse.getElementsByTagName('categories')[0]?.textContent || 
-                              verse.getElementsByTagName('category')[0]?.textContent || '';
-        const categories = categoriesNode.split(',').map(c => c.trim()).filter(c => c);
+        const categoryNode = verse.getElementsByTagName('category')[0]?.textContent || '';
+        const categories = categoryNode ? [categoryNode] : [];
         
-        return { text, reference, categories };
+        return { 
+          text, 
+          reference, 
+          categories,
+          category: categoryNode
+        };
       });
       
       return this.allVersesCache;
@@ -78,7 +78,6 @@ class BibleVerseService {
     }
   }
 
-  // Helper method to get a random verse that hasn't been shown recently
   private static getRandomVerseFromArray(verses: VerseResult[], category: string = 'All'): VerseResult {
     if (verses.length === 0) {
       throw new Error('No verses available');
@@ -91,12 +90,10 @@ class BibleVerseService {
     let lastIndex = this.categoryLastVerseIndex.get(category) ?? -1;
     let randomIndex;
     
-    // Make sure we don't show the same verse twice in a row
     do {
       randomIndex = Math.floor(Math.random() * verses.length);
     } while (randomIndex === lastIndex && verses.length > 1);
     
-    // Store this index as the last one shown for this category
     this.categoryLastVerseIndex.set(category, randomIndex);
     
     return verses[randomIndex];
@@ -107,7 +104,8 @@ class BibleVerseService {
       const allVerses = await this.getAllVerses();
       if (allVerses.length === 0) return null;
       
-      return this.getRandomVerseFromArray(allVerses);
+      const randomVerse = this.getRandomVerseFromArray(allVerses);
+      return randomVerse;
     } catch (error) {
       console.error('Error fetching random verse:', error);
       return null;
@@ -120,7 +118,6 @@ class BibleVerseService {
     }
     
     try {
-      // Check if we already have cached verses for this category
       if (this.verseCache.has(category)) {
         const cachedVerses = this.verseCache.get(category)!;
         if (cachedVerses.length > 0) {
@@ -128,7 +125,6 @@ class BibleVerseService {
         }
       }
       
-      // If not cached, get all verses for this category
       const allVerses = await this.getAllVerses();
       const matchingVerses = allVerses.filter(verse => 
         verse.categories?.some(c => c.toLowerCase() === category.toLowerCase())
@@ -136,7 +132,6 @@ class BibleVerseService {
       
       if (matchingVerses.length === 0) return null;
       
-      // Cache these verses for future use
       this.verseCache.set(category, matchingVerses);
       
       return this.getRandomVerseFromArray(matchingVerses, category);
@@ -146,13 +141,11 @@ class BibleVerseService {
     }
   }
   
-  // Get multiple verses by category for caching
   static async getVersesByCategory(category: string, count = 20): Promise<VerseResult[] | null> {
     if (category === 'All') {
       return null;
     }
     
-    // Check cache first
     if (this.verseCache.has(category)) {
       return this.verseCache.get(category) || null;
     }
@@ -165,7 +158,6 @@ class BibleVerseService {
       
       if (matchingVerses.length === 0) return null;
       
-      // Store in cache
       this.verseCache.set(category, matchingVerses);
       
       return matchingVerses;
@@ -179,15 +171,12 @@ class BibleVerseService {
     try {
       const allVerses = await this.getAllVerses();
       
-      // Normalize the search reference
       const searchRef = reference.trim().toLowerCase();
       
-      // Find exact matches first
       let matchingVerse = allVerses.find(verse => 
         verse.reference.toLowerCase() === searchRef
       );
       
-      // If no exact match, look for partial matches
       if (!matchingVerse) {
         matchingVerse = allVerses.find(verse => 
           verse.reference.toLowerCase().includes(searchRef)
@@ -203,7 +192,6 @@ class BibleVerseService {
     }
   }
   
-  // Method to search verses by text content
   static async searchVersesByText(query: string): Promise<VerseResult[]> {
     if (!query || query.trim().length < 2) return [];
     
@@ -220,17 +208,14 @@ class BibleVerseService {
     }
   }
   
-  // Method to get available categories
   static getCategories(): string[] {
     return this.categories;
   }
   
-  // Method to preload all verses for faster access
   static async preloadAllVerses(): Promise<void> {
     try {
       await this.getAllVerses();
       
-      // Preload verses for each category
       for (const category of this.categories) {
         if (!this.verseCache.has(category)) {
           await this.getVersesByCategory(category, 25);
@@ -241,7 +226,6 @@ class BibleVerseService {
     }
   }
   
-  // Clear cache if needed
   static clearCache(): void {
     this.verseCache.clear();
     this.allVersesCache = null;
@@ -250,8 +234,6 @@ class BibleVerseService {
   }
 }
 
-// Start preloading verses in the background after a small delay
-// Using setTimeout to not block initial page load
 setTimeout(() => {
   BibleVerseService.preloadAllVerses();
 }, 1000);

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import SearchBar from '@/components/SearchBar';
@@ -28,8 +27,9 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
   const [currentCategory, setCurrentCategory] = useState('All');
   const [previousVerse, setPreviousVerse] = useState('');
   const [lastClickedCategory, setLastClickedCategory] = useState<string | null>(null);
+  const [verseCategory, setVerseCategory] = useState<string | null>(null);
 
-  const verseCache = useRef<Map<string, { text: string, reference: string }[]>>(new Map());
+  const verseCache = useRef<Map<string, { text: string, reference: string, category: string }[]>>(new Map());
 
   useEffect(() => {
     const bibleVerse = searchParams.get('bibleverse');
@@ -99,6 +99,9 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           // Update category based on the verse's category if possible
           if (result.categories && result.categories.length > 0) {
             setCurrentCategory(result.categories[0]);
+            setVerseCategory(result.categories[0]);
+          } else if (result.category) {
+            setVerseCategory(result.category);
           }
         }
       })
@@ -106,7 +109,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
       .finally(() => setIsLoading(false));
   };
 
-  // Update URL helper function
   const updateUrlWithVerse = (verseReference: string) => {
     const url = new URL(window.location.href);
     url.searchParams.set('bibleverse', verseReference);
@@ -125,19 +127,13 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
   const handleRandomVerse = (category?: string) => {
     setIsLoading(true);
     
-    // If category is provided, use it; otherwise, use 'All'
-    const categoryToUse = category || 'All';
-    
-    // If not 'All', update current category
-    if (category) {
-      setCurrentCategory(category);
-    }
+    // If category is provided, use it; otherwise, use current category
+    const categoryToUse = category || currentCategory;
     
     // Get a verse from the specified category (or random if 'All')
     getVerseFromCategory(categoryToUse);
   };
   
-  // Helper function to get a verse from a category
   const getVerseFromCategory = (category: string) => {
     if (category !== 'All' && verseCache.current.has(category)) {
       const cachedVerses = verseCache.current.get(category)!;
@@ -151,6 +147,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
         
         setVerse(newVerse.text);
         setReference(newVerse.reference);
+        setVerseCategory(newVerse.category);
         addToRecentVerses(newVerse.text, newVerse.reference);
         setPreviousVerse(newVerse.reference);
         
@@ -168,6 +165,15 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
           setReference(result.reference);
           addToRecentVerses(result.text, result.reference);
           setPreviousVerse(result.reference);
+          
+          // If we are in "All" category, display the verse's original category
+          if (category === 'All' && result.category) {
+            setVerseCategory(result.category);
+          } else if (result.categories && result.categories.length > 0) {
+            setVerseCategory(result.categories[0]);
+          } else {
+            setVerseCategory(category);
+          }
           
           updateUrlWithVerse(result.reference);
         }
@@ -212,7 +218,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse }) => {
             <BibleVerseCard 
               verse={verse} 
               reference={reference} 
-              category={currentCategory} 
+              category={verseCategory || currentCategory} 
               ref={cardRef} 
             />
           )}
