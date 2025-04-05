@@ -1,7 +1,6 @@
-
-import React, { forwardRef, useState, useEffect } from 'react';
+import React, { forwardRef, useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Palette } from 'lucide-react';
+import { Download, Palette, ChevronLeft, ChevronRight } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +9,23 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { useTheme } from "next-themes";
 
 interface BibleVerseCardProps {
   verse: string;
@@ -107,9 +123,12 @@ const fontFamilies = [
   'font-sans',
 ];
 
+const GRADIENTS_PER_PAGE = 10;
+
 const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
   ({ verse, reference, category }, ref) => {
     const { toast } = useToast();
+    const { theme } = useTheme();
     const [gradientIndex, setGradientIndex] = useState(0);
     const [fontFamily, setFontFamily] = useState(fontFamilies[0]);
     const [isLoading, setIsLoading] = useState(false);
@@ -117,6 +136,29 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
     const [showControls, setShowControls] = useState(false);
     const [useTextureStyle, setUseTextureStyle] = useState(false);
     const [darkStyleIndex, setDarkStyleIndex] = useState(0);
+    const [currentLightPage, setCurrentLightPage] = useState(1);
+    const [currentDarkPage, setCurrentDarkPage] = useState(1);
+    
+    // Calculate total pages
+    const totalLightPages = Math.ceil(gradients.length / GRADIENTS_PER_PAGE);
+    const totalDarkPages = Math.ceil(darkGradients.length / GRADIENTS_PER_PAGE);
+    const totalTexturePages = Math.ceil(textureDarkBgs.length / GRADIENTS_PER_PAGE);
+    
+    // Get current gradients for pagination
+    const getCurrentLightGradients = useCallback(() => {
+      const startIndex = (currentLightPage - 1) * GRADIENTS_PER_PAGE;
+      return gradients.slice(startIndex, startIndex + GRADIENTS_PER_PAGE);
+    }, [currentLightPage]);
+    
+    const getCurrentDarkGradients = useCallback(() => {
+      const startIndex = (currentDarkPage - 1) * GRADIENTS_PER_PAGE;
+      return darkGradients.slice(startIndex, startIndex + GRADIENTS_PER_PAGE);
+    }, [currentDarkPage]);
+    
+    const getCurrentTextureGradients = useCallback(() => {
+      const startIndex = (currentDarkPage - 1) * GRADIENTS_PER_PAGE;
+      return textureDarkBgs.slice(startIndex, startIndex + GRADIENTS_PER_PAGE);
+    }, [currentDarkPage]);
     
     useEffect(() => {
       if (verse && reference) {
@@ -189,15 +231,26 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
     };
 
     const handleGradientChange = (index: number) => {
-      setGradientIndex(index);
+      const actualIndex = ((currentLightPage - 1) * GRADIENTS_PER_PAGE) + index;
+      setGradientIndex(actualIndex);
       setUseTextureStyle(false);
       setKey(prev => prev + 1);
     };
 
-    const handleTextureChange = (index: number) => {
-      setUseTextureStyle(true);
-      setDarkStyleIndex(index);
+    const handleDarkGradientChange = (index: number) => {
+      const actualIndex = ((currentDarkPage - 1) * GRADIENTS_PER_PAGE) + index;
+      setGradientIndex(actualIndex);
+      setUseTextureStyle(false); 
       setKey(prev => prev + 1);
+    };
+
+    const handleTextureChange = (index: number) => {
+      const actualIndex = ((currentDarkPage - 1) * GRADIENTS_PER_PAGE) + index;
+      if (actualIndex < textureDarkBgs.length) {
+        setDarkStyleIndex(actualIndex);
+        setUseTextureStyle(true);
+        setKey(prev => prev + 1);
+      }
     };
 
     const handleFontChange = (font: string) => {
@@ -295,56 +348,208 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
                     <span className="sr-only">Customize</span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2" side="top">
+                <PopoverContent className="w-72 p-4" side="top">
                   <div className="space-y-4">
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Light Mode Style</h4>
-                      <div className="grid grid-cols-5 gap-1">
-                        {gradients.slice(0, 15).map((_, index) => (
-                          <button
-                            key={index}
-                            className={`w-full aspect-square rounded-md ${gradients[index]} hover:scale-110 transition-transform ${
-                              gradientIndex === index && !useTextureStyle ? 'ring-2 ring-primary' : ''
-                            }`}
-                            onClick={() => handleGradientChange(index)}
-                            aria-label={`Gradient style ${index + 1}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Dark Mode Style</h4>
-                      <div className="grid grid-cols-5 gap-1">
-                        {textureDarkBgs.map((_, index) => (
-                          <button
-                            key={`texture-${index}`}
-                            className={`w-full aspect-square rounded-md ${textureDarkBgs[index]} hover:scale-110 transition-transform ${
-                              darkStyleIndex === index && useTextureStyle ? 'ring-2 ring-primary' : ''
-                            }`}
-                            onClick={() => handleTextureChange(index)}
-                            aria-label={`Dark texture style ${index + 1}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
                       <h4 className="text-sm font-medium mb-2">Font Style</h4>
-                      <div className="flex flex-col space-y-1">
-                        {fontFamilies.map((font) => (
-                          <button
-                            key={font}
-                            className={`px-2 py-1 text-left rounded-md text-sm ${font} hover:bg-secondary transition-colors ${
-                              fontFamily === font ? 'bg-secondary' : ''
-                            }`}
-                            onClick={() => handleFontChange(font)}
-                          >
-                            <span className="text-current">Aa</span> {font.replace('font-', '')}
-                          </button>
-                        ))}
-                      </div>
+                      <Select value={fontFamily} onValueChange={handleFontChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Choose a font" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {fontFamilies.map((font) => (
+                            <SelectItem key={font} value={font}>
+                              <span className={`${font}`}>
+                                {font.replace('font-', '').charAt(0).toUpperCase() + font.replace('font-', '').slice(1)}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
+                    
+                    {theme !== "dark" && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Light Mode Style</h4>
+                        <div className="grid grid-cols-5 gap-1">
+                          {getCurrentLightGradients().map((_, index) => {
+                            const actualIndex = ((currentLightPage - 1) * GRADIENTS_PER_PAGE) + index;
+                            return (
+                              <button
+                                key={index}
+                                className={`w-full aspect-square rounded-md ${gradients[actualIndex]} hover:scale-110 transition-transform ${
+                                  gradientIndex === actualIndex && !useTextureStyle ? 'ring-2 ring-primary' : ''
+                                }`}
+                                onClick={() => handleGradientChange(index)}
+                                aria-label={`Gradient style ${index + 1}`}
+                              />
+                            );
+                          })}
+                        </div>
+                        
+                        {totalLightPages > 1 && (
+                          <Pagination className="mt-2">
+                            <PaginationContent>
+                              <PaginationItem>
+                                <PaginationPrevious 
+                                  href="#" 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    if (currentLightPage > 1) setCurrentLightPage(curr => curr - 1);
+                                  }} 
+                                  className={currentLightPage === 1 ? "pointer-events-none opacity-50" : ""}
+                                />
+                              </PaginationItem>
+                              
+                              {Array.from({length: Math.min(3, totalLightPages)}).map((_, i) => {
+                                const pageNum = currentLightPage <= 2 
+                                  ? i + 1 
+                                  : currentLightPage >= totalLightPages - 1
+                                    ? totalLightPages - 2 + i
+                                    : currentLightPage - 1 + i;
+                                
+                                if (pageNum > totalLightPages) return null;
+                                
+                                return (
+                                  <PaginationItem key={pageNum}>
+                                    <PaginationLink 
+                                      href="#" 
+                                      isActive={pageNum === currentLightPage}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        setCurrentLightPage(pageNum);
+                                      }}
+                                    >
+                                      {pageNum}
+                                    </PaginationLink>
+                                  </PaginationItem>
+                                );
+                              })}
+                              
+                              {totalLightPages > 3 && currentLightPage < totalLightPages - 1 && (
+                                <PaginationItem>
+                                  <PaginationEllipsis />
+                                </PaginationItem>
+                              )}
+                              
+                              <PaginationItem>
+                                <PaginationNext 
+                                  href="#" 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    if (currentLightPage < totalLightPages) setCurrentLightPage(curr => curr + 1);
+                                  }}
+                                  className={currentLightPage === totalLightPages ? "pointer-events-none opacity-50" : ""}
+                                />
+                              </PaginationItem>
+                            </PaginationContent>
+                          </Pagination>
+                        )}
+                      </div>
+                    )}
+                    
+                    {theme === "dark" && (
+                      <>
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Dark Mode Style</h4>
+                          <div className="grid grid-cols-5 gap-1">
+                            {getCurrentDarkGradients().map((_, index) => {
+                              const actualIndex = ((currentDarkPage - 1) * GRADIENTS_PER_PAGE) + index;
+                              if (actualIndex >= darkGradients.length) return null;
+                              return (
+                                <button
+                                  key={`dark-${index}`}
+                                  className={`w-full aspect-square rounded-md ${darkGradients[actualIndex].replace('dark:', '')} hover:scale-110 transition-transform ${
+                                    gradientIndex === actualIndex && !useTextureStyle ? 'ring-2 ring-primary' : ''
+                                  }`}
+                                  onClick={() => handleDarkGradientChange(index)}
+                                  aria-label={`Dark gradient style ${index + 1}`}
+                                />
+                              );
+                            })}
+                          </div>
+                          
+                          {totalDarkPages > 1 && (
+                            <Pagination className="mt-2">
+                              <PaginationContent>
+                                <PaginationItem>
+                                  <PaginationPrevious 
+                                    href="#" 
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      if (currentDarkPage > 1) setCurrentDarkPage(curr => curr - 1);
+                                    }}
+                                    className={currentDarkPage === 1 ? "pointer-events-none opacity-50" : ""}
+                                  />
+                                </PaginationItem>
+                                
+                                {Array.from({length: Math.min(3, totalDarkPages)}).map((_, i) => {
+                                  const pageNum = currentDarkPage <= 2 
+                                    ? i + 1 
+                                    : currentDarkPage >= totalDarkPages - 1
+                                      ? totalDarkPages - 2 + i
+                                      : currentDarkPage - 1 + i;
+                                  
+                                  if (pageNum > totalDarkPages) return null;
+                                  
+                                  return (
+                                    <PaginationItem key={pageNum}>
+                                      <PaginationLink 
+                                        href="#" 
+                                        isActive={pageNum === currentDarkPage}
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          setCurrentDarkPage(pageNum);
+                                        }}
+                                      >
+                                        {pageNum}
+                                      </PaginationLink>
+                                    </PaginationItem>
+                                  );
+                                })}
+                                
+                                {totalDarkPages > 3 && currentDarkPage < totalDarkPages - 1 && (
+                                  <PaginationItem>
+                                    <PaginationEllipsis />
+                                  </PaginationItem>
+                                )}
+                                
+                                <PaginationItem>
+                                  <PaginationNext 
+                                    href="#" 
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      if (currentDarkPage < totalDarkPages) setCurrentDarkPage(curr => curr + 1);
+                                    }}
+                                    className={currentDarkPage === totalDarkPages ? "pointer-events-none opacity-50" : ""}
+                                  />
+                                </PaginationItem>
+                              </PaginationContent>
+                            </Pagination>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Special Dark Textures</h4>
+                          <div className="grid grid-cols-5 gap-1">
+                            {getCurrentTextureGradients().map((_, index) => {
+                              const actualIndex = ((currentDarkPage - 1) * GRADIENTS_PER_PAGE) + index;
+                              if (actualIndex >= textureDarkBgs.length) return null;
+                              return (
+                                <button
+                                  key={`texture-${index}`}
+                                  className={`w-full aspect-square rounded-md ${textureDarkBgs[actualIndex].replace('dark:', '')} hover:scale-110 transition-transform ${
+                                    darkStyleIndex === actualIndex && useTextureStyle ? 'ring-2 ring-primary' : ''
+                                  }`}
+                                  onClick={() => handleTextureChange(index)}
+                                  aria-label={`Dark texture style ${index + 1}`}
+                                />
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>
