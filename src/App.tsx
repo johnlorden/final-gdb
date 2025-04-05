@@ -38,10 +38,45 @@ const App = () => {
     return savedOfflineMode === 'true';
   });
   
+  // Reference to track if we need to regenerate a verse on language change
+  const shouldRegenerateRef = useRef(false);
+  
   // Set language in the Bible service whenever it changes
   useEffect(() => {
     BibleVerseService.setLanguage(language);
     localStorage.setItem('app_language', language);
+    
+    // Skip regeneration on first render
+    if (shouldRegenerateRef.current && currentVerse.reference) {
+      // Try to get the same verse in the new language
+      BibleVerseService.getVerseByReference(currentVerse.reference)
+        .then((result) => {
+          if (result) {
+            setCurrentVerse({
+              verse: result.text,
+              reference: result.reference
+            });
+          } else {
+            // If verse not found in new language, get a random verse
+            return BibleVerseService.getRandomVerse();
+          }
+          return null;
+        })
+        .then((randomResult) => {
+          if (randomResult) {
+            setCurrentVerse({
+              verse: randomResult.text,
+              reference: randomResult.reference
+            });
+          }
+        })
+        .catch(console.error);
+    }
+    
+    // Set flag to true after first render
+    if (!shouldRegenerateRef.current) {
+      shouldRegenerateRef.current = true;
+    }
   }, [language]);
   
   // Save recent verses to localStorage when updated

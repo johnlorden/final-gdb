@@ -1,3 +1,4 @@
+
 import React, { forwardRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Palette } from 'lucide-react';
@@ -38,6 +39,16 @@ const gradients = [
   'bg-gradient-to-tr from-green-100 to-blue-200',
   'bg-gradient-to-bl from-pink-100 to-purple-200',
   'bg-gradient-to-r from-orange-100 to-rose-200',
+  'bg-gradient-to-r from-slate-100 to-blue-100',
+  'bg-gradient-to-br from-violet-50 to-pink-100',
+  'bg-gradient-to-tr from-amber-50 to-yellow-100',
+  'bg-gradient-to-tl from-lime-100 to-green-100',
+  'bg-gradient-to-bl from-sky-100 to-indigo-100',
+  'bg-gradient-to-r from-red-50 to-amber-50',
+  'bg-gradient-to-tr from-gray-100 to-slate-200',
+  'bg-gradient-to-br from-blue-50 to-sky-100',
+  'bg-gradient-to-tl from-stone-100 to-amber-100',
+  'bg-gradient-to-bl from-emerald-50 to-teal-100',
 ];
 
 // Enhanced dark mode gradients with vibrant and pastel options
@@ -62,6 +73,16 @@ const darkGradients = [
   'dark:bg-gradient-to-tr dark:from-blue-900/90 dark:to-green-800/90',
   'dark:bg-gradient-to-bl dark:from-purple-900/90 dark:to-pink-800/90',
   'dark:bg-gradient-to-r dark:from-rose-900/90 dark:to-orange-800/90',
+  'dark:bg-gradient-to-r dark:from-gray-900 dark:to-slate-800',
+  'dark:bg-gradient-to-br dark:from-slate-900 dark:to-zinc-800',
+  'dark:bg-gradient-to-tr dark:from-stone-900 dark:to-neutral-800',
+  'dark:bg-gradient-to-bl dark:from-zinc-900 dark:to-gray-800',
+  'dark:bg-gradient-to-tl dark:from-sky-900 dark:to-blue-800',
+  'dark:bg-gradient-to-r dark:from-emerald-900 dark:to-green-800',
+  'dark:bg-gradient-to-br dark:from-amber-900 dark:to-yellow-800',
+  'dark:bg-gradient-to-tr dark:from-fuchsia-900 dark:to-pink-800',
+  'dark:bg-gradient-to-bl dark:from-indigo-900 dark:to-violet-800',
+  'dark:bg-gradient-to-tl dark:from-red-900 dark:to-rose-800',
 ];
 
 // Alternative texture-based dark mode backgrounds
@@ -71,6 +92,9 @@ const textureDarkBgs = [
   'dark:bg-[linear-gradient(to_right_bottom,_var(--tw-gradient-stops))] dark:from-gray-900 dark:via-purple-900 dark:to-blue-900',
   'dark:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] dark:from-gray-900 dark:to-gray-800',
   'dark:bg-[linear-gradient(to_left_bottom,_var(--tw-gradient-stops))] dark:from-indigo-900 dark:via-gray-900 dark:to-gray-800',
+  'dark:bg-[conic-gradient(at_bottom_left,_var(--tw-gradient-stops))] dark:from-purple-900 dark:via-blue-900 dark:to-gray-900',
+  'dark:bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] dark:from-slate-900 dark:via-gray-900 dark:to-black',
+  'dark:bg-[linear-gradient(to_top_right,_var(--tw-gradient-stops))] dark:from-slate-900 dark:via-purple-900 dark:to-slate-900',
 ];
 
 // Font family options for verse text
@@ -127,14 +151,6 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
         clonedElement.style.padding = '30px';
         clonedElement.style.borderRadius = '0px';
         clonedElement.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
-        
-        const categoryBadge = clonedElement.querySelector('.category-badge') as HTMLElement;
-        if (categoryBadge) {
-          categoryBadge.style.position = 'absolute';
-          categoryBadge.style.top = '15px';
-          categoryBadge.style.left = '15px';
-          categoryBadge.style.zIndex = '10';
-        }
         
         const canvas = await html2canvas(clonedElement, {
           backgroundColor: null,
@@ -225,13 +241,18 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
               whileHover={{ scale: 1.01, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
-              {category && category !== 'All' && (
-                <div className="category-badge absolute top-3 left-3 bg-white/70 dark:bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium z-10">
-                  {category}
-                </div>
-              )}
               <div className="px-8 py-12 sm:p-12">
                 <div className="text-center">
+                  {category && category !== 'All' && (
+                    <motion.p 
+                      className="mb-2 text-sm italic opacity-80"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.8 }}
+                      transition={{ delay: 0.1, duration: 0.5 }}
+                    >
+                      — {category}
+                    </motion.p>
+                  )}
                   <motion.p 
                     className={`text-lg sm:text-xl leading-relaxed mb-6 ${fontFamily}`}
                     initial={{ opacity: 0 }}
@@ -279,7 +300,7 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
                     <div>
                       <h4 className="text-sm font-medium mb-2">Light Mode Style</h4>
                       <div className="grid grid-cols-5 gap-1">
-                        {gradients.slice(0, 10).map((_, index) => (
+                        {gradients.slice(0, 15).map((_, index) => (
                           <button
                             key={index}
                             className={`w-full aspect-square rounded-md ${gradients[index]} hover:scale-110 transition-transform ${
