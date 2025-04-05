@@ -2,6 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SwipeVerseNavigationProps {
   onNextVerse: () => void;
@@ -16,6 +17,7 @@ const SwipeVerseNavigation: React.FC<SwipeVerseNavigationProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // Minimum swipe distance to trigger navigation (in px)
   const SWIPE_THRESHOLD = 50;
@@ -23,7 +25,7 @@ const SwipeVerseNavigation: React.FC<SwipeVerseNavigationProps> = ({
   const SWIPE_TIMEOUT = 300;
   
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !isMobile) return;
     
     let startX: number;
     let startY: number;
@@ -91,17 +93,21 @@ const SwipeVerseNavigation: React.FC<SwipeVerseNavigationProps> = ({
       element.removeEventListener('touchmove', handleTouchMove);
       element.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [onNextVerse, onPreviousVerse]);
+  }, [onNextVerse, onPreviousVerse, isMobile]);
   
   return (
     <div ref={containerRef} className="relative w-full">
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 p-2 bg-black/5 dark:bg-white/5 rounded-r-lg opacity-50">
-        <ArrowLeft className="h-6 w-6 text-muted-foreground" />
-      </div>
-      
-      <div className="absolute top-1/2 right-0 -translate-y-1/2 p-2 bg-black/5 dark:bg-white/5 rounded-l-lg opacity-50">
-        <ArrowRight className="h-6 w-6 text-muted-foreground" />
-      </div>
+      {isMobile && (
+        <>
+          <div className="absolute top-1/2 left-0 -translate-y-1/2 p-2 bg-black/5 dark:bg-white/5 rounded-r-lg opacity-50">
+            <ArrowLeft className="h-6 w-6 text-muted-foreground" />
+          </div>
+          
+          <div className="absolute top-1/2 right-0 -translate-y-1/2 p-2 bg-black/5 dark:bg-white/5 rounded-l-lg opacity-50">
+            <ArrowRight className="h-6 w-6 text-muted-foreground" />
+          </div>
+        </>
+      )}
       
       {children}
     </div>

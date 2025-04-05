@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import EnhancedSearchBar from '@/components/EnhancedSearchBar';
@@ -12,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import SwipeVerseNavigation from '@/components/SwipeVerseNavigation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface IndexProps {
   addToRecentVerses: (verse: string, reference: string) => void;
@@ -43,6 +43,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
   const [verseCategory, setVerseCategory] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const verseCache = useRef<Map<string, VerseResult[]>>(new Map());
 
@@ -355,7 +356,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
         <AnimatePresence mode="wait">
           <motion.section 
             key={reference || 'loading' || 'error'}
-            className="flex flex-col items-center"
+            className="flex flex-col items-center justify-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -380,17 +381,28 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
                 </Button>
               </div>
             ) : verse ? (
-              <SwipeVerseNavigation
-                onNextVerse={() => handleRandomVerse(currentCategory)}
-                onPreviousVerse={() => handleRandomVerse(currentCategory)}
-              >
-                <BibleVerseCard 
-                  verse={verse} 
-                  reference={reference} 
-                  category={verseCategory || currentCategory} 
-                  ref={cardRef} 
-                />
-              </SwipeVerseNavigation>
+              <div className="flex justify-center w-full">
+                {isMobile ? (
+                  <SwipeVerseNavigation
+                    onNextVerse={() => handleRandomVerse(currentCategory)}
+                    onPreviousVerse={() => handleRandomVerse(currentCategory)}
+                  >
+                    <BibleVerseCard 
+                      verse={verse} 
+                      reference={reference} 
+                      category={verseCategory || currentCategory} 
+                      ref={cardRef} 
+                    />
+                  </SwipeVerseNavigation>
+                ) : (
+                  <BibleVerseCard 
+                    verse={verse} 
+                    reference={reference} 
+                    category={verseCategory || currentCategory} 
+                    ref={cardRef} 
+                  />
+                )}
+              </div>
             ) : (
               <div className="w-full max-w-2xl p-8 text-center bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-900">
                 <h3 className="text-lg font-medium text-amber-800 dark:text-amber-300 mb-2">No verse loaded</h3>
