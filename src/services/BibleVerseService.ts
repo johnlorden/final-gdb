@@ -1,3 +1,4 @@
+
 import { DOMParser } from '@xmldom/xmldom';
 
 interface VerseResult {
@@ -103,7 +104,7 @@ class BibleVerseService {
     return this.xmlDocPromises[lang]!;
   }
 
-  private static async getAllVerses(language?: string): Promise<VerseResult[]> {
+  public static async getAllVerses(language?: string): Promise<VerseResult[]> {
     const lang = language || this.currentLanguage;
     
     if (this.allVersesCaches[lang] && this.allVersesCaches[lang]!.length > 0) {
