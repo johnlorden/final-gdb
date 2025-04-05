@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Wifi, WifiOff } from 'lucide-react';
+import { Wifi, WifiOff, Download, Database, Trash } from 'lucide-react';
 import OfflineVerseService from '@/services/OfflineVerseService';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
@@ -12,8 +12,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface OfflineModeProps {
   isOffline: boolean;
@@ -25,7 +31,24 @@ const OfflineMode: React.FC<OfflineModeProps> = ({ isOffline, toggleOfflineMode 
   const [isDownloading, setIsDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showDialog, setShowDialog] = useState(false);
-  const [verseCount, setVerseCount] = useState(100);
+  const [verseCount, setVerseCount] = useState(500);
+  const [cacheSize, setCacheSize] = useState(0);
+  
+  // Predefined verse count options
+  const verseCounts = [
+    { value: 100, label: '100 verses (~0.5MB)' },
+    { value: 250, label: '250 verses (~1.2MB)' },
+    { value: 500, label: '500 verses (~2.5MB)' },
+    { value: 1000, label: '1000 verses (~5MB)' },
+    { value: 2000, label: '2000 verses (~10MB)' },
+  ];
+  
+  // Get the current cache size on mount
+  useEffect(() => {
+    if (OfflineVerseService.isOfflineModeAvailable()) {
+      setCacheSize(OfflineVerseService.getCacheSize());
+    }
+  }, [isOffline]);
   
   const cacheVersesForOffline = async () => {
     if (isDownloading) return;
@@ -48,6 +71,7 @@ const OfflineMode: React.FC<OfflineModeProps> = ({ isOffline, toggleOfflineMode 
       setProgress(100);
       
       if (success) {
+        setCacheSize(OfflineVerseService.getCacheSize());
         toast({
           title: "Offline Mode Ready",
           description: `${verseCount} verses cached for offline use`,
@@ -80,6 +104,20 @@ const OfflineMode: React.FC<OfflineModeProps> = ({ isOffline, toggleOfflineMode 
     if (!isOffline && !OfflineVerseService.isOfflineModeAvailable()) {
       setShowDialog(true);
     } else {
+      toggleOfflineMode();
+    }
+  };
+  
+  const clearCache = () => {
+    OfflineVerseService.clearCache();
+    setCacheSize(0);
+    toast({
+      title: "Cache Cleared",
+      description: "All cached verses have been removed",
+      duration: 3000,
+    });
+    
+    if (isOffline) {
       toggleOfflineMode();
     }
   };
@@ -143,23 +181,28 @@ const OfflineMode: React.FC<OfflineModeProps> = ({ isOffline, toggleOfflineMode 
           <div className="flex flex-col gap-4 py-4">
             <div className="flex flex-col gap-2">
               <label htmlFor="verseCount" className="text-sm font-medium">
-                Number of verses to download:
+                Select how many verses to download:
               </label>
-              <input
-                id="verseCount"
-                type="range"
-                min="20"
-                max="500"
-                step="10"
-                value={verseCount}
-                onChange={(e) => setVerseCount(parseInt(e.target.value))}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>20</span>
-                <span>{verseCount} verses</span>
-                <span>500</span>
-              </div>
+              
+              <Select
+                value={verseCount.toString()}
+                onValueChange={(value) => setVerseCount(parseInt(value))}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select verse count" />
+                </SelectTrigger>
+                <SelectContent>
+                  {verseCounts.map((option) => (
+                    <SelectItem key={option.value} value={option.value.toString()}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <p className="text-xs text-muted-foreground">
+                More verses will take up more storage space but provide a better offline experience.
+              </p>
             </div>
             
             {isDownloading && (
@@ -168,6 +211,24 @@ const OfflineMode: React.FC<OfflineModeProps> = ({ isOffline, toggleOfflineMode 
                 <p className="text-xs text-center text-muted-foreground">
                   Downloading verses... {progress}%
                 </p>
+              </div>
+            )}
+            
+            {cacheSize > 0 && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <Database className="h-4 w-4 text-muted-foreground" />
+                  <span>Current cache: <strong>{cacheSize} verses</strong></span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-2"
+                  onClick={clearCache}
+                >
+                  <Trash className="h-4 w-4 mr-2" />
+                  Clear cached verses
+                </Button>
               </div>
             )}
           </div>
@@ -183,8 +244,10 @@ const OfflineMode: React.FC<OfflineModeProps> = ({ isOffline, toggleOfflineMode 
             <Button
               onClick={cacheVersesForOffline}
               disabled={isDownloading}
+              className="gap-2"
             >
-              Download
+              <Download className="h-4 w-4" />
+              Download Verses
             </Button>
           </DialogFooter>
         </DialogContent>

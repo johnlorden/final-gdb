@@ -1,10 +1,15 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Twitter, Facebook, Mail, Link, Instagram, Linkedin, Share2, Smartphone } from 'lucide-react';
+import { Copy, Twitter, Facebook, Mail, Instagram, Linkedin, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 import BookmarkVerse from './BookmarkVerse';
 import { ShareTemplate, ShareTemplateSelector } from './ShareTemplateSelector';
+import TextToSpeech from './TextToSpeech';
+import VerseQRCode from './VerseQRCode';
+import CustomBackgroundSelector from './CustomBackgroundSelector';
+import AddToHomeScreen from './AddToHomeScreen';
 
 interface SocialShareBarProps {
   verse: string;
@@ -16,6 +21,8 @@ interface SocialShareBarProps {
 const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardRef, category }) => {
   const { toast } = useToast();
   const [template, setTemplate] = useState<ShareTemplate>('default');
+  const [backgroundColor, setBackgroundColor] = useState<string>('#ffffff');
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   
   // Don't try to share if no verse is loaded
   if (!verse || !reference) {
@@ -39,7 +46,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
         
         // Apply export styles to the clone based on template
         clonedElement.style.padding = '20px';
-        clonedElement.style.borderRadius = '0px';
+        clonedElement.style.borderRadius = '8px';
         clonedElement.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
         
         // Apply template-specific styling
@@ -62,6 +69,36 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
               el.style.fontStyle = 'italic';
             }
           });
+        } else if (template === 'gradient' || template === 'custom') {
+          clonedElement.style.padding = '35px';
+          
+          // Apply custom background
+          if (backgroundImage) {
+            clonedElement.style.backgroundImage = `url(${backgroundImage})`;
+            clonedElement.style.backgroundSize = 'cover';
+            clonedElement.style.backgroundPosition = 'center';
+            
+            // Add text shadow for better legibility
+            const textElements = clonedElement.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
+            textElements.forEach(el => {
+              if (el instanceof HTMLElement) {
+                el.style.textShadow = '1px 1px 3px rgba(0,0,0,0.3)';
+              }
+            });
+          } else {
+            // Apply gradient or solid background
+            clonedElement.style.background = backgroundColor;
+          }
+          
+          // Set text color based on background brightness
+          if (backgroundColor.includes('#171717') || backgroundColor.includes('220, 78%, 29%')) {
+            const textElements = clonedElement.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
+            textElements.forEach(el => {
+              if (el instanceof HTMLElement) {
+                el.style.color = '#ffffff';
+              }
+            });
+          }
         }
         
         // Remove any rounded corners from inner elements
@@ -70,10 +107,22 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           if (el instanceof HTMLElement) {
             const style = window.getComputedStyle(el);
             if (parseInt(style.borderRadius) > 0) {
-              el.style.borderRadius = '0px';
+              el.style.borderRadius = '8px';
             }
           }
         });
+        
+        // Add watermark
+        const watermark = document.createElement('div');
+        watermark.style.position = 'absolute';
+        watermark.style.bottom = '10px';
+        watermark.style.right = '10px';
+        watermark.style.fontSize = '10px';
+        watermark.style.opacity = '0.7';
+        watermark.style.color = template === 'gradient' && backgroundColor.includes('dark') ? '#fff' : '#666';
+        watermark.textContent = 'Daily Bible Verse';
+        clonedElement.style.position = 'relative';
+        clonedElement.appendChild(watermark);
         
         // Generate image from verse card
         const canvas = await html2canvas(clonedElement, { 
@@ -235,10 +284,21 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
 
   return (
     <div className="flex flex-col gap-3 my-4 w-full max-w-2xl mx-auto">
-      <ShareTemplateSelector 
-        currentTemplate={template} 
-        onTemplateChange={setTemplate} 
-      />
+      <div className="flex items-center justify-center gap-2 flex-wrap">
+        <ShareTemplateSelector 
+          currentTemplate={template} 
+          onTemplateChange={setTemplate}
+          currentBackgroundColor={backgroundColor}
+          onBackgroundColorChange={setBackgroundColor}
+          currentBackgroundImage={backgroundImage}
+          onBackgroundImageChange={setBackgroundImage}
+        />
+        
+        <CustomBackgroundSelector
+          onSelectBackground={setBackgroundImage}
+          currentBackground={backgroundImage}
+        />
+      </div>
       
       <div className="flex flex-wrap justify-center gap-2">
         <BookmarkVerse 
@@ -246,6 +306,17 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           reference={reference} 
           category={category}
         />
+        
+        <TextToSpeech 
+          text={verse} 
+          reference={reference} 
+        />
+        
+        <VerseQRCode 
+          verse={verse} 
+          reference={reference} 
+        />
+        
         <Button 
           onClick={copyToClipboard} 
           variant="outline" 
@@ -255,6 +326,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           <Copy className="h-4 w-4" />
           <span className="hidden sm:inline">Copy</span>
         </Button>
+        
         <Button 
           onClick={() => shareWithImage('twitter')} 
           variant="outline" 
@@ -264,6 +336,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           <Twitter className="h-4 w-4" />
           <span className="hidden sm:inline">Twitter</span>
         </Button>
+        
         <Button 
           onClick={() => shareWithImage('facebook')} 
           variant="outline" 
@@ -273,6 +346,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           <Facebook className="h-4 w-4" />
           <span className="hidden sm:inline">Facebook</span>
         </Button>
+        
         <Button 
           onClick={() => shareWithImage('linkedin')} 
           variant="outline" 
@@ -282,6 +356,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           <Linkedin className="h-4 w-4" />
           <span className="hidden sm:inline">LinkedIn</span>
         </Button>
+        
         <Button 
           onClick={() => shareWithImage('instagram')} 
           variant="outline" 
@@ -291,6 +366,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           <Instagram className="h-4 w-4" />
           <span className="hidden sm:inline">Instagram</span>
         </Button>
+        
         <Button 
           onClick={() => shareWithImage('email')} 
           variant="outline" 
@@ -300,6 +376,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           <Mail className="h-4 w-4" />
           <span className="hidden sm:inline">Email</span>
         </Button>
+        
         {navigator.share && (
           <Button 
             onClick={shareViaWebShare} 
@@ -311,6 +388,10 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
             <span className="hidden sm:inline">Share</span>
           </Button>
         )}
+      </div>
+      
+      <div className="flex justify-center mt-2">
+        <AddToHomeScreen />
       </div>
     </div>
   );
