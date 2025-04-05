@@ -1,12 +1,5 @@
-
 import BibleVerseService from './BibleVerseService';
-
-interface VerseResult {
-  text: string;
-  reference: string;
-  categories?: string[];
-  category?: string;
-}
+import { VerseResult } from './types/BibleVerseTypes';
 
 class OfflineVerseService {
   private static CACHE_KEY = 'offline_verses_cache';

@@ -1,15 +1,11 @@
 
-import { DOMParser } from '@xmldom/xmldom';
-
-interface VerseResult {
-  text: string;
-  reference: string;
-  categories?: string[];
-  category?: string;
-}
+import { VerseResult } from './types/BibleVerseTypes';
+import { XmlParser } from './utils/XmlParser';
+import { VerseCache } from './utils/VerseCache';
+import { XmlFileLoader } from './utils/XmlFileLoader';
+import { VerseSelector } from './utils/VerseSelector';
 
 class BibleVerseService {
-  private static parser = new DOMParser();
   private static categories = [
     'Faith', 'Love', 'Hope', 'Wisdom', 'Prayer',
     'Forgiveness', 'Peace', 'Salvation', 'Strength',
@@ -17,27 +13,6 @@ class BibleVerseService {
     'Perseverance', 'Courage', 'Patience', 'Righteousness',
     'Encouragement', 'Protection', 'Spiritual Growth'
   ];
-  
-  private static xmlDocPromises: Record<string, Promise<Document> | null> = {
-    en: null,
-    fil: null
-  };
-  
-  private static verseCaches: Record<string, Map<string, VerseResult[]>> = {
-    en: new Map(),
-    fil: new Map()
-  };
-  
-  private static allVersesCaches: Record<string, VerseResult[] | null> = {
-    en: null,
-    fil: null
-  };
-  
-  private static categoryLastVerseIndex: Map<string, number> = new Map();
-  private static searchCaches: Record<string, Map<string, VerseResult[]>> = {
-    en: new Map(),
-    fil: new Map()
-  };
   
   private static currentLanguage: string = 'en';
 
@@ -52,68 +27,17 @@ class BibleVerseService {
     return this.currentLanguage;
   }
 
-  private static async getXmlDoc(language: string = 'en'): Promise<Document> {
-    const lang = language === 'fil' ? 'fil' : 'en';
-    
-    if (!this.xmlDocPromises[lang]) {
-      const filePath = lang === 'fil' ? 'bible-verses-fil.xml' : 'bible-verses.xml';
-      const url = `/data/${filePath}`;
-      
-      console.log(`Attempting to load XML from: ${url}`);
-      
-      this.xmlDocPromises[lang] = fetch(url)
-        .then(response => {
-          if (!response.ok) {
-            if (lang === 'fil') {
-              console.warn('Filipino Bible verses not found, falling back to English');
-              return fetch('/data/bible-verses.xml');
-            }
-            throw new Error(`Failed to load Bible verses XML: ${response.status} ${response.statusText}`);
-          }
-          return response.text();
-        })
-        .then(xmlText => {
-          if (!xmlText || xmlText.trim() === '') {
-            throw new Error('Empty XML content received');
-          }
-          
-          if (xmlText.includes('<!DOCTYPE html>')) {
-            throw new Error('Received HTML instead of XML, check server configuration');
-          }
-          
-          try {
-            const parsedDoc = this.parser.parseFromString(xmlText, 'text/xml');
-            const verses = parsedDoc.getElementsByTagName('verse');
-            if (verses.length === 0) {
-              console.warn(`No verses found in parsed XML document for language: ${lang}`);
-            } else {
-              console.log(`Successfully loaded ${verses.length} verses for language: ${lang}`);
-            }
-            return parsedDoc;
-          } catch (parseError) {
-            console.error('Error parsing XML:', parseError);
-            throw parseError;
-          }
-        })
-        .catch(error => {
-          console.error(`Error loading XML document for ${lang}:`, error);
-          this.xmlDocPromises[lang] = null;
-          throw error;
-        });
-    }
-    return this.xmlDocPromises[lang]!;
-  }
-
   public static async getAllVerses(language?: string): Promise<VerseResult[]> {
     const lang = language || this.currentLanguage;
     
-    if (this.allVersesCaches[lang] && this.allVersesCaches[lang]!.length > 0) {
-      return this.allVersesCaches[lang]!;
+    const cachedVerses = VerseCache.getAllVerses(lang);
+    if (cachedVerses && cachedVerses.length > 0) {
+      return cachedVerses;
     }
     
     try {
-      const xmlDoc = await this.getXmlDoc(lang);
-      const verses = Array.from(xmlDoc.getElementsByTagName('verse'));
+      const xmlDoc = await XmlFileLoader.loadXmlDoc(lang);
+      const verses = XmlParser.extractVersesFromDocument(xmlDoc);
       
       if (verses.length === 0) {
         console.warn(`No verses found in XML document for language: ${lang}`);
@@ -126,21 +50,8 @@ class BibleVerseService {
         return [];
       }
       
-      this.allVersesCaches[lang] = verses.map(verse => {
-        const text = verse.getElementsByTagName('text')[0]?.textContent || '';
-        const reference = verse.getElementsByTagName('reference')[0]?.textContent || '';
-        const categoryNode = verse.getElementsByTagName('category')[0]?.textContent || '';
-        const categories = categoryNode ? [categoryNode] : [];
-        
-        return { 
-          text, 
-          reference, 
-          categories,
-          category: categoryNode
-        };
-      });
-      
-      return this.allVersesCaches[lang]!;
+      VerseCache.setAllVerses(verses, lang);
+      return verses;
     } catch (error) {
       console.error('Error parsing all verses:', error);
       
@@ -153,27 +64,6 @@ class BibleVerseService {
     }
   }
 
-  private static getRandomVerseFromArray(verses: VerseResult[], category: string = 'All'): VerseResult {
-    if (verses.length === 0) {
-      throw new Error('No verses available');
-    }
-    
-    if (verses.length === 1) {
-      return verses[0];
-    }
-    
-    let lastIndex = this.categoryLastVerseIndex.get(category) ?? -1;
-    let randomIndex;
-    
-    do {
-      randomIndex = Math.floor(Math.random() * verses.length);
-    } while (randomIndex === lastIndex && verses.length > 1);
-    
-    this.categoryLastVerseIndex.set(category, randomIndex);
-    
-    return verses[randomIndex];
-  }
-
   static async getRandomVerse(language?: string): Promise<VerseResult | null> {
     const lang = language || this.currentLanguage;
     
@@ -184,7 +74,7 @@ class BibleVerseService {
         return null;
       }
       
-      const randomVerse = this.getRandomVerseFromArray(allVerses);
+      const randomVerse = VerseSelector.getRandomVerseFromArray(allVerses);
       return randomVerse;
     } catch (error) {
       console.error('Error fetching random verse:', error);
@@ -200,10 +90,10 @@ class BibleVerseService {
     }
     
     try {
-      if (this.verseCaches[lang].has(category)) {
-        const cachedVerses = this.verseCaches[lang].get(category)!;
-        if (cachedVerses.length > 0) {
-          return this.getRandomVerseFromArray(cachedVerses, category);
+      if (VerseCache.hasCachedVerses(category, lang)) {
+        const cachedVerses = VerseCache.getCachedVerses(category, lang);
+        if (cachedVerses && cachedVerses.length > 0) {
+          return VerseSelector.getRandomVerseFromArray(cachedVerses, category);
         }
       }
       
@@ -222,9 +112,9 @@ class BibleVerseService {
         return this.getRandomVerse(lang);
       }
       
-      this.verseCaches[lang].set(category, matchingVerses);
+      VerseCache.setCachedVerses(category, matchingVerses, lang);
       
-      return this.getRandomVerseFromArray(matchingVerses, category);
+      return VerseSelector.getRandomVerseFromArray(matchingVerses, category);
     } catch (error) {
       console.error(`Error fetching verse by category '${category}':`, error);
       return null;
@@ -238,8 +128,8 @@ class BibleVerseService {
       return null;
     }
     
-    if (this.verseCaches[lang].has(category)) {
-      return this.verseCaches[lang].get(category) || null;
+    if (VerseCache.hasCachedVerses(category, lang)) {
+      return VerseCache.getCachedVerses(category, lang) || null;
     }
     
     try {
@@ -250,7 +140,7 @@ class BibleVerseService {
       
       if (matchingVerses.length === 0) return null;
       
-      this.verseCaches[lang].set(category, matchingVerses);
+      VerseCache.setCachedVerses(category, matchingVerses, lang);
       
       return matchingVerses;
     } catch (error) {
@@ -292,55 +182,17 @@ class BibleVerseService {
     if (!query || query.trim().length < 2) return [];
     
     const cacheKey = query.trim().toLowerCase();
-    if (this.searchCaches[lang].has(cacheKey)) {
-      return this.searchCaches[lang].get(cacheKey)!;
+    if (VerseCache.hasSearchCache(cacheKey, lang)) {
+      return VerseCache.getSearchCache(cacheKey, lang)!;
     }
     
     try {
       const allVerses = await this.getAllVerses(lang);
       const searchTerm = query.trim().toLowerCase();
       
-      const results = allVerses.map(verse => {
-        let score = 0;
-        
-        if (verse.reference.toLowerCase() === searchTerm) {
-          score += 100;
-        } 
-        else if (verse.reference.toLowerCase().includes(searchTerm)) {
-          score += 50;
-          
-          if (verse.reference.toLowerCase().startsWith(searchTerm)) {
-            score += 20;
-          }
-        }
-        
-        const textLower = verse.text.toLowerCase();
-        if (textLower === searchTerm) {
-          score += 50;
-        } else if (textLower.includes(searchTerm)) {
-          score += 30;
-          
-          const words = textLower.split(/\s+/);
-          if (words.some(word => word === searchTerm)) {
-            score += 15;
-          }
-        }
-        
-        if (verse.categories && 
-            verse.categories.some(cat => {
-              const catLower = cat.toLowerCase();
-              return catLower === searchTerm || catLower.includes(searchTerm);
-            })) {
-          score += 20;
-        }
-        
-        return { verse, score };
-      })
-      .filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map(item => item.verse);
+      const results = VerseSelector.rankSearchResults(allVerses, searchTerm);
       
-      this.searchCaches[lang].set(cacheKey, results);
+      VerseCache.setSearchCache(cacheKey, results, lang);
       return results;
     } catch (error) {
       console.error(`Error searching verses by query '${query}':`, error);
@@ -380,7 +232,7 @@ class BibleVerseService {
       
       if (verses.length > 0) {
         for (const category of this.categories) {
-          if (!this.verseCaches[lang].has(category)) {
+          if (!VerseCache.hasCachedVerses(category, lang)) {
             await this.getVersesByCategory(category, 25, lang);
           }
         }
@@ -393,11 +245,8 @@ class BibleVerseService {
   static clearCache(language?: string): void {
     const lang = language || this.currentLanguage;
     
-    this.verseCaches[lang].clear();
-    this.allVersesCaches[lang] = null;
-    this.xmlDocPromises[lang] = null;
-    this.categoryLastVerseIndex.clear();
-    this.searchCaches[lang].clear();
+    VerseCache.clearCache(lang);
+    XmlFileLoader.clearPromiseCache(lang);
   }
 }
 
