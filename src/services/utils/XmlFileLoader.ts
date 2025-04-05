@@ -22,7 +22,12 @@ export class XmlFileLoader {
           if (!response.ok) {
             if (lang === 'fil') {
               console.warn('Filipino Bible verses not found, falling back to English');
-              return fetch('/data/bible-verses.xml');
+              return fetch('/data/bible-verses.xml').then(fallbackResponse => {
+                if (!fallbackResponse.ok) {
+                  throw new Error(`Failed to load Bible verses XML: ${fallbackResponse.status} ${fallbackResponse.statusText}`);
+                }
+                return fallbackResponse.text();
+              });
             }
             throw new Error(`Failed to load Bible verses XML: ${response.status} ${response.statusText}`);
           }
