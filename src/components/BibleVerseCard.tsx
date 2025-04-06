@@ -1,3 +1,4 @@
+
 import React, { forwardRef, useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Palette, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -193,6 +194,8 @@ const BibleVerseCard = forwardRef<HTMLDivElement, BibleVerseCardProps>(
         
         clonedElement.style.padding = '30px';
         clonedElement.style.borderRadius = '0px';
+        // Remove border when exporting
+        clonedElement.style.border = 'none';
         clonedElement.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
         
         const canvas = await html2canvas(clonedElement, {

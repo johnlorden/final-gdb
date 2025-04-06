@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Twitter, Facebook, Mail, Instagram, Share2 } from 'lucide-react';
@@ -23,14 +22,12 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
   const [backgroundColor, setBackgroundColor] = useState<string>('#ffffff');
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   
-  // Don't try to share if no verse is loaded
   if (!verse || !reference) {
     return null;
   }
   
   const verseText = `"${verse}" — ${reference}`;
   
-  // Create URL with verse parameter for sharing
   const currentURL = new URL(window.location.href);
   currentURL.pathname = '/';
   currentURL.search = `?bibleverse=${encodeURIComponent(reference)}`;
@@ -39,16 +36,13 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
   const generateImage = async () => {
     try {
       if (cardRef?.current) {
-        // Create a clone of the element for export to avoid modifying the original
         const clonedElement = cardRef.current.cloneNode(true) as HTMLElement;
         document.body.appendChild(clonedElement);
         
-        // Apply export styles to the clone based on template
         clonedElement.style.padding = '20px';
         clonedElement.style.borderRadius = '8px';
         clonedElement.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
         
-        // Apply template-specific styling
         if (template === 'minimal') {
           clonedElement.style.padding = '30px';
           const innerElements = clonedElement.querySelectorAll('p');
@@ -71,13 +65,11 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
         } else if (template === 'gradient' || template === 'custom') {
           clonedElement.style.padding = '35px';
           
-          // Apply custom background
           if (backgroundImage) {
             clonedElement.style.backgroundImage = `url(${backgroundImage})`;
             clonedElement.style.backgroundSize = 'cover';
             clonedElement.style.backgroundPosition = 'center';
             
-            // Add text shadow for better legibility
             const textElements = clonedElement.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
             textElements.forEach(el => {
               if (el instanceof HTMLElement) {
@@ -85,11 +77,9 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
               }
             });
           } else {
-            // Apply gradient or solid background
             clonedElement.style.background = backgroundColor;
           }
           
-          // Set text color based on background brightness
           if (backgroundColor.includes('#171717') || backgroundColor.includes('220, 78%, 29%')) {
             const textElements = clonedElement.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
             textElements.forEach(el => {
@@ -100,7 +90,6 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           }
         }
         
-        // Remove any rounded corners from inner elements
         const innerElements = clonedElement.querySelectorAll('*');
         innerElements.forEach(el => {
           if (el instanceof HTMLElement) {
@@ -111,7 +100,6 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           }
         });
         
-        // Add watermark
         const watermark = document.createElement('div');
         watermark.style.position = 'absolute';
         watermark.style.bottom = '10px';
@@ -123,21 +111,18 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
         clonedElement.style.position = 'relative';
         clonedElement.appendChild(watermark);
         
-        // Generate image from verse card
         const canvas = await html2canvas(clonedElement, { 
           backgroundColor: null,
-          scale: 3, // Better quality
+          scale: 3,
           useCORS: true,
           allowTaint: true,
           logging: false
         });
         
-        // Remove the clone
         document.body.removeChild(clonedElement);
         
         const imageUrl = canvas.toDataURL('image/png');
         
-        // Store image in local storage
         localStorage.setItem('verse_image', imageUrl);
         return imageUrl;
       }
@@ -150,10 +135,8 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
   
   const shareWithImage = async (platform: 'twitter' | 'facebook' | 'email' | 'instagram') => {
     try {
-      // Generate and save the image first
       const imageUrl = await generateImage();
       
-      // Share text with URL
       const shareText = `${verseText}`;
       const appUrl = shareURL;
       
@@ -166,7 +149,6 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           );
           break;
         case 'facebook':
-          // Facebook sharing API
           window.open(
             `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(appUrl)}&quote=${encodeURIComponent(shareText)}`,
             '_blank',
@@ -174,7 +156,6 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           );
           break;
         case 'instagram':
-          // Instagram doesn't have a direct share URL, so we'll just download the image and notify user
           if (imageUrl) {
             const link = document.createElement('a');
             link.href = imageUrl;
@@ -204,7 +185,6 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
     } catch (error) {
       console.error('Error sharing:', error);
       
-      // Fallback to regular sharing
       const shareText = `${verseText}`;
       const url = platform === 'twitter'
         ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareURL)}&hashtags=Bible,DailyVerse`

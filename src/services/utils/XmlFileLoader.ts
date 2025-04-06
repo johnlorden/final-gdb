@@ -23,6 +23,8 @@ export class XmlFileLoader {
     fil: '/data/bible-verses-fil.xml'
   };
   
+  private static disabledLanguages: Set<string> = new Set();
+  
   /**
    * Initialize XML URL mappings from the database
    */
@@ -40,10 +42,20 @@ export class XmlFileLoader {
     }
   }
   
+  static isLanguageDisabled(language: string): boolean {
+    return this.disabledLanguages.has(language);
+  }
+  
   static async loadXmlDoc(language: string = 'en'): Promise<Document> {
     // Ensure the xmlUrlMap is initialized
     if (Object.keys(this.xmlUrlMap).length <= 2) {
       await this.initializeXmlUrls();
+    }
+    
+    // Check if language is disabled
+    if (this.disabledLanguages.has(language)) {
+      console.warn(`Language ${language} is disabled due to previous errors, falling back to English`);
+      language = 'en';
     }
     
     // Check if we support this language
@@ -90,6 +102,13 @@ export class XmlFileLoader {
           if (!response.ok) {
             if (language !== 'en') {
               console.warn(`${language} Bible verses not found, falling back to English`);
+              // Disable the language because it's not working
+              this.disabledLanguages.add(language);
+              // Update language status in database
+              LanguageService.updateLanguageStatus(language, false)
+                .then(() => console.log(`Disabled language ${language} due to missing XML`))
+                .catch(err => console.error(`Failed to update language status for ${language}`, err));
+              
               return fetch('/data/bible-verses.xml');
             }
             throw new Error(`Failed to load Bible verses XML: ${response.status} ${response.statusText}`);
@@ -98,25 +117,74 @@ export class XmlFileLoader {
         })
         .then(response => response.text())
         .then(xmlText => {
-          // Cache the XML in localStorage for offline use
-          try {
-            localStorage.setItem(`bible_xml_${language}`, xmlText);
-            console.log(`Cached XML for ${language} in local storage`);
-          } catch (error) {
-            console.warn('Error caching XML in localStorage:', error);
+          if (!xmlText || xmlText.trim().length === 0) {
+            throw new Error(`Empty XML content for language ${language}`);
           }
           
-          const doc = XmlParser.parseXmlDocument(xmlText);
-          this.cachedXmlDocs[language] = doc;
-          return doc;
+          // Try to parse the XML to validate it
+          try {
+            const doc = XmlParser.parseXmlDocument(xmlText);
+            
+            // Validate that it contains verses
+            const verseNodes = doc.getElementsByTagName('verse');
+            if (verseNodes.length === 0) {
+              throw new Error(`No verses found in XML for language ${language}`);
+            }
+            
+            // Cache the XML in localStorage for offline use
+            try {
+              localStorage.setItem(`bible_xml_${language}`, xmlText);
+              console.log(`Cached XML for ${language} in local storage`);
+            } catch (error) {
+              console.warn('Error caching XML in localStorage:', error);
+            }
+            
+            this.cachedXmlDocs[language] = doc;
+            return doc;
+          } catch (xmlError) {
+            console.error(`Invalid XML format for language ${language}:`, xmlError);
+            
+            // Disable the language because it has invalid XML
+            this.disabledLanguages.add(language);
+            // Update language status in database
+            LanguageService.updateLanguageStatus(language, false)
+              .then(() => console.log(`Disabled language ${language} due to invalid XML`))
+              .catch(err => console.error(`Failed to update language status for ${language}`, err));
+            
+            // Fallback to English
+            if (language !== 'en') {
+              return this.loadXmlDoc('en');
+            }
+            throw xmlError;
+          }
         })
         .catch(error => {
           console.error(`Error loading XML document for ${language}:`, error);
+          
+          // Disable the language only if it's not English
+          if (language !== 'en') {
+            this.disabledLanguages.add(language);
+            // Update language status in database
+            LanguageService.updateLanguageStatus(language, false)
+              .then(() => console.log(`Disabled language ${language} due to loading error`))
+              .catch(err => console.error(`Failed to update language status for ${language}`, err));
+          }
+          
           this.xmlDocPromises[language] = null;
           throw error;
         });
     }
-    return this.xmlDocPromises[language]!;
+    
+    try {
+      return await this.xmlDocPromises[language]!;
+    } catch (error) {
+      // If there was an error and this isn't English, try to fall back to English
+      if (language !== 'en') {
+        console.warn(`Error loading ${language}, falling back to English`);
+        return this.loadXmlDoc('en');
+      }
+      throw error;
+    }
   }
   
   static clearPromiseCache(language: string): void {
@@ -142,6 +210,9 @@ export class XmlFileLoader {
   
   static async addLanguageXml(languageCode: string, xmlUrl: string): Promise<boolean> {
     this.xmlUrlMap[languageCode] = xmlUrl;
+    
+    // Remove from disabled languages if it was previously disabled
+    this.disabledLanguages.delete(languageCode);
     
     // Try to load the XML to verify it's valid
     try {

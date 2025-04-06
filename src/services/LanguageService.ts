@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { BibleLanguage, UserLanguagePreference } from '@/types/LanguageTypes';
 
@@ -163,6 +162,31 @@ class LanguageService {
       return true;
     } catch (error) {
       console.error('Error in updateLanguage:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Update language active status in the database
+   */
+  static async updateLanguageStatus(languageCode: string, isActive: boolean): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('bible_languages')
+        .update({
+          is_active: isActive,
+          updated_at: new Date().toISOString()
+        })
+        .eq('language_code', languageCode);
+      
+      if (error) {
+        console.error('Error updating language status:', error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error in updateLanguageStatus:', error);
       return false;
     }
   }

@@ -1,0 +1,83 @@
+
+# Developer Notes for Daily Bible Verses Web App
+
+## WHAT TO DO:
+
+1. ALWAYS check for React import in every component file
+   - Import React explicitly in every component: `import React from 'react'`
+   - This helps prevent "Cannot read properties of null (reading 'useState')" errors
+
+2. ALWAYS check for localStorage usage
+   - Wrap localStorage access in a typeof window check:
+   ```javascript
+   if (typeof window !== 'undefined') {
+     localStorage.getItem('key');
+   }
+   ```
+   - This prevents SSR/build-time errors
+
+3. ALWAYS use StrictMode in main.tsx
+   - Keep the React.StrictMode wrapper around the App component
+   - This helps identify potential problems
+
+4. SPLIT large components into smaller ones
+   - Files like BibleVerseCard.tsx and SocialShareBar.tsx are too large
+   - Extract functionality into custom hooks and subcomponents
+
+5. HANDLE language fallbacks properly
+   - Always provide a fallback to English when a language fails to load
+   - Disable languages with invalid XML files
+
+6. USE descriptive console.log statements for debugging
+   - Add context to your logs (e.g., `console.log('Loading language:', language)`)
+   - This makes troubleshooting easier
+
+7. OPTIMIZE image exports
+   - Use proper image optimization for exports and sharing
+
+8. TEST on both light and dark themes
+   - Ensure all UI elements work well in both themes
+
+## WHAT NOT TO DO:
+
+1. DO NOT modify read-only files directly
+   - For App.tsx routing changes, we need to create a PR or request access
+   - Current workaround: Update main.tsx to import the routes we need
+
+2. DO NOT use localStorage without checking for window
+   - This causes build failures when localStorage is accessed during SSR
+
+3. DO NOT leave large components without refactoring
+   - BibleVerseCard.tsx is 612 lines - way too large!
+   - SocialShareBar.tsx is 376 lines - needs refactoring
+
+4. DO NOT hardcode language support
+   - Always use the database for language configuration
+
+5. DO NOT add new features without updating tests
+   - All new functionality should have corresponding tests
+
+6. DO NOT forget to update the About page
+   - When adding new features, remember to update the About page
+
+7. DO NOT leave unused imports or code
+   - Clean up unused variables and imports before committing
+
+8. DO NOT use non-responsive design
+   - All UI elements must work on mobile and desktop views
+
+## KNOWN ISSUES TO FIX:
+
+1. Vercel deployment needs proper configuration
+   - Current vercel.json needs validation
+   - Make sure all required public files are included in the build
+
+2. Bible Verse Card exports still have a border
+   - Need to apply border: none to clonedElement when exporting
+
+3. App.tsx route updates needed for About page
+   - Need to add About page to routes
+
+4. Language system needs to disable invalid languages
+   - Add validation when loading XML files
+   - Update database status when languages fail to load
