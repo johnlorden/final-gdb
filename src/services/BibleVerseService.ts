@@ -1,4 +1,3 @@
-
 import { VerseResult } from './types/BibleVerseTypes';
 import { XmlParser } from './utils/XmlParser';
 import { VerseCache } from './utils/VerseCache';
@@ -62,7 +61,8 @@ class BibleVerseService {
     return this.availableLanguages.has(language);
   }
 
-  public static async getAllVerses(language?: string): Promise<VerseResult[]> {
+  
+  static async getAllVerses(language?: string): Promise<VerseResult[]> {
     const lang = language || this.currentLanguage;
     
     const cachedVerses = VerseCache.getAllVerses(lang);
@@ -99,6 +99,8 @@ class BibleVerseService {
     }
   }
 
+  
+  
   static async getRandomVerse(language?: string): Promise<VerseResult | null> {
     const lang = language || this.currentLanguage;
     

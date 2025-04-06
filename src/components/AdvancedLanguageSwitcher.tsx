@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Globe, Check, Settings, Plus, Trash, Download } from 'lucide-react';
+import { Globe, Check, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -19,26 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetFooter,
-  SheetClose
-} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BibleLanguage, LanguageOption } from '@/types/LanguageTypes';
-import { useClickOutside } from '@/hooks/use-click-outside';
 import LanguageService from '@/services/LanguageService';
-import { Switch } from '@/components/ui/switch';
-import { useRef } from 'react';
 import { Badge } from '@/components/ui/badge';
 import OfflineVerseService from '@/services/OfflineVerseService';
-import { supabase } from '@/integrations/supabase/client';
 
 interface AdvancedLanguageSwitcherProps {
   currentLanguage: string;
@@ -52,45 +38,18 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
   isOfflineMode = false
 }) => {
   const { toast } = useToast();
-  const [isManageOpen, setIsManageOpen] = useState(false);
-  const [isAddOpen, setIsAddOpen] = useState(false);
-  const [languages, setLanguages] = useState<BibleLanguage[]>([]);
-  const [newLanguage, setNewLanguage] = useState({
-    language_code: '',
-    language_name: '',
-    xml_url: '',
-    is_active: true
-  });
   const [downloadOptions, setDownloadOptions] = useState(false);
+  const [languages, setLanguages] = useState<BibleLanguage[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<Record<string, boolean>>({});
   const [verseCount, setVerseCount] = useState(500);
   const [isLoading, setIsLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<Record<string, number>>({});
-  
-  // Get the current user
-  useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        setUserId(data.user.id);
-        
-        // Check if user is admin
-        if (data.user.email === 'admin@example.com') {
-          setIsAdmin(true);
-        }
-      }
-    };
-    
-    getUser();
-  }, []);
   
   // Load languages from database
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const langs = await LanguageService.getAllLanguages();
+        const langs = await LanguageService.getActiveLanguages();
         setLanguages(langs);
         
         // Set offline flags based on downloaded status
@@ -133,88 +92,6 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
       description: `Switched to ${languages.find(l => l.language_code === languageCode)?.language_name || languageCode}`,
       duration: 2000,
     });
-  };
-  
-  const handleAddLanguage = async () => {
-    if (!newLanguage.language_code.trim() || !newLanguage.language_name.trim() || !newLanguage.xml_url.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all fields",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      const result = await LanguageService.addLanguage({
-        language_code: newLanguage.language_code.trim(),
-        language_name: newLanguage.language_name.trim(),
-        xml_url: newLanguage.xml_url.trim(),
-        is_active: newLanguage.is_active
-      });
-      
-      if (result) {
-        setLanguages([...languages, result]);
-        
-        toast({
-          title: "Success",
-          description: `Added ${result.language_name} language`
-        });
-        
-        setIsAddOpen(false);
-        setNewLanguage({
-          language_code: '',
-          language_name: '',
-          xml_url: '',
-          is_active: true
-        });
-      }
-    } catch (error) {
-      console.error('Error adding language:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add language",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const handleToggleActive = async (languageCode: string, isActive: boolean) => {
-    const language = languages.find(l => l.language_code === languageCode);
-    if (!language) return;
-    
-    setIsLoading(true);
-    
-    try {
-      const success = await LanguageService.updateLanguage({
-        ...language,
-        is_active: isActive
-      });
-      
-      if (success) {
-        setLanguages(languages.map(l => 
-          l.language_code === languageCode ? { ...l, is_active: isActive } : l
-        ));
-        
-        toast({
-          title: isActive ? "Language Activated" : "Language Deactivated",
-          description: `${language.language_name} has been ${isActive ? 'activated' : 'deactivated'}`
-        });
-      }
-    } catch (error) {
-      console.error('Error updating language:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update language status",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
   
   const handleLanguageSelect = (languageCode: string, selected: boolean) => {
@@ -271,16 +148,6 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
         clearInterval(progressInterval);
         
         if (success) {
-          // If user is logged in, save their preference
-          if (userId) {
-            await LanguageService.saveUserLanguagePreference(
-              userId,
-              langCode,
-              true,
-              verseCount
-            );
-          }
-          
           toast({
             title: "Download Complete",
             description: `Successfully downloaded ${verseCount} verses for ${language.language_name}`
@@ -336,15 +203,6 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
         description: `Cleared offline cache for ${language.language_name}`
       });
       
-      // If user is logged in, update their preference
-      if (userId) {
-        LanguageService.saveUserLanguagePreference(
-          userId,
-          languageCode,
-          false,
-          0
-        );
-      }
     } catch (error) {
       console.error(`Error clearing cache for ${languageCode}:`, error);
       toast({
@@ -417,134 +275,8 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
             <Download className="h-4 w-4 mr-2" />
             Download Languages
           </DropdownMenuItem>
-          
-          {isAdmin && (
-            <DropdownMenuItem onClick={() => setIsManageOpen(true)}>
-              <Settings className="h-4 w-4 mr-2" />
-              Manage Languages
-            </DropdownMenuItem>
-          )}
         </DropdownMenuContent>
       </DropdownMenu>
-      
-      {/* Language Management Sheet */}
-      <Sheet open={isManageOpen} onOpenChange={setIsManageOpen}>
-        <SheetContent side="right" className="w-full sm:w-[400px] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Manage Languages</SheetTitle>
-            <SheetDescription>
-              Add, edit or remove languages from the application.
-            </SheetDescription>
-          </SheetHeader>
-          
-          <div className="py-4 space-y-4">
-            <Button onClick={() => setIsAddOpen(true)} className="w-full">
-              <Plus className="mr-2 h-4 w-4" /> Add New Language
-            </Button>
-            
-            <div className="space-y-4">
-              {languages.map(language => (
-                <div key={language.language_code} className="flex flex-col border rounded-md p-3">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{language.language_name}</span>
-                    <div className="flex items-center">
-                      <Switch 
-                        checked={language.is_active} 
-                        onCheckedChange={(checked) => handleToggleActive(language.language_code, checked)}
-                        disabled={isLoading}
-                      />
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    Code: {language.language_code}
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-1 truncate">
-                    URL: {language.xml_url}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <SheetFooter>
-            <SheetClose asChild>
-              <Button variant="outline">Close</Button>
-            </SheetClose>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-      
-      {/* Add Language Dialog */}
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Language</DialogTitle>
-            <DialogDescription>
-              Enter the details for the new language.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="lang-code" className="text-right">
-                Code
-              </Label>
-              <Input
-                id="lang-code"
-                placeholder="en"
-                value={newLanguage.language_code}
-                onChange={(e) => setNewLanguage({...newLanguage, language_code: e.target.value})}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="lang-name" className="text-right">
-                Name
-              </Label>
-              <Input
-                id="lang-name"
-                placeholder="English"
-                value={newLanguage.language_name}
-                onChange={(e) => setNewLanguage({...newLanguage, language_name: e.target.value})}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="lang-url" className="text-right">
-                XML URL
-              </Label>
-              <Input
-                id="lang-url"
-                placeholder="/data/bible-verses.xml"
-                value={newLanguage.xml_url}
-                onChange={(e) => setNewLanguage({...newLanguage, xml_url: e.target.value})}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="lang-active" className="text-right">
-                Active
-              </Label>
-              <div className="col-span-3">
-                <Switch
-                  id="lang-active"
-                  checked={newLanguage.is_active}
-                  onCheckedChange={(checked) => setNewLanguage({...newLanguage, is_active: checked})}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)} disabled={isLoading}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddLanguage} disabled={isLoading}>
-              {isLoading ? "Adding..." : "Add Language"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       
       {/* Download Languages Dialog */}
       <Dialog open={downloadOptions} onOpenChange={setDownloadOptions}>
@@ -605,7 +337,7 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
                           onClick={() => handleClearLanguageCache(language.language_code)}
                           disabled={isLoading}
                         >
-                          <Trash className="h-4 w-4" />
+                          <span className="text-xs text-red-500">Clear</span>
                         </Button>
                       ) : null}
                     </div>
