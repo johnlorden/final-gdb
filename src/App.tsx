@@ -158,23 +158,25 @@ const App = () => {
             isOfflineMode={isOfflineMode}
             toggleOfflineMode={toggleOfflineMode}
           />
-          <div className="flex-1 mt-16">
-            <Routes>
-              <Route 
-                path="/" 
-                element={
-                  <Index 
-                    addToRecentVerses={addToRecentVerses}
-                    currentVerse={currentVerse}
-                    language={language}
-                    isOfflineMode={isOfflineMode}
-                  />
-                } 
-              />
-              <Route path="/bookmarks" element={<Bookmarks />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
+          <main className="flex-1 mt-16 flex justify-center">
+            <div className="w-full max-w-4xl px-4">
+              <Routes>
+                <Route 
+                  path="/" 
+                  element={
+                    <Index 
+                      addToRecentVerses={addToRecentVerses}
+                      currentVerse={currentVerse}
+                      language={language}
+                      isOfflineMode={isOfflineMode}
+                    />
+                  } 
+                />
+                <Route path="/bookmarks" element={<Bookmarks />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+          </main>
         </div>
         <Toaster />
       </Router>

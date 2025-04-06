@@ -1,14 +1,13 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Twitter, Facebook, Mail, Instagram, Linkedin, Share2 } from 'lucide-react';
+import { Copy, Twitter, Facebook, Mail, Instagram, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 import BookmarkVerse from './BookmarkVerse';
 import { ShareTemplate, ShareTemplateSelector } from './ShareTemplateSelector';
 import TextToSpeech from './TextToSpeech';
 import VerseQRCode from './VerseQRCode';
-import CustomBackgroundSelector from './CustomBackgroundSelector';
 import AddToHomeScreen from './AddToHomeScreen';
 
 interface SocialShareBarProps {
@@ -149,7 +148,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
     }
   };
   
-  const shareWithImage = async (platform: 'twitter' | 'facebook' | 'email' | 'instagram' | 'linkedin') => {
+  const shareWithImage = async (platform: 'twitter' | 'facebook' | 'email' | 'instagram') => {
     try {
       // Generate and save the image first
       const imageUrl = await generateImage();
@@ -189,13 +188,6 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
             });
           }
           break;
-        case 'linkedin':
-          window.open(
-            `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(appUrl)}&summary=${encodeURIComponent(shareText)}`,
-            '_blank',
-            'noopener,noreferrer'
-          );
-          break;
         case 'email':
           const subject = `Bible Verse: ${reference}`;
           const body = `${shareText}\n\nRead more: ${appUrl}`;
@@ -218,9 +210,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
         ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareURL)}&hashtags=Bible,DailyVerse`
         : platform === 'facebook'
           ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL)}&quote=${encodeURIComponent(shareText)}`
-          : platform === 'linkedin'
-            ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareURL)}&summary=${encodeURIComponent(shareText)}`
-            : `mailto:?subject=${encodeURIComponent(`Bible Verse: ${reference}`)}&body=${encodeURIComponent(`${shareText}\n\nRead more: ${shareURL}`)}`;
+          : `mailto:?subject=${encodeURIComponent(`Bible Verse: ${reference}`)}&body=${encodeURIComponent(`${shareText}\n\nRead more: ${shareURL}`)}`;
       
       window.open(url, '_blank', 'noopener,noreferrer');
       toast({
@@ -293,11 +283,6 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
           currentBackgroundImage={backgroundImage}
           onBackgroundImageChange={setBackgroundImage}
         />
-        
-        <CustomBackgroundSelector
-          onSelectBackground={setBackgroundImage}
-          currentBackground={backgroundImage}
-        />
       </div>
       
       <div className="flex flex-wrap justify-center gap-2">
@@ -345,16 +330,6 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({ verse, reference, cardR
         >
           <Facebook className="h-4 w-4" />
           <span className="hidden sm:inline">Facebook</span>
-        </Button>
-        
-        <Button 
-          onClick={() => shareWithImage('linkedin')} 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-1"
-        >
-          <Linkedin className="h-4 w-4" />
-          <span className="hidden sm:inline">LinkedIn</span>
         </Button>
         
         <Button 

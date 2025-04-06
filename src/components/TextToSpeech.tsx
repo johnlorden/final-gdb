@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, VolumeX, Pause, Play, Volume } from 'lucide-react';
+import { Volume2, VolumeX, Pause, Play, Volume, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Select,
@@ -11,6 +11,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useClickOutside } from '@/hooks/use-click-outside';
 
 interface TextToSpeechProps {
   text: string;
@@ -26,6 +32,7 @@ const TextToSpeech: React.FC<TextToSpeechProps> = ({ text, reference }) => {
   const [selectedVoice, setSelectedVoice] = useState<string>('');
   const [rate, setRate] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
   
   // Initialize speech synthesis and load available voices
   useEffect(() => {
@@ -155,7 +162,7 @@ const TextToSpeech: React.FC<TextToSpeechProps> = ({ text, reference }) => {
   }
   
   return (
-    <div className="flex flex-col items-center">
+    <div className="relative">
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
@@ -196,56 +203,56 @@ const TextToSpeech: React.FC<TextToSpeechProps> = ({ text, reference }) => {
           </Button>
         )}
         
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowSettings(!showSettings)}
-          title="Voice settings"
-        >
-          <Volume className="h-4 w-4" />
-        </Button>
-      </div>
-      
-      {showSettings && (
-        <div className="mt-2 p-4 border rounded-lg w-full max-w-xs">
-          <div className="flex flex-col gap-3">
-            <div>
-              <label className="text-xs text-muted-foreground">Voice</label>
-              <Select
-                value={selectedVoice}
-                onValueChange={setSelectedVoice}
-                disabled={!isVoicesLoaded}
-              >
-                <SelectTrigger className="w-full mt-1">
-                  <SelectValue placeholder="Select voice" />
-                </SelectTrigger>
-                <SelectContent>
-                  {voices.map((voice) => (
-                    <SelectItem key={voice.name} value={voice.name}>
-                      {voice.name} ({voice.lang})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <div className="flex justify-between items-center">
-                <label className="text-xs text-muted-foreground">Speed</label>
-                <span className="text-xs">{rate}x</span>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              title="Voice settings"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[250px] p-4" side="bottom" align="start">
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="text-xs text-muted-foreground">Voice</label>
+                <Select
+                  value={selectedVoice}
+                  onValueChange={setSelectedVoice}
+                  disabled={!isVoicesLoaded}
+                >
+                  <SelectTrigger className="w-full mt-1">
+                    <SelectValue placeholder="Select voice" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {voices.map((voice) => (
+                      <SelectItem key={voice.name} value={voice.name}>
+                        {voice.name} ({voice.lang})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Slider
-                value={[rate]}
-                min={0.5}
-                max={2}
-                step={0.1}
-                onValueChange={(values) => setRate(values[0])}
-                className="mt-1"
-              />
+              
+              <div>
+                <div className="flex justify-between items-center">
+                  <label className="text-xs text-muted-foreground">Speed</label>
+                  <span className="text-xs">{rate}x</span>
+                </div>
+                <Slider
+                  value={[rate]}
+                  min={0.5}
+                  max={2}
+                  step={0.1}
+                  onValueChange={(values) => setRate(values[0])}
+                  className="mt-1"
+                />
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 };
