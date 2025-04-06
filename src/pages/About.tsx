@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,14 +9,29 @@ import { useTheme } from 'next-themes';
 import { Clock, Code, Globe, Heart, Lightbulb, Users } from 'lucide-react';
 import LanguageService from '@/services/LanguageService';
 import { BibleLanguage } from '@/types/LanguageTypes';
+import { Link } from 'react-router-dom';
 
 const About = () => {
   const { toast } = useToast();
   const { theme } = useTheme();
-  const [languages, setLanguages] = React.useState<BibleLanguage[]>([]);
-  const [activeTab, setActiveTab] = React.useState('about');
+  const [languages, setLanguages] = useState<BibleLanguage[]>([]);
+  const [activeTab, setActiveTab] = useState('about');
+  const [currentLanguage, setCurrentLanguage] = useState<string>(() => {
+    const savedLanguage = localStorage.getItem('app_language');
+    return savedLanguage || 'en';
+  });
+  const [isOfflineMode, setIsOfflineMode] = useState<boolean>(() => {
+    const savedOfflineMode = localStorage.getItem('offline_mode');
+    return savedOfflineMode === 'true';
+  });
   
-  React.useEffect(() => {
+  // Mock empty functions and data for Header props
+  const recentVerses = [];
+  const handleSelectVerse = (verse: string, reference: string) => {};
+  const handleLanguageChange = (language: string) => {};
+  const toggleOfflineMode = () => {};
+  
+  useEffect(() => {
     const fetchLanguages = async () => {
       try {
         const allLanguages = await LanguageService.getAllLanguages();
@@ -64,9 +79,16 @@ const About = () => {
   
   return (
     <div className="container mx-auto px-4 max-w-4xl">
-      <Header />
+      <Header 
+        recentVerses={recentVerses}
+        onSelectVerse={handleSelectVerse}
+        currentLanguage={currentLanguage}
+        onLanguageChange={handleLanguageChange}
+        isOfflineMode={isOfflineMode}
+        toggleOfflineMode={toggleOfflineMode}
+      />
       
-      <main className="py-6">
+      <main className="py-6 mt-16">
         <h1 className="text-3xl font-bold mb-6 text-center">About Daily Bible Verses</h1>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
