@@ -42,6 +42,10 @@
 9. TEST on both light and dark themes
    - Ensure all UI elements work well in both themes
 
+10. ALWAYS check for undefined objects before using their methods
+    - Especially in static utility classes like VerseCache
+    - Use null checks and optionally initialize objects before using them
+
 ## WHAT NOT TO DO:
 
 1. DO NOT modify read-only files directly
@@ -74,6 +78,10 @@
    - Only use one Router component in your app (in main.tsx)
    - Never put a Router inside App.tsx if main.tsx already has one
 
+10. DO NOT assume objects or properties exist
+    - Always check if an object exists before accessing its properties
+    - Use optional chaining or conditionals to safely access properties and methods
+
 ## KNOWN ISSUES TO FIX:
 
 1. Vercel deployment needs proper configuration
@@ -89,3 +97,8 @@
 4. Language system needs to disable invalid languages
    - Add validation when loading XML files
    - Update database status when languages fail to load
+
+5. VerseCache error with new languages
+   - Fixed: Added null checks when accessing verseCaches and searchCaches
+   - Added initialization for new language caches on first access
+

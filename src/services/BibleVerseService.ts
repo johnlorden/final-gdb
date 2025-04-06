@@ -1,3 +1,4 @@
+
 import { VerseResult } from './types/BibleVerseTypes';
 import { XmlParser } from './utils/XmlParser';
 import { VerseCache } from './utils/VerseCache';
@@ -16,6 +17,7 @@ class BibleVerseService {
   
   private static currentLanguage: string = 'en';
   private static availableLanguages: Set<string> = new Set(['en', 'fil']);
+  private static invalidLanguages: Set<string> = new Set();
 
   static async refreshLanguageList(): Promise<void> {
     try {
@@ -38,6 +40,12 @@ class BibleVerseService {
   }
 
   static setLanguage(language: string): void {
+    if (this.invalidLanguages.has(language)) {
+      console.warn(`Language ${language} was previously marked as invalid, defaulting to English`);
+      this.currentLanguage = 'en';
+      return;
+    }
+
     if (this.availableLanguages.has(language)) {
       this.currentLanguage = language;
       this.clearCache(language);
@@ -53,6 +61,11 @@ class BibleVerseService {
   }
 
   static async isLanguageAvailable(language: string): Promise<boolean> {
+    // If language has been marked as invalid, it's not available
+    if (this.invalidLanguages.has(language)) {
+      return false;
+    }
+    
     // Refresh language list if not yet loaded
     if (this.availableLanguages.size <= 2) {
       await this.refreshLanguageList();
@@ -61,6 +74,13 @@ class BibleVerseService {
     return this.availableLanguages.has(language);
   }
 
+  static markLanguageAsInvalid(language: string): void {
+    this.invalidLanguages.add(language);
+    if (this.currentLanguage === language) {
+      console.warn(`Current language ${language} is invalid, switching to English`);
+      this.currentLanguage = 'en';
+    }
+  }
   
   static async getAllVerses(language?: string): Promise<VerseResult[]> {
     const lang = language || this.currentLanguage;
@@ -77,6 +97,9 @@ class BibleVerseService {
       if (verses.length === 0) {
         console.warn(`No verses found in XML document for language: ${lang}`);
         
+        // Mark this language as invalid
+        this.markLanguageAsInvalid(lang);
+        
         if (lang !== 'en') {
           console.log('Falling back to English verses');
           return this.getAllVerses('en');
@@ -89,6 +112,9 @@ class BibleVerseService {
       return verses;
     } catch (error) {
       console.error('Error parsing all verses:', error);
+      
+      // Mark this language as invalid if we can't load it
+      this.markLanguageAsInvalid(lang);
       
       if (lang !== 'en') {
         console.log('Error with non-English verses, falling back to English');
@@ -282,8 +308,12 @@ class BibleVerseService {
   static clearCache(language?: string): void {
     const lang = language || this.currentLanguage;
     
-    VerseCache.clearCache(lang);
-    XmlFileLoader.clearPromiseCache(lang);
+    try {
+      VerseCache.clearCache(lang);
+      XmlFileLoader.clearPromiseCache(lang);
+    } catch (error) {
+      console.error(`Error clearing cache for language ${lang}:`, error);
+    }
   }
 }
 
