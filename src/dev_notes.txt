@@ -46,6 +46,10 @@
     - Especially in static utility classes like VerseCache
     - Use null checks and optionally initialize objects before using them
 
+11. NEVER conditionally call React hooks
+    - This violates the Rules of Hooks and causes "Rendered more hooks than during the previous render" errors
+    - Instead, call all hooks unconditionally and use conditional logic inside the hooks or for rendering content
+
 ## WHAT NOT TO DO:
 
 1. DO NOT modify read-only files directly
@@ -82,6 +86,10 @@
     - Always check if an object exists before accessing its properties
     - Use optional chaining or conditionals to safely access properties and methods
 
+11. DO NOT conditionally call React hooks
+    - Hooks must be called in the same order on every render
+    - Use conditional logic inside hooks instead of conditionally calling hooks
+
 ## KNOWN ISSUES TO FIX:
 
 1. Vercel deployment needs proper configuration
@@ -101,4 +109,8 @@
 5. VerseCache error with new languages
    - Fixed: Added null checks when accessing verseCaches and searchCaches
    - Added initialization for new language caches on first access
+
+6. SwipeVerseNavigation hook order error
+   - Fixed: Always call hooks in the same order, even when mobile detection changes
+   - Modified to use conditional logic inside hooks instead of conditionally calling hooks
 

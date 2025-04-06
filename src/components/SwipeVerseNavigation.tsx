@@ -19,18 +19,14 @@ const SwipeVerseNavigation: React.FC<SwipeVerseNavigationProps> = ({
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  // Don't render any special navigation if not on mobile
-  if (!isMobile) {
-    return <>{children}</>;
-  }
-  
   // Minimum swipe distance to trigger navigation (in px)
   const SWIPE_THRESHOLD = 50;
   // Maximum time for a swipe to be considered valid (in ms)
   const SWIPE_TIMEOUT = 300;
   
+  // Always define the useEffect hook regardless of isMobile
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !isMobile) return;
     
     let startX: number;
     let startY: number;
@@ -98,7 +94,12 @@ const SwipeVerseNavigation: React.FC<SwipeVerseNavigationProps> = ({
       element.removeEventListener('touchmove', handleTouchMove);
       element.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [onNextVerse, onPreviousVerse]);
+  }, [onNextVerse, onPreviousVerse, isMobile, toast]);
+  
+  // Render different components based on isMobile after all hooks are called
+  if (!isMobile) {
+    return <>{children}</>;
+  }
   
   return (
     <div ref={containerRef} className="relative w-full">
