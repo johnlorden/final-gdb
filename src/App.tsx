@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import NotFound from './pages/NotFound';
 import Bookmarks from './pages/Bookmarks';
@@ -222,38 +221,27 @@ const App = () => {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <Router>
-        <div className="flex flex-col min-h-screen">
-          <Header 
-            recentVerses={recentVerses} 
-            onSelectVerse={handleSelectVerse}
-            currentLanguage={language}
-            onLanguageChange={handleLanguageChange}
-            isOfflineMode={isOfflineMode}
-            toggleOfflineMode={toggleOfflineMode}
-          />
-          <main className="flex-1 mt-16 flex justify-center">
-            <div className="w-full max-w-4xl px-4">
-              <Routes>
-                <Route 
-                  path="/" 
-                  element={
-                    <Index 
-                      addToRecentVerses={addToRecentVerses}
-                      currentVerse={currentVerse}
-                      language={language}
-                      isOfflineMode={isOfflineMode}
-                    />
-                  } 
-                />
-                <Route path="/bookmarks" element={<Bookmarks />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
-          </main>
-        </div>
-        <Toaster />
-      </Router>
+      <div className="flex flex-col min-h-screen">
+        <Header 
+          recentVerses={recentVerses} 
+          onSelectVerse={handleSelectVerse}
+          currentLanguage={language}
+          onLanguageChange={handleLanguageChange}
+          isOfflineMode={isOfflineMode}
+          toggleOfflineMode={toggleOfflineMode}
+        />
+        <main className="flex-1 mt-16 flex justify-center">
+          <div className="w-full max-w-4xl px-4">
+            <Index 
+              addToRecentVerses={addToRecentVerses}
+              currentVerse={currentVerse}
+              language={language}
+              isOfflineMode={isOfflineMode}
+            />
+          </div>
+        </main>
+      </div>
+      <Toaster />
     </ThemeProvider>
   );
 };

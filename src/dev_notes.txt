@@ -20,22 +20,26 @@
    - Keep the React.StrictMode wrapper around the App component
    - This helps identify potential problems
 
-4. SPLIT large components into smaller ones
+4. NEVER nest Router components
+   - Only use one BrowserRouter/Router in your application (in main.tsx)
+   - Using multiple Router components will cause the error: "You cannot render a <Router> inside another <Router>"
+
+5. SPLIT large components into smaller ones
    - Files like BibleVerseCard.tsx and SocialShareBar.tsx are too large
    - Extract functionality into custom hooks and subcomponents
 
-5. HANDLE language fallbacks properly
+6. HANDLE language fallbacks properly
    - Always provide a fallback to English when a language fails to load
    - Disable languages with invalid XML files
 
-6. USE descriptive console.log statements for debugging
+7. USE descriptive console.log statements for debugging
    - Add context to your logs (e.g., `console.log('Loading language:', language)`)
    - This makes troubleshooting easier
 
-7. OPTIMIZE image exports
+8. OPTIMIZE image exports
    - Use proper image optimization for exports and sharing
 
-8. TEST on both light and dark themes
+9. TEST on both light and dark themes
    - Ensure all UI elements work well in both themes
 
 ## WHAT NOT TO DO:
@@ -65,6 +69,10 @@
 
 8. DO NOT use non-responsive design
    - All UI elements must work on mobile and desktop views
+
+9. DO NOT nest Router components
+   - Only use one Router component in your app (in main.tsx)
+   - Never put a Router inside App.tsx if main.tsx already has one
 
 ## KNOWN ISSUES TO FIX:
 
