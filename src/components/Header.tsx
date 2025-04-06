@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import RecentVerses from './RecentVerses';
-import LanguageSwitcher from './LanguageSwitcher';
+import AdvancedLanguageSwitcher from './AdvancedLanguageSwitcher';
 import OfflineMode from './OfflineMode';
 import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -90,9 +90,10 @@ const Header: React.FC<HeaderProps> = ({
                 </DropdownMenuContent>
               </DropdownMenu>
               
-              <LanguageSwitcher 
+              <AdvancedLanguageSwitcher 
                 currentLanguage={currentLanguage}
                 onLanguageChange={onLanguageChange}
+                isOfflineMode={isOfflineMode}
               />
               
               <a 

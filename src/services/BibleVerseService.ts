@@ -4,6 +4,7 @@ import { XmlParser } from './utils/XmlParser';
 import { VerseCache } from './utils/VerseCache';
 import { XmlFileLoader } from './utils/XmlFileLoader';
 import { VerseSelector } from './utils/VerseSelector';
+import LanguageService from './LanguageService';
 
 class BibleVerseService {
   private static categories = [
@@ -15,16 +16,50 @@ class BibleVerseService {
   ];
   
   private static currentLanguage: string = 'en';
+  private static availableLanguages: Set<string> = new Set(['en', 'fil']);
+
+  static async refreshLanguageList(): Promise<void> {
+    try {
+      const languages = await LanguageService.getActiveLanguages();
+      this.availableLanguages = new Set(languages.map(l => l.language_code));
+      
+      if (languages.length === 0) {
+        // Default to English and Filipino if no languages are set
+        this.availableLanguages.add('en');
+        this.availableLanguages.add('fil');
+      }
+      
+      console.log('Available languages:', Array.from(this.availableLanguages).join(', '));
+    } catch (error) {
+      console.error('Error refreshing language list:', error);
+      
+      // Default to English and Filipino
+      this.availableLanguages = new Set(['en', 'fil']);
+    }
+  }
 
   static setLanguage(language: string): void {
-    if (language === 'en' || language === 'fil') {
+    if (this.availableLanguages.has(language)) {
       this.currentLanguage = language;
       this.clearCache(language);
+    } else {
+      console.warn(`Language ${language} is not available, defaulting to English`);
+      this.currentLanguage = 'en';
+      this.clearCache('en');
     }
   }
 
   static getLanguage(): string {
     return this.currentLanguage;
+  }
+
+  static async isLanguageAvailable(language: string): Promise<boolean> {
+    // Refresh language list if not yet loaded
+    if (this.availableLanguages.size <= 2) {
+      await this.refreshLanguageList();
+    }
+    
+    return this.availableLanguages.has(language);
   }
 
   public static async getAllVerses(language?: string): Promise<VerseResult[]> {
@@ -42,7 +77,7 @@ class BibleVerseService {
       if (verses.length === 0) {
         console.warn(`No verses found in XML document for language: ${lang}`);
         
-        if (lang === 'fil') {
+        if (lang !== 'en') {
           console.log('Falling back to English verses');
           return this.getAllVerses('en');
         }
@@ -55,8 +90,8 @@ class BibleVerseService {
     } catch (error) {
       console.error('Error parsing all verses:', error);
       
-      if (lang === 'fil') {
-        console.log('Error with Filipino verses, falling back to English');
+      if (lang !== 'en') {
+        console.log('Error with non-English verses, falling back to English');
         return this.getAllVerses('en');
       }
       
@@ -250,9 +285,12 @@ class BibleVerseService {
   }
 }
 
+// Refresh language list and preload verses when module loads
 setTimeout(() => {
-  console.log('Starting Bible verse preload');
-  BibleVerseService.preloadAllVerses();
+  console.log('Starting Bible verse initialization');
+  BibleVerseService.refreshLanguageList().then(() => {
+    BibleVerseService.preloadAllVerses();
+  });
 }, 1000);
 
 export default BibleVerseService;

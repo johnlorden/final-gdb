@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import ThemeToggle from './ThemeToggle';
 import OfflineMode from './OfflineMode';
-import LanguageSwitcher from './LanguageSwitcher';
+import AdvancedLanguageSwitcher from './AdvancedLanguageSwitcher';
 
 interface MobileMenuProps {
   currentLanguage: string;
@@ -88,10 +88,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </div>
             <div className="flex justify-between items-center px-4 menu-item-appear delay-5">
               <span className="font-medium">Language</span>
-              <LanguageSwitcher 
-                currentLanguage={currentLanguage}
-                onLanguageChange={onLanguageChange}
-              />
+              <div className="ml-auto">
+                <AdvancedLanguageSwitcher 
+                  currentLanguage={currentLanguage}
+                  onLanguageChange={onLanguageChange}
+                  isOfflineMode={isOfflineMode}
+                />
+              </div>
             </div>
             <div className="flex justify-between items-center px-4 menu-item-appear delay-5">
               <span className="font-medium">Offline Mode</span>

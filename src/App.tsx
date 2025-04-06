@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
@@ -9,6 +8,8 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
 import BibleVerseService from './services/BibleVerseService';
 import OfflineVerseService from './services/OfflineVerseService';
+import { supabase } from '@/integrations/supabase/client';
+import { XmlFileLoader } from './services/utils/XmlFileLoader';
 
 interface VerseItem {
   verse: string;
@@ -38,8 +39,41 @@ const App = () => {
     return savedOfflineMode === 'true';
   });
   
+  const [user, setUser] = useState<any>(null);
+  
   // Reference to track if we need to regenerate a verse on language change
   const shouldRegenerateRef = useRef(false);
+  
+  // Check for auth status
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data?.user || null);
+      
+      // Subscribe to auth changes
+      const { data: authListener } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          setUser(session?.user || null);
+          
+          if (event === 'SIGNED_IN' && session?.user) {
+            // Sync offline preferences with database
+            await OfflineVerseService.syncUserLanguagePreferences(session.user.id);
+          }
+        }
+      );
+      
+      return () => {
+        authListener?.subscription.unsubscribe();
+      };
+    };
+    
+    checkUser();
+  }, []);
+  
+  // Initialize language files when app starts
+  useEffect(() => {
+    XmlFileLoader.initializeXmlUrls();
+  }, []);
   
   // Set language in the Bible service whenever it changes
   useEffect(() => {
@@ -92,8 +126,25 @@ const App = () => {
   // Initialize offline cache if it's not valid
   useEffect(() => {
     const checkOfflineCache = async () => {
-      if (isOfflineMode && !OfflineVerseService.isCacheValid()) {
-        await OfflineVerseService.cacheVerses(100);
+      if (isOfflineMode) {
+        const downloadedLanguages = OfflineVerseService.getDownloadedLanguages();
+        
+        // If no languages are downloaded or current language not downloaded
+        if (downloadedLanguages.length === 0 || 
+            !downloadedLanguages.some(l => l.code === language)) {
+          // Default to English if available
+          if (downloadedLanguages.some(l => l.code === 'en')) {
+            setLanguage('en');
+          }
+          // Otherwise, use the first available language
+          else if (downloadedLanguages.length > 0) {
+            setLanguage(downloadedLanguages[0].code);
+          }
+          // If no languages are downloaded at all, try to cache current language
+          else {
+            await OfflineVerseService.cacheVerses(100, language);
+          }
+        }
       }
     };
     
@@ -137,13 +188,36 @@ const App = () => {
   
   // Handle language switch
   const handleLanguageChange = (newLanguage: string) => {
+    // Verify if the language is available in offline mode
+    if (isOfflineMode && !OfflineVerseService.isLanguageDownloaded(newLanguage)) {
+      return; // Don't change language if not available offline
+    }
+    
     setLanguage(newLanguage);
     BibleVerseService.setLanguage(newLanguage);
   };
   
   // Toggle offline mode
   const toggleOfflineMode = () => {
-    setIsOfflineMode(prev => !prev);
+    // When turning on offline mode, make sure current language is downloaded
+    const newOfflineMode = !isOfflineMode;
+    
+    if (newOfflineMode && !OfflineVerseService.isLanguageDownloaded(language)) {
+      // Switch to a downloaded language if available
+      const downloadedLanguages = OfflineVerseService.getDownloadedLanguages();
+      if (downloadedLanguages.length > 0) {
+        // Prefer English if available
+        const englishLang = downloadedLanguages.find(l => l.code === 'en');
+        if (englishLang) {
+          setLanguage('en');
+        } else {
+          // Otherwise use first available
+          setLanguage(downloadedLanguages[0].code);
+        }
+      }
+    }
+    
+    setIsOfflineMode(newOfflineMode);
   };
 
   return (
