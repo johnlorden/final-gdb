@@ -1,14 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Index from './pages/Index';
-import NotFound from './pages/NotFound';
-import Bookmarks from './pages/Bookmarks';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { Outlet, useOutletContext } from 'react-router-dom';
 import Header from './components/Header';
-import { ThemeProvider } from './components/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
+import { ThemeProvider } from './components/ThemeProvider';
 import BibleVerseService from './services/BibleVerseService';
 import OfflineVerseService from './services/OfflineVerseService';
 import { supabase } from '@/integrations/supabase/client';
 import { XmlFileLoader } from './services/utils/XmlFileLoader';
+import { Skeleton } from './components/ui/skeleton';
 
 interface VerseItem {
   verse: string;
@@ -16,11 +15,25 @@ interface VerseItem {
   timestamp: number;
 }
 
+type ContextType = {
+  addToRecentVerses: (verse: string, reference: string) => void;
+  currentVerse: {
+    verse: string;
+    reference: string;
+  };
+  language: string;
+  isOfflineMode: boolean;
+  recentVerses: VerseItem[];
+};
+
 const App = () => {
   // State management
   const [recentVerses, setRecentVerses] = useState<VerseItem[]>(() => {
-    const saved = localStorage.getItem('recentVerses');
-    return saved ? JSON.parse(saved) : [];
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('recentVerses');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
   });
 
   const [currentVerse, setCurrentVerse] = useState({
@@ -29,19 +42,50 @@ const App = () => {
   });
   
   const [language, setLanguage] = useState<string>(() => {
-    const savedLanguage = localStorage.getItem('app_language');
-    return savedLanguage || 'en';
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem('app_language');
+      return savedLanguage || 'en';
+    }
+    return 'en';
   });
   
   const [isOfflineMode, setIsOfflineMode] = useState<boolean>(() => {
-    const savedOfflineMode = localStorage.getItem('offline_mode');
-    return savedOfflineMode === 'true';
+    if (typeof window !== 'undefined') {
+      const savedOfflineMode = localStorage.getItem('offline_mode');
+      return savedOfflineMode === 'true';
+    }
+    return false;
   });
   
   const [user, setUser] = useState<any>(null);
   
-  // Reference to track if we need to regenerate a verse on language change
-  const shouldRegenerateRef = useRef(false);
+  // Initialize language files when app starts
+  useEffect(() => {
+    XmlFileLoader.initializeXmlUrls();
+  }, []);
+  
+  // Set language in the Bible service whenever it changes
+  useEffect(() => {
+    BibleVerseService.setLanguage(language);
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('app_language', language);
+    }
+  }, [language]);
+  
+  // Save recent verses to localStorage when updated
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('recentVerses', JSON.stringify(recentVerses));
+    }
+  }, [recentVerses]);
+  
+  // Save offline mode preference
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('offline_mode', isOfflineMode.toString());
+    }
+  }, [isOfflineMode]);
   
   // Check for auth status
   useEffect(() => {
@@ -62,65 +106,14 @@ const App = () => {
       );
       
       return () => {
-        authListener?.subscription.unsubscribe();
+        if (authListener?.subscription?.unsubscribe) {
+          authListener.subscription.unsubscribe();
+        }
       };
     };
     
     checkUser();
   }, []);
-  
-  // Initialize language files when app starts
-  useEffect(() => {
-    XmlFileLoader.initializeXmlUrls();
-  }, []);
-  
-  // Set language in the Bible service whenever it changes
-  useEffect(() => {
-    BibleVerseService.setLanguage(language);
-    localStorage.setItem('app_language', language);
-    
-    // Skip regeneration on first render
-    if (shouldRegenerateRef.current && currentVerse.reference) {
-      // Try to get the same verse in the new language
-      BibleVerseService.getVerseByReference(currentVerse.reference)
-        .then((result) => {
-          if (result) {
-            setCurrentVerse({
-              verse: result.text,
-              reference: result.reference
-            });
-          } else {
-            // If verse not found in new language, get a random verse
-            return BibleVerseService.getRandomVerse();
-          }
-          return null;
-        })
-        .then((randomResult) => {
-          if (randomResult) {
-            setCurrentVerse({
-              verse: randomResult.text,
-              reference: randomResult.reference
-            });
-          }
-        })
-        .catch(console.error);
-    }
-    
-    // Set flag to true after first render
-    if (!shouldRegenerateRef.current) {
-      shouldRegenerateRef.current = true;
-    }
-  }, [language]);
-  
-  // Save recent verses to localStorage when updated
-  useEffect(() => {
-    localStorage.setItem('recentVerses', JSON.stringify(recentVerses));
-  }, [recentVerses]);
-  
-  // Save offline mode preference
-  useEffect(() => {
-    localStorage.setItem('offline_mode', isOfflineMode.toString());
-  }, [isOfflineMode]);
   
   // Initialize offline cache if it's not valid
   useEffect(() => {
@@ -155,9 +148,11 @@ const App = () => {
     setCurrentVerse({ verse, reference });
     
     // Update URL if needed
-    const url = new URL(window.location.href);
-    url.searchParams.set('bibleverse', reference);
-    window.history.pushState({}, '', url);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('bibleverse', reference);
+      window.history.pushState({}, '', url);
+    }
   };
 
   // Add a verse to recent verses
@@ -193,7 +188,6 @@ const App = () => {
     }
     
     setLanguage(newLanguage);
-    BibleVerseService.setLanguage(newLanguage);
   };
   
   // Toggle offline mode
@@ -220,7 +214,7 @@ const App = () => {
   };
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="light" storageKey="bible-verse-theme">
       <div className="flex flex-col min-h-screen">
         <Header 
           recentVerses={recentVerses} 
@@ -232,12 +226,15 @@ const App = () => {
         />
         <main className="flex-1 mt-16 flex justify-center">
           <div className="w-full max-w-4xl px-4">
-            <Index 
-              addToRecentVerses={addToRecentVerses}
-              currentVerse={currentVerse}
-              language={language}
-              isOfflineMode={isOfflineMode}
-            />
+            <Suspense fallback={<div className="w-full py-10 flex justify-center"><Skeleton className="h-[400px] w-full max-w-2xl" /></div>}>
+              <Outlet context={{ 
+                addToRecentVerses, 
+                currentVerse, 
+                language, 
+                isOfflineMode,
+                recentVerses 
+              }} />
+            </Suspense>
           </div>
         </main>
       </div>
@@ -245,5 +242,9 @@ const App = () => {
     </ThemeProvider>
   );
 };
+
+export function useVerseContext() {
+  return useOutletContext<ContextType>();
+}
 
 export default App;

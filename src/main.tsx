@@ -8,16 +8,19 @@ import About from './pages/About.tsx'
 import NotFound from './pages/NotFound.tsx'
 import Bookmarks from './pages/Bookmarks.tsx'
 import { ThemeProvider } from './components/ThemeProvider.tsx'
+import Index from './pages/Index.tsx'
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ThemeProvider defaultTheme="system" storageKey="bible-verse-theme">
+    <ThemeProvider defaultTheme="light" storageKey="bible-verse-theme">
       <Router>
         <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/bookmarks" element={<Bookmarks />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/" element={<App />}>
+            <Route index element={<Index />} />
+            <Route path="about" element={<About />} />
+            <Route path="bookmarks" element={<Bookmarks />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
         </Routes>
       </Router>
     </ThemeProvider>

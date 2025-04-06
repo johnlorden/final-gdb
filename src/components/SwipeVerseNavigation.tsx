@@ -84,8 +84,8 @@ const SwipeVerseNavigation: React.FC<SwipeVerseNavigationProps> = ({
     const element = containerRef.current;
     
     // Add touch event listeners
-    element.addEventListener('touchstart', handleTouchStart);
-    element.addEventListener('touchmove', handleTouchMove);
+    element.addEventListener('touchstart', handleTouchStart, { passive: true });
+    element.addEventListener('touchmove', handleTouchMove, { passive: true });
     element.addEventListener('touchend', handleTouchEnd);
     
     return () => {

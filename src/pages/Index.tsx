@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import EnhancedSearchBar from '@/components/EnhancedSearchBar';
 import VerseCategories from '@/components/VerseCategories';
@@ -12,16 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import SwipeVerseNavigation from '@/components/SwipeVerseNavigation';
 import { useIsMobile } from '@/hooks/use-mobile';
-
-interface IndexProps {
-  addToRecentVerses: (verse: string, reference: string) => void;
-  currentVerse: {
-    verse: string;
-    reference: string;
-  };
-  language?: string;
-  isOfflineMode?: boolean;
-}
+import { useVerseContext } from '@/App';
 
 interface VerseResult {
   text: string;
@@ -30,7 +22,8 @@ interface VerseResult {
   category?: string;
 }
 
-const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language = 'en', isOfflineMode = false }) => {
+const Index: React.FC = () => {
+  const { addToRecentVerses, currentVerse, language, isOfflineMode } = useVerseContext();
   const [searchParams] = useSearchParams();
   const cardRef = useRef<HTMLDivElement>(null);
   const [verse, setVerse] = useState('');
@@ -39,7 +32,6 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
   const [isLoading, setIsLoading] = useState(false);
   const [currentCategory, setCurrentCategory] = useState('All');
   const [previousVerse, setPreviousVerse] = useState('');
-  const [lastClickedCategory, setLastClickedCategory] = useState<string | null>(null);
   const [verseCategory, setVerseCategory] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
   const { toast } = useToast();
@@ -90,7 +82,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
       setInitialLoad(false);
       handleRandomVerse();
     }
-  }, [searchParams, initialLoad, language]);
+  }, [searchParams, initialLoad, language, addToRecentVerses, toast]);
 
   useEffect(() => {
     if (currentVerse.verse && currentVerse.reference) {
@@ -99,10 +91,13 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
     }
   }, [currentVerse]);
 
+  // Preload verses for each category to improve performance
   useEffect(() => {
-    async function preloadCategoryVerses() {
+    const preloadCategoryVerses = async () => {
       const categories = BibleVerseService.getCategories();
-      for (const category of categories) {
+      
+      // Use Promise.all for parallel loading
+      await Promise.all(categories.map(async (category) => {
         if (!verseCache.current.has(category)) {
           try {
             const verses = await BibleVerseService.getVersesByCategory(category, 10);
@@ -113,13 +108,15 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
             console.error(`Error preloading verses for category ${category}:`, error);
           }
         }
-      }
-    }
+      }));
+    };
     
-    preloadCategoryVerses();
-  }, [language]);
+    if (!isOfflineMode) {
+      preloadCategoryVerses();
+    }
+  }, [language, isOfflineMode]);
 
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     if (!query.trim()) return;
     
     setIsLoading(true);
@@ -156,9 +153,9 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
         });
       })
       .finally(() => setIsLoading(false));
-  };
+  }, [toast]);
 
-  const displayVerse = (result: VerseResult) => {
+  const displayVerse = useCallback((result: VerseResult) => {
     setVerse(result.text);
     setReference(result.reference);
     addToRecentVerses(result.text, result.reference);
@@ -172,7 +169,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
     } else if (result.category) {
       setVerseCategory(result.category);
     }
-  };
+  }, [addToRecentVerses]);
 
   const updateUrlWithVerse = (verseReference: string) => {
     const url = new URL(window.location.href);
@@ -180,16 +177,15 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
     window.history.pushState({}, '', url);
   };
 
-  const handleCategorySelect = (category: string) => {
+  const handleCategorySelect = useCallback((category: string) => {
     setIsLoading(true);
     setCurrentCategory(category);
-    setLastClickedCategory(category);
     setHasError(false);
     
     getVerseFromCategory(category);
-  };
+  }, []);
 
-  const handleRandomVerse = (category?: string) => {
+  const handleRandomVerse = useCallback((category?: string) => {
     setIsLoading(true);
     setHasError(false);
     
@@ -212,10 +208,10 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
           }
           
           updateUrlWithVerse(result.reference);
+          return null;
         } else {
           return BibleVerseService.getRandomVerse();
         }
-        return null;
       })
       .then((randomResult) => {
         if (randomResult) {
@@ -242,7 +238,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
         });
       })
       .finally(() => setIsLoading(false));
-  };
+  }, [currentCategory, addToRecentVerses, toast]);
 
   const getVerseFromCategory = (category: string) => {
     if (category !== 'All' && verseCache.current.has(category)) {
@@ -283,10 +279,10 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
           }
           
           updateUrlWithVerse(result.reference);
+          return null;
         } else {
           return BibleVerseService.getRandomVerse();
         }
-        return null;
       })
       .then((randomResult) => {
         if (randomResult) {
@@ -326,6 +322,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
             }
           })
           .catch(() => {
+            // Already showing error toast, no need for another
           });
       })
       .finally(() => setIsLoading(false));
@@ -336,14 +333,14 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
       className="container px-4 pt-4 mx-auto max-w-4xl"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.3 }}
     >
       <div className="flex flex-col gap-6">
         <motion.section 
           className="flex flex-col gap-4"
-          initial={{ y: -20, opacity: 0 }}
+          initial={{ y: -10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.4 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
         >
           <EnhancedSearchBar onSearch={handleSearch} />
           <VerseCategories 
@@ -357,10 +354,10 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
           <motion.section 
             key={reference || 'loading' || 'error'}
             className="flex flex-col items-center justify-center"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
           >
             {isLoading ? (
               <div className="w-full max-w-2xl">
@@ -420,9 +417,9 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
         {verse && reference && (
           <motion.section 
             className="w-full max-w-2xl mx-auto"
-            initial={{ y: 20, opacity: 0 }}
+            initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.4 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
           >
             <SocialShareBar 
               verse={verse} 
@@ -436,7 +433,7 @@ const Index: React.FC<IndexProps> = ({ addToRecentVerses, currentVerse, language
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.5 }}
+          transition={{ delay: 0.4, duration: 0.3 }}
         >
           <DonateFooter />
         </motion.div>
