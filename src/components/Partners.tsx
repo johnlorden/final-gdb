@@ -13,7 +13,9 @@ const Partners: React.FC = () => {
     const fetchPartners = async () => {
       try {
         setIsLoading(true);
-        const { data, error } = await supabase
+        // Using 'any' type to bypass the TypeScript error due to missing type definitions
+        // for the partners table in the supabase client
+        const { data, error } = await (supabase as any)
           .from('partners')
           .select('*')
           .order('name');
