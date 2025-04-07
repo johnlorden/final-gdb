@@ -2,11 +2,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
-import Partners from '@/components/Partners';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const About = () => {
   return (
-    <div className="min-h-screen pt-16">
+    <div className="pt-6">
       <div className="container mx-auto px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -48,7 +49,13 @@ const About = () => {
           
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Our Partners</h2>
-            <Partners />
+            <div className="flex justify-center my-4">
+              <Link to="/partners">
+                <Button variant="outline" className="flex items-center gap-2">
+                  View All Partners <ExternalLink className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </section>
           
           <section className="mb-8">

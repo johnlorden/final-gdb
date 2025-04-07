@@ -1,15 +1,13 @@
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import EnhancedSearchBar from '@/components/EnhancedSearchBar';
-import VerseCategories from '@/components/VerseCategories';
+import SearchSection from '@/components/home/SearchSection';
+import VerseSection from '@/components/home/VerseSection';
+import ShareSection from '@/components/home/ShareSection';
 import DonateFooter from '@/components/DonateFooter';
-import SocialShareBar from '@/components/SocialShareBar';
-import VerseDisplay from '@/components/VerseDisplay';
 import { useVerseDisplay } from '@/hooks/useVerseDisplay';
 
 const Index: React.FC = () => {
-  const cardRef = useRef<HTMLDivElement>(null);
   const { 
     verse,
     reference,
@@ -30,21 +28,16 @@ const Index: React.FC = () => {
       transition={{ duration: 0.3 }}
     >
       <div className="flex flex-col gap-6">
-        <motion.section 
-          className="flex flex-col gap-4"
-          initial={{ y: -10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.3 }}
-        >
-          <EnhancedSearchBar onSearch={handleSearch} />
-          <VerseCategories 
-            onCategorySelect={handleCategorySelect} 
-            onRandomVerse={handleRandomVerse}
-            currentCategory={currentCategory}
-          />
-        </motion.section>
+        {/* Search and Categories Section */}
+        <SearchSection 
+          onSearch={handleSearch}
+          onCategorySelect={handleCategorySelect}
+          onRandomVerse={handleRandomVerse}
+          currentCategory={currentCategory}
+        />
         
-        <VerseDisplay 
+        {/* Verse Display Section */}
+        <VerseSection 
           verse={verse}
           reference={reference}
           verseCategory={verseCategory}
@@ -54,22 +47,16 @@ const Index: React.FC = () => {
           handleRandomVerse={handleRandomVerse}
         />
         
+        {/* Share Section - Only shown when there's a verse to share */}
         {verse && reference && (
-          <motion.section 
-            className="w-full max-w-2xl mx-auto"
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.3 }}
-          >
-            <SocialShareBar 
-              verse={verse} 
-              reference={reference} 
-              cardRef={cardRef} 
-              category={verseCategory || currentCategory}
-            />
-          </motion.section>
+          <ShareSection 
+            verse={verse} 
+            reference={reference} 
+            category={verseCategory || currentCategory} 
+          />
         )}
         
+        {/* Donate Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

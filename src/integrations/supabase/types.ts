@@ -39,6 +39,30 @@ export type Database = {
         }
         Relationships: []
       }
+      partners: {
+        Row: {
+          created_at: string | null
+          id: string
+          logo_url: string
+          name: string
+          website_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          logo_url: string
+          name: string
+          website_url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          logo_url?: string
+          name?: string
+          website_url?: string
+        }
+        Relationships: []
+      }
       user_language_preferences: {
         Row: {
           created_at: string | null
