@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import SocialShareBar from '@/components/SocialShareBar';
 
@@ -9,7 +9,8 @@ interface ShareSectionProps {
   category: string;
 }
 
-const ShareSection: React.FC<ShareSectionProps> = (props) => {
+// Using memo to prevent unnecessary re-renders
+const ShareSection: React.FC<ShareSectionProps> = memo((props) => {
   return (
     <motion.section 
       className="w-full max-w-2xl mx-auto"
@@ -20,6 +21,8 @@ const ShareSection: React.FC<ShareSectionProps> = (props) => {
       <SocialShareBar {...props} />
     </motion.section>
   );
-};
+});
+
+ShareSection.displayName = 'ShareSection';
 
 export default ShareSection;

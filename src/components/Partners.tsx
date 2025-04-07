@@ -13,8 +13,8 @@ const Partners: React.FC = () => {
     const fetchPartners = async () => {
       try {
         setIsLoading(true);
-        // Using 'any' type to bypass the TypeScript error due to missing type definitions
-        const { data, error } = await (supabase as any)
+        // Using a type assertion to handle the type mismatch
+        const { data, error } = await supabase
           .from('partners')
           .select('*')
           .order('name');

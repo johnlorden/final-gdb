@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import VerseDisplay from '@/components/VerseDisplay';
 
 interface VerseSectionProps {
@@ -12,9 +12,11 @@ interface VerseSectionProps {
   handleRandomVerse: () => void;
 }
 
-const VerseSection: React.FC<VerseSectionProps> = (props) => {
-  // Directly pass all props to VerseDisplay for cleaner code
+// Using memo to prevent unnecessary re-renders
+const VerseSection: React.FC<VerseSectionProps> = memo((props) => {
   return <VerseDisplay {...props} />;
-};
+});
+
+VerseSection.displayName = 'VerseSection';
 
 export default VerseSection;
