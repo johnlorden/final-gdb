@@ -14,7 +14,6 @@ const Partners: React.FC = () => {
       try {
         setIsLoading(true);
         // Using 'any' type to bypass the TypeScript error due to missing type definitions
-        // for the partners table in the supabase client
         const { data, error } = await (supabase as any)
           .from('partners')
           .select('*')
@@ -58,13 +57,13 @@ const Partners: React.FC = () => {
   if (partners.length === 0) {
     return (
       <div className="text-center p-4">
-        <p className="text-muted-foreground">No partners available at the moment.</p>
+        <p className="text-muted-foreground">No partner organizations available at the moment.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full">
       {partners.map((partner) => (
         <a 
           key={partner.id} 

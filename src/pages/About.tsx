@@ -1,83 +1,302 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, User, Info, Heart, Book, Clock, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import PartnersComponent from '@/components/Partners';
+
+const MotionCard = motion(Card);
 
 const About = () => {
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+      },
+    }),
+  };
+  
   return (
-    <div className="pt-6">
-      <div className="container mx-auto px-4 py-8">
-        <motion.div
+    <div className="container mx-auto px-4 py-8 mb-10">
+      <motion.div 
+        className="prose dark:prose-invert mx-auto max-w-4xl"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-3xl font-bold mb-6 text-center">About God's Daily Bread</h1>
+        
+        {/* Hero Section */}
+        <motion.section 
+          className="mb-12 text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="prose dark:prose-invert mx-auto"
         >
-          <h1 className="text-3xl font-bold mb-6 text-center">About God's Daily Bread</h1>
+          <p className="text-lg mb-4">
+            <span className="text-primary font-semibold">God's Daily Bread</span> is dedicated to bringing the wisdom and comfort of scripture to people around the world.
+          </p>
+          <p className="text-muted-foreground">
+            "Your word is a lamp to my feet and a light to my path." — Psalm 119:105
+          </p>
+        </motion.section>
+        
+        {/* Profile Section */}
+        <motion.section 
+          className="mb-12"
+          initial="hidden"
+          animate="visible"
+          custom={1}
+          variants={fadeIn}
+        >
+          <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+            <User className="h-5 w-5 text-primary" /> Meet the Creator
+          </h2>
           
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Our Mission</h2>
-            <p>
-              God's Daily Bread is dedicated to bringing the wisdom and comfort of scripture to people around the world.
-              We believe that daily engagement with Bible verses can provide guidance, inspiration, and spiritual nourishment.
-            </p>
-          </section>
-          
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Our Vision</h2>
-            <p>
-              We envision a world where everyone can easily access and reflect on God's word every day,
-              regardless of language barriers or internet limitations. Our goal is to make Bible verses accessible,
-              shareable, and meaningful for daily life.
-            </p>
-          </section>
-          
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Features</h2>
-            <ul className="list-disc pl-6">
-              <li>Daily Bible verses from various categories</li>
-              <li>Mobile-friendly interface with swipe navigation</li>
-              <li>Multiple language support</li>
-              <li>Offline mode for access without internet</li>
-              <li>Share verses on social media</li>
-              <li>Bookmark your favorite verses</li>
-              <li>Customizable verse displays</li>
-            </ul>
-          </section>
-          
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Our Partners</h2>
-            <div className="flex justify-center my-4">
-              <Link to="/partners">
-                <Button variant="outline" className="flex items-center gap-2">
-                  View All Partners <ExternalLink className="h-4 w-4" />
-                </Button>
-              </Link>
+          <div className="flex flex-col md:flex-row gap-6 items-center md:items-start bg-muted/30 rounded-xl p-6">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Avatar className="h-32 w-32 border-2 border-primary">
+                <AvatarImage src="https://i.pravatar.cc/300" alt="John Lorden E." />
+                <AvatarFallback>JL</AvatarFallback>
+              </Avatar>
+            </motion.div>
+            
+            <div className="flex-1">
+              <h3 className="text-xl font-bold mb-2">John Lorden E.</h3>
+              <div className="flex flex-wrap gap-2 mb-3">
+                <Badge variant="outline">Developer</Badge>
+                <Badge variant="outline">Believer</Badge>
+                <Badge variant="outline">Servant of God</Badge>
+              </div>
+              <p className="mb-4">
+                John created God's Daily Bread with a mission to share the power of scripture with people seeking guidance, 
+                hope, and strength. His passion for technology and faith came together in this project to make the Word of God 
+                accessible to everyone, everywhere.
+              </p>
+              <p className="text-muted-foreground">
+                "I built this application to help those who need spiritual guidance and hope through the power of God's Word. 
+                Each verse can be a beacon of light during dark times, a source of wisdom during confusion, 
+                and a wellspring of strength when we feel weak."
+              </p>
+              <div className="mt-4">
+                <a 
+                  href="https://itsme.johnlorden.online" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-primary hover:underline inline-flex items-center"
+                >
+                  Visit my website <ExternalLink className="ml-1 h-4 w-4" />
+                </a>
+              </div>
             </div>
-          </section>
+          </div>
+        </motion.section>
+        
+        {/* Mission & Vision Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <MotionCard 
+            className="overflow-hidden"
+            initial="hidden"
+            animate="visible"
+            custom={2}
+            variants={fadeIn}
+          >
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-primary">
+                <Heart className="h-5 w-5" /> Our Mission
+              </h2>
+              <p className="mb-4">
+                God's Daily Bread is dedicated to bringing the wisdom and comfort of scripture to people around the world.
+                We believe that daily engagement with Bible verses can provide guidance, inspiration, and spiritual nourishment.
+              </p>
+              <motion.div 
+                className="w-16 h-1 bg-primary"
+                initial={{ width: 0 }}
+                animate={{ width: 64 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+              />
+            </CardContent>
+          </MotionCard>
           
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
-            <p>
-              Have questions, feedback, or suggestions? We'd love to hear from you!
-              Please reach out to us at <a href="mailto:contact@godsdailybread.org" className="text-primary hover:underline">contact@godsdailybread.org</a>.
+          <MotionCard 
+            className="overflow-hidden"
+            initial="hidden"
+            animate="visible"
+            custom={3}
+            variants={fadeIn}
+          >
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-primary">
+                <Globe className="h-5 w-5" /> Our Vision
+              </h2>
+              <p className="mb-4">
+                We envision a world where everyone can easily access and reflect on God's word every day,
+                regardless of language barriers or internet limitations. Our goal is to make Bible verses accessible,
+                shareable, and meaningful for daily life.
+              </p>
+              <motion.div 
+                className="w-16 h-1 bg-primary"
+                initial={{ width: 0 }}
+                animate={{ width: 64 }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+              />
+            </CardContent>
+          </MotionCard>
+        </div>
+        
+        {/* Features Section */}
+        <motion.section 
+          className="mb-12"
+          initial="hidden"
+          animate="visible"
+          custom={4}
+          variants={fadeIn}
+        >
+          <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+            <Book className="h-5 w-5 text-primary" /> Features
+          </h2>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {[
+              "Daily Bible verses from various categories",
+              "Mobile-friendly interface with swipe navigation",
+              "Multiple language support",
+              "Offline mode for access without internet",
+              "Share verses on social media",
+              "Bookmark your favorite verses",
+              "Customizable verse displays",
+              "Dark and light mode support",
+              "Voice reading of verses"
+            ].map((feature, index) => (
+              <motion.div 
+                key={index}
+                className="bg-card p-4 rounded-lg border flex items-start gap-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + index * 0.1, duration: 0.3 }}
+                whileHover={{ scale: 1.02, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+              >
+                <div className="rounded-full bg-primary/10 p-1">
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                </div>
+                {feature}
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+        
+        {/* Partners Section */}
+        <motion.section 
+          className="mb-12"
+          initial="hidden"
+          animate="visible"
+          custom={5}
+          variants={fadeIn}
+        >
+          <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+            <Info className="h-5 w-5 text-primary" /> Our Partners
+          </h2>
+          <p className="text-center mb-8 text-muted-foreground">
+            We're grateful for the support of these amazing organizations who help us bring God's word to people around the world.
+          </p>
+          
+          <div className="bg-muted/30 p-6 rounded-xl">
+            <PartnersComponent />
+          </div>
+          
+          <div className="mt-4 text-center">
+            <p className="text-muted-foreground text-sm">
+              Special thanks to <span className="font-semibold">Every Nation Campus</span> for their continued support and guidance.
             </p>
-          </section>
+          </div>
+        </motion.section>
+        
+        {/* Timeline Section */}
+        <motion.section 
+          className="mb-12"
+          initial="hidden"
+          animate="visible"
+          custom={6}
+          variants={fadeIn}
+        >
+          <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" /> Our Journey
+          </h2>
           
-          <div className="text-center mt-10">
+          <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+            {[
+              { year: "2023", title: "Project Inception", description: "The idea of God's Daily Bread was born from a desire to make scripture more accessible." },
+              { year: "2024", title: "Beta Launch", description: "First version of the application launched with core features and basic language support." },
+              { year: "2025", title: "Global Expansion", description: "Added multiple languages and partnered with religious organizations around the world." },
+            ].map((milestone, index) => (
+              <motion.div 
+                key={index} 
+                className="relative flex items-start group md:items-center md:before:absolute md:before:left-1/2 md:before:-translate-x-1/2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + index * 0.2, duration: 0.5 }}
+              >
+                <div className="flex items-center mb-1 md:mb-0 md:items-center md:mx-auto md:w-10">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full border border-slate-200 bg-primary shrink-0 z-10">
+                    <span className="text-white font-semibold text-xs">{milestone.year.substring(2)}</span>
+                  </div>
+                </div>
+                <div className="ml-4 md:ml-0 md:mt-0 md:w-1/2 md:pr-16 md:pl-4 md:group-odd:pl-0 md:group-odd:pr-4 md:group-odd:text-right">
+                  <div className="bg-card p-4 rounded-lg border">
+                    <div className="font-bold text-primary">{milestone.year}</div>
+                    <div className="font-semibold">{milestone.title}</div>
+                    <div className="text-sm text-muted-foreground">{milestone.description}</div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+        
+        {/* Contact Section */}
+        <motion.section 
+          className="mb-8 text-center"
+          initial="hidden"
+          animate="visible"
+          custom={7}
+          variants={fadeIn}
+        >
+          <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
+          <p className="mb-6">
+            Have questions, feedback, or suggestions? We'd love to hear from you!
+            Please reach out to us at <a href="mailto:contact@godsdailybread.org" className="text-primary hover:underline">contact@godsdailybread.org</a>.
+          </p>
+          
+          <div className="flex justify-center gap-4">
+            <Button variant="outline" className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="h-4 w-4" viewBox="0 0 16 16">
+                <path d="M16 8.05A8 8 0 1 1 0 8.05 8 8 0 0 1 16 8.05zM8 3.368v.001a4.682 4.682 0 0 0-4.682 4.682c0 2.585 2.096 4.681 4.682 4.681 2.586 0 4.682-2.096 4.682-4.681C12.682 5.465 10.586 3.368 8 3.368zm1.414 7.03a.485.485 0 0 1-.686 0L6.294 7.965a.483.483 0 0 1-.142-.343v-2.29a.484.484 0 0 1 .969 0v2.09l2.293 2.294a.484.484 0 0 1 0 .686z"/>
+              </svg>
+              Share Feedback
+            </Button>
             <a 
               href="https://www.bible.com" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="inline-flex items-center text-primary hover:underline"
             >
-              Visit YouVersion Bible <ExternalLink className="ml-1 h-4 w-4" />
+              <Button className="flex items-center gap-2">
+                Visit YouVersion Bible <ExternalLink className="ml-1 h-4 w-4" />
+              </Button>
             </a>
           </div>
-        </motion.div>
-      </div>
+        </motion.section>
+      </motion.div>
     </div>
   );
 };
