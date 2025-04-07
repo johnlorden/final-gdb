@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Toaster } from './components/ui/toaster';
 import { ThemeProvider } from './components/ThemeProvider';
