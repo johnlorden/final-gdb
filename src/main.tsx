@@ -9,6 +9,7 @@ import NotFound from './pages/NotFound.tsx'
 import Bookmarks from './pages/Bookmarks.tsx'
 import { ThemeProvider } from './components/ThemeProvider.tsx'
 import Index from './pages/Index.tsx'
+import Partners from './pages/Partners.tsx'
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -19,6 +20,7 @@ createRoot(document.getElementById("root")!).render(
             <Route index element={<Index />} />
             <Route path="about" element={<About />} />
             <Route path="bookmarks" element={<Bookmarks />} />
+            <Route path="partners" element={<Partners />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

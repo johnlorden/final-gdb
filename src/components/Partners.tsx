@@ -22,7 +22,7 @@ const Partners: React.FC = () => {
           throw new Error(error.message);
         }
         
-        setPartners(data || []);
+        setPartners(data as Partner[] || []);
       } catch (err: any) {
         console.error('Error fetching partners:', err);
         setError(err.message);

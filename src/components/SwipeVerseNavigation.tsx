@@ -96,20 +96,19 @@ const SwipeVerseNavigation: React.FC<SwipeVerseNavigationProps> = ({
     };
   }, [onNextVerse, onPreviousVerse, isMobile, toast]);
   
-  // Render different components based on isMobile after all hooks are called
-  if (!isMobile) {
-    return <>{children}</>;
-  }
-  
   return (
     <div ref={containerRef} className="relative w-full">
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 p-2 bg-black/5 dark:bg-white/5 rounded-r-lg opacity-50">
-        <ArrowLeft className="h-6 w-6 text-muted-foreground" />
-      </div>
-      
-      <div className="absolute top-1/2 right-0 -translate-y-1/2 p-2 bg-black/5 dark:bg-white/5 rounded-l-lg opacity-50">
-        <ArrowRight className="h-6 w-6 text-muted-foreground" />
-      </div>
+      {isMobile && (
+        <>
+          <div className="absolute top-1/2 left-0 -translate-y-1/2 p-2 bg-black/5 dark:bg-white/5 rounded-r-lg opacity-50">
+            <ArrowLeft className="h-6 w-6 text-muted-foreground" />
+          </div>
+          
+          <div className="absolute top-1/2 right-0 -translate-y-1/2 p-2 bg-black/5 dark:bg-white/5 rounded-l-lg opacity-50">
+            <ArrowRight className="h-6 w-6 text-muted-foreground" />
+          </div>
+        </>
+      )}
       
       {children}
     </div>
