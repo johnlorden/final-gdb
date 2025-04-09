@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ShareButtons } from './social/ShareButtons';
 import { Button } from '@/components/ui/button';
 import { Bookmark } from 'lucide-react';
@@ -18,13 +18,19 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
   reference,
   category,
 }) => {
+  const [template, setTemplate] = useState<'default' | 'minimal' | 'elegant' | 'gradient' | 'custom'>('default');
+  const [backgroundColor, setBackgroundColor] = useState('#ffffff');
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex flex-wrap gap-2 justify-center">
         <ShareButtons 
           verse={verse} 
-          reference={reference} 
-          category={category} 
+          reference={reference}
+          template={template}
+          backgroundColor={backgroundColor}
+          backgroundImage={backgroundImage}
         />
         
         <BookmarkVerse 
@@ -39,8 +45,12 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
         />
         
         <ShareTemplateSelector 
-          verse={verse} 
-          reference={reference} 
+          currentTemplate={template}
+          onTemplateChange={setTemplate}
+          currentBackgroundColor={backgroundColor}
+          onBackgroundColorChange={setBackgroundColor}
+          currentBackgroundImage={backgroundImage}
+          onBackgroundImageChange={setBackgroundImage}
         />
       </div>
     </div>
