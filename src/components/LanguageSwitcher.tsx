@@ -61,6 +61,13 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     }
   };
   
+  // Function to check if a language is available
+  const isLanguageUnavailable = async (lang: string): Promise<boolean> => {
+    if (!lang) return false;
+    const available = await BibleVerseService.isLanguageAvailable(lang);
+    return !available;
+  };
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -91,7 +98,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             {currentLanguage === 'en' && (
               <Check className="h-4 w-4 ml-2" />
             )}
-            {BibleVerseService.getLanguage() === 'en' && BibleVerseService.isLanguageAvailable('en') === false && (
+            {BibleVerseService.getLanguage() === 'en' && !BibleVerseService.isLanguageAvailable('en') && (
               <AlertCircle className="h-4 w-4 ml-2 text-red-500" />
             )}
           </div>
@@ -106,7 +113,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             {currentLanguage === 'fil' && (
               <Check className="h-4 w-4 ml-2" />
             )}
-            {BibleVerseService.getLanguage() === 'fil' && BibleVerseService.isLanguageAvailable('fil') === false && (
+            {BibleVerseService.getLanguage() === 'fil' && !BibleVerseService.isLanguageAvailable('fil') && (
               <AlertCircle className="h-4 w-4 ml-2 text-red-500" />
             )}
           </div>
