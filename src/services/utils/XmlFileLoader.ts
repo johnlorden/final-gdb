@@ -1,6 +1,5 @@
 
 // This is a facade for the refactored XML utilities
-import { XmlDocPromises } from '../types/BibleVerseTypes';
 import { XmlLoader } from './xml/XmlLoader';
 import { XmlManager } from './xml/XmlManager';
 import { XmlCache } from './xml/XmlCache';

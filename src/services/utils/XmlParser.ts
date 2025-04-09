@@ -1,10 +1,10 @@
 
-import { DOMParser } from '@xmldom/xmldom';
 import { VerseResult } from '../types/BibleVerseTypes';
 
+// Create a DOMParser instance for XML parsing
+const domParser = new DOMParser();
+
 export class XmlParser {
-  private static parser = new DOMParser();
-  
   static parseXmlDocument(xmlText: string): Document {
     if (!xmlText || xmlText.trim() === '') {
       throw new Error('Empty XML content received');
@@ -15,7 +15,7 @@ export class XmlParser {
     }
     
     try {
-      const parsedDoc = this.parser.parseFromString(xmlText, 'text/xml');
+      const parsedDoc = domParser.parseFromString(xmlText, 'text/xml');
       const verses = parsedDoc.getElementsByTagName('verse');
       if (verses.length === 0) {
         console.warn('No verses found in parsed XML document');
