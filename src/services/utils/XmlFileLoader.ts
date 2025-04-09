@@ -5,7 +5,11 @@ import { XmlManager } from './xml/XmlManager';
 import { XmlCache } from './xml/XmlCache';
 
 export class XmlFileLoader {
+  private static isInitialized = false;
+  
   static async initializeXmlUrls(): Promise<void> {
+    if (this.isInitialized) return Promise.resolve();
+    this.isInitialized = true;
     return XmlManager.initializeXmlUrls();
   }
   
@@ -14,6 +18,10 @@ export class XmlFileLoader {
   }
   
   static async loadXmlDoc(language: string = 'en'): Promise<Document> {
+    // Ensure initialization before loading
+    if (!this.isInitialized) {
+      await this.initializeXmlUrls();
+    }
     return XmlLoader.loadXmlDoc(language);
   }
   
@@ -22,7 +30,10 @@ export class XmlFileLoader {
   }
   
   static preloadAllLanguages(): void {
-    XmlLoader.preloadAllLanguages();
+    // Ensure initialization before preloading
+    this.initializeXmlUrls().then(() => {
+      XmlLoader.preloadAllLanguages();
+    });
   }
   
   static async addLanguageXml(languageCode: string, xmlUrl: string): Promise<boolean> {
@@ -30,7 +41,4 @@ export class XmlFileLoader {
   }
 }
 
-// Initialize XML URLs when module loads
-setTimeout(() => {
-  XmlFileLoader.initializeXmlUrls();
-}, 2000);
+// We're removing the automatic setTimeout initialization to load on-demand instead

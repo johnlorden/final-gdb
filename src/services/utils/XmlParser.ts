@@ -5,6 +5,9 @@ import { VerseResult } from '../types/BibleVerseTypes';
 const domParser = new DOMParser();
 
 export class XmlParser {
+  // Cache to store parsed XML documents
+  private static parsedDocumentsCache = new Map<string, Document>();
+  
   static parseXmlDocument(xmlText: string): Document {
     if (!xmlText || xmlText.trim() === '') {
       throw new Error('Empty XML content received');
@@ -12,6 +15,14 @@ export class XmlParser {
     
     if (xmlText.includes('<!DOCTYPE html>')) {
       throw new Error('Received HTML instead of XML, check server configuration');
+    }
+    
+    // Generate a simple hash of the XML for caching
+    const xmlHash = this.hashString(xmlText);
+    
+    // Check if we've already parsed this XML
+    if (this.parsedDocumentsCache.has(xmlHash)) {
+      return this.parsedDocumentsCache.get(xmlHash)!;
     }
     
     try {
@@ -22,6 +33,10 @@ export class XmlParser {
       } else {
         console.log(`Successfully loaded ${verses.length} verses`);
       }
+      
+      // Cache the parsed document
+      this.parsedDocumentsCache.set(xmlHash, parsedDoc);
+      
       return parsedDoc;
     } catch (parseError) {
       console.error('Error parsing XML:', parseError);
@@ -50,5 +65,16 @@ export class XmlParser {
         category: categoryNode
       };
     });
+  }
+  
+  // Simple hash function for XML caching
+  private static hashString(str: string): string {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash.toString();
   }
 }
