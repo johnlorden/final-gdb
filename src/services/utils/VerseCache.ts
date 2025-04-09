@@ -1,4 +1,3 @@
-
 import { VerseResult, CachedVerses, CachedAllVerses, SearchCaches } from '../types/BibleVerseTypes';
 
 export class VerseCache {

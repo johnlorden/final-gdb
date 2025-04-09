@@ -1,3 +1,4 @@
+
 export interface VerseResult {
   text: string;
   reference: string;
@@ -7,4 +8,11 @@ export interface VerseResult {
 
 export interface XmlDocPromises {
   [key: string]: Promise<Document> | null;
+}
+
+export type CachedVerses = Map<string, VerseResult[]>;
+export type CachedAllVerses = VerseResult[] | null;
+
+export interface SearchCaches {
+  [key: string]: Map<string, VerseResult[]>;
 }

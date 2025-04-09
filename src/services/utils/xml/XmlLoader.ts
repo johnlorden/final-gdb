@@ -40,6 +40,7 @@ export class XmlLoader {
     }
     
     try {
+      // Await the promise to get the actual Document
       const doc = await this.xmlDocPromises[language]!;
       return doc;
     } catch (error) {
@@ -113,7 +114,7 @@ export class XmlLoader {
         
         // Fallback to English
         if (language !== 'en') {
-          return this.loadXmlDoc('en');
+          throw new Error(`Invalid XML format for ${language}. Falling back to English.`);
         }
         throw xmlError;
       }
