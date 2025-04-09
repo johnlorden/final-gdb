@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Globe } from 'lucide-react';
+import { Globe, Check, AlertCircle, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from '@/hooks/use-toast';
+import BibleVerseService from '@/services/BibleVerseService';
 
 interface LanguageSwitcherProps {
   currentLanguage: string;
@@ -20,24 +21,60 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   onLanguageChange 
 }) => {
   const { toast } = useToast();
+  const [isChanging, setIsChanging] = useState(false);
   
-  const handleLanguageChange = (language: string) => {
+  const handleLanguageChange = async (language: string) => {
     if (language === currentLanguage) return;
     
-    onLanguageChange(language);
+    setIsChanging(true);
     
-    toast({
-      title: "Language Changed",
-      description: language === 'en' ? "Switched to English" : "Switched to Filipino",
-      duration: 2000,
-    });
+    try {
+      // Check if the language is valid
+      const isValid = await BibleVerseService.isLanguageAvailable(language);
+      
+      if (!isValid) {
+        toast({
+          title: "Language Not Available",
+          description: `The selected language is not available.`,
+          variant: "destructive"
+        });
+        setIsChanging(false);
+        return;
+      }
+      
+      onLanguageChange(language);
+      
+      toast({
+        title: "Language Changed",
+        description: language === 'en' ? "Switched to English" : "Switched to Filipino",
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error changing language:', error);
+      toast({
+        title: "Error",
+        description: "Could not change language. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsChanging(false);
+    }
   };
   
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="flex items-center gap-1">
-          <Globe className="h-4 w-4" />
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex items-center gap-1" 
+          disabled={isChanging}
+        >
+          {isChanging ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Globe className="h-4 w-4" />
+          )}
           <span className="hidden sm:inline">
             {currentLanguage === 'en' ? 'English' : 'Filipino'}
           </span>
@@ -47,14 +84,32 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <DropdownMenuItem 
           onClick={() => handleLanguageChange('en')}
           className={currentLanguage === 'en' ? 'bg-secondary' : ''}
+          disabled={isChanging}
         >
-          English
+          <div className="flex items-center w-full justify-between">
+            <span>English</span>
+            {currentLanguage === 'en' && (
+              <Check className="h-4 w-4 ml-2" />
+            )}
+            {BibleVerseService.getLanguage() === 'en' && BibleVerseService.isLanguageAvailable('en') === false && (
+              <AlertCircle className="h-4 w-4 ml-2 text-red-500" />
+            )}
+          </div>
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => handleLanguageChange('fil')}
           className={currentLanguage === 'fil' ? 'bg-secondary' : ''}
+          disabled={isChanging}
         >
-          Filipino
+          <div className="flex items-center w-full justify-between">
+            <span>Filipino</span>
+            {currentLanguage === 'fil' && (
+              <Check className="h-4 w-4 ml-2" />
+            )}
+            {BibleVerseService.getLanguage() === 'fil' && BibleVerseService.isLanguageAvailable('fil') === false && (
+              <AlertCircle className="h-4 w-4 ml-2 text-red-500" />
+            )}
+          </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

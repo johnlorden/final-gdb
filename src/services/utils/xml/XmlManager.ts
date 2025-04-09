@@ -20,7 +20,11 @@ export class XmlManager {
       const languages = await LanguageService.getActiveLanguages();
       
       languages.forEach(lang => {
-        this.xmlUrlMap[lang.language_code] = lang.xml_url;
+        if (lang.is_active) {
+          this.xmlUrlMap[lang.language_code] = lang.xml_url;
+        } else {
+          this.disabledLanguages.add(lang.language_code);
+        }
       });
       
       console.log('Initialized XML URLs for languages:', Object.keys(this.xmlUrlMap).join(', '));
@@ -34,12 +38,23 @@ export class XmlManager {
   }
   
   static disableLanguage(language: string): void {
+    if (language === 'en') {
+      console.warn('Cannot disable English language - it is the fallback language');
+      return;
+    }
+    
     this.disabledLanguages.add(language);
     
     // Update language status in database
     LanguageService.updateLanguageStatus(language, false)
       .then(() => console.log(`Disabled language ${language}`))
       .catch(err => console.error(`Failed to update language status for ${language}`, err));
+    
+    // Trigger a custom event to notify components
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('language-disabled', { detail: language });
+      window.dispatchEvent(event);
+    }
   }
   
   static getXmlUrl(language: string): string {

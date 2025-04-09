@@ -1,7 +1,9 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import BibleVerseService from '../services/BibleVerseService';
 import OfflineVerseService from '../services/OfflineVerseService';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface SettingsContextType {
   language: string;
@@ -22,6 +24,7 @@ export const useSettingsContext = () => {
 };
 
 export const SettingsContextProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+  const { toast } = useToast();
   const [language, setLanguage] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       const savedLanguage = localStorage.getItem('app_language');
@@ -42,12 +45,44 @@ export const SettingsContextProvider: React.FC<{children: React.ReactNode}> = ({
   
   // Set language in the Bible service whenever it changes
   useEffect(() => {
-    BibleVerseService.setLanguage(language);
+    const applyLanguageChange = async () => {
+      try {
+        // Check if language is valid before setting it
+        const isAvailable = await BibleVerseService.isLanguageAvailable(language);
+        
+        if (isAvailable) {
+          BibleVerseService.setLanguage(language);
+          
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('app_language', language);
+          }
+          
+          // Dispatch a custom event to notify components about language change
+          const event = new CustomEvent('language-changed', { detail: language });
+          window.dispatchEvent(event);
+        } else {
+          console.warn(`Language ${language} is not available, defaulting to English`);
+          setLanguage('en');
+          toast({
+            title: "Language Not Available",
+            description: `The selected language is not available. Using English instead.`,
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        console.error('Error applying language change:', error);
+        BibleVerseService.markLanguageAsInvalid(language);
+        setLanguage('en');
+        toast({
+          title: "Language Error",
+          description: `There was an error loading the language file. Using English instead.`,
+          variant: "destructive"
+        });
+      }
+    };
     
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('app_language', language);
-    }
-  }, [language]);
+    applyLanguageChange();
+  }, [language, toast]);
   
   // Save offline mode preference
   useEffect(() => {
@@ -116,6 +151,11 @@ export const SettingsContextProvider: React.FC<{children: React.ReactNode}> = ({
   const handleLanguageChange = (newLanguage: string) => {
     // Verify if the language is available in offline mode
     if (isOfflineMode && !OfflineVerseService.isLanguageDownloaded(newLanguage)) {
+      toast({
+        title: "Language Not Available Offline",
+        description: `The selected language is not available in offline mode.`,
+        variant: "destructive"
+      });
       return; // Don't change language if not available offline
     }
     

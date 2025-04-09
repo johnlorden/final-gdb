@@ -13,6 +13,7 @@ export class XmlLoader {
   static async loadXmlDoc(language: string = 'en'): Promise<Document> {
     // Check if language is valid
     if (XmlManager.isLanguageDisabled(language)) {
+      console.warn(`Language ${language} is disabled due to previous errors, falling back to English`);
       language = 'en';
     }
     
@@ -42,11 +43,26 @@ export class XmlLoader {
     try {
       // Await the promise to get the actual Document
       const doc = await this.xmlDocPromises[language]!;
+      
+      // Validate that the document contains verses
+      const verseCount = doc.getElementsByTagName('verse').length;
+      if (verseCount === 0) {
+        console.error(`XML document for ${language} doesn't contain any verses`);
+        XmlManager.disableLanguage(language);
+        
+        if (language !== 'en') {
+          console.warn(`Falling back to English`);
+          return this.loadXmlDoc('en');
+        }
+        throw new Error(`No verses found in English XML document`);
+      }
+      
       return doc;
     } catch (error) {
       // If there was an error and this isn't English, try to fall back to English
       if (language !== 'en') {
         console.warn(`Error loading ${language}, falling back to English`);
+        XmlManager.disableLanguage(language);
         return this.loadXmlDoc('en');
       }
       throw error;

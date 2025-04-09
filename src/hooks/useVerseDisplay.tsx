@@ -27,6 +27,20 @@ export const useVerseDisplay = () => {
   useEffect(() => {
     BibleVerseService.setLanguage(language);
   }, [language]);
+  
+  // Listen for language changes and reload verse
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      const newLanguage = event.detail;
+      console.log(`Language changed to ${newLanguage}, regenerating verse`);
+      handleRandomVerse(currentCategory);
+    };
+    
+    window.addEventListener('language-changed', handleLanguageChange as EventListener);
+    return () => {
+      window.removeEventListener('language-changed', handleLanguageChange as EventListener);
+    };
+  }, [currentCategory]);
 
   useEffect(() => {
     const bibleVerse = searchParams.get('bibleverse');
