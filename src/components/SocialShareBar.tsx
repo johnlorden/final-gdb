@@ -1,11 +1,11 @@
 
 import React from 'react';
-import ShareButtons from './social/ShareButtons';
+import { ShareButtons } from './social/ShareButtons';
 import { Button } from '@/components/ui/button';
 import { Bookmark } from 'lucide-react';
 import BookmarkVerse from './BookmarkVerse';
 import VerseQRCode from './VerseQRCode';
-import ShareTemplateSelector from './ShareTemplateSelector';
+import { ShareTemplateSelector } from './ShareTemplateSelector';
 
 interface SocialShareBarProps {
   verse: string;

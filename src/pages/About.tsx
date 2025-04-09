@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink, User, Info, Heart, Book, Clock, Globe } from 'lucide-react';
+import { ExternalLink, User, Info, Heart, Book, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -219,48 +219,6 @@ const About = () => {
             <p className="text-muted-foreground text-sm">
               Special thanks to <span className="font-semibold">Every Nation Campus</span> for their continued support and guidance.
             </p>
-          </div>
-        </motion.section>
-        
-        {/* Timeline Section */}
-        <motion.section 
-          className="mb-12"
-          initial="hidden"
-          animate="visible"
-          custom={6}
-          variants={fadeIn}
-        >
-          <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary" /> Our Journey
-          </h2>
-          
-          <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
-            {[
-              { year: "2023", title: "Project Inception", description: "The idea of God's Daily Bread was born from a desire to make scripture more accessible." },
-              { year: "2024", title: "Beta Launch", description: "First version of the application launched with core features and basic language support." },
-              { year: "2025", title: "Global Expansion", description: "Added multiple languages and partnered with religious organizations around the world." },
-            ].map((milestone, index) => (
-              <motion.div 
-                key={index} 
-                className="relative flex items-start group md:items-center md:before:absolute md:before:left-1/2 md:before:-translate-x-1/2"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.2, duration: 0.5 }}
-              >
-                <div className="flex items-center mb-1 md:mb-0 md:items-center md:mx-auto md:w-10">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full border border-slate-200 bg-primary shrink-0 z-10">
-                    <span className="text-white font-semibold text-xs">{milestone.year.substring(2)}</span>
-                  </div>
-                </div>
-                <div className="ml-4 md:ml-0 md:mt-0 md:w-1/2 md:pr-16 md:pl-4 md:group-odd:pl-0 md:group-odd:pr-4 md:group-odd:text-right">
-                  <div className="bg-card p-4 rounded-lg border">
-                    <div className="font-bold text-primary">{milestone.year}</div>
-                    <div className="font-semibold">{milestone.title}</div>
-                    <div className="text-sm text-muted-foreground">{milestone.description}</div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
           </div>
         </motion.section>
         

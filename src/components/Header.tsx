@@ -2,7 +2,7 @@
 import React from 'react';
 import ThemeToggle from './ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { Home, BookOpen, Clock, Bookmark } from 'lucide-react';
+import { Home, BookOpen, Clock, Bookmark, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   DropdownMenu,
@@ -67,6 +67,13 @@ const Header: React.FC<HeaderProps> = ({
                 isOffline={isOfflineMode}
                 toggleOfflineMode={toggleOfflineMode}
               />
+              
+              <Link to="/about">
+                <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+                  <Info className="h-4 w-4" />
+                  <span className="hidden sm:inline">About</span>
+                </Button>
+              </Link>
               
               <Link to="/bookmarks">
                 <Button variant="ghost" size="sm" className="flex items-center space-x-1">

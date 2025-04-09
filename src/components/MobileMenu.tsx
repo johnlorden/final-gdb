@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Home, BookOpen, Bookmark, X } from 'lucide-react';
+import { Home, BookOpen, Bookmark, X, Info } from 'lucide-react';
 import {
   Drawer,
   DrawerClose,
@@ -66,7 +66,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               <Home className="h-5 w-5" />
               <span>Home</span>
             </Link>
-            <Link to="/bookmarks" className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-secondary menu-item-appear delay-2">
+            <Link to="/about" className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-secondary menu-item-appear delay-2">
+              <Info className="h-5 w-5" />
+              <span>About</span>
+            </Link>
+            <Link to="/bookmarks" className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-secondary menu-item-appear delay-3">
               <Bookmark className="h-5 w-5" />
               <span>Bookmarks</span>
             </Link>
@@ -74,7 +78,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               href="https://www.bible.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-secondary menu-item-appear delay-3"
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-secondary menu-item-appear delay-4"
             >
               <BookOpen className="h-5 w-5" />
               <span>Bible</span>
@@ -82,11 +86,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </div>
           
           <div className="border-t pt-4 space-y-4">
-            <div className="flex justify-between items-center px-4 menu-item-appear delay-4">
+            <div className="flex justify-between items-center px-4 menu-item-appear delay-5">
               <span className="font-medium">Dark Mode</span>
               <ThemeToggle />
             </div>
-            <div className="flex justify-between items-center px-4 menu-item-appear delay-5">
+            <div className="flex justify-between items-center px-4 menu-item-appear delay-6">
               <span className="font-medium">Language</span>
               <div className="ml-auto">
                 <AdvancedLanguageSwitcher 
@@ -96,7 +100,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 />
               </div>
             </div>
-            <div className="flex justify-between items-center px-4 menu-item-appear delay-5">
+            <div className="flex justify-between items-center px-4 menu-item-appear delay-7">
               <span className="font-medium">Offline Mode</span>
               <OfflineMode 
                 isOffline={isOfflineMode}
