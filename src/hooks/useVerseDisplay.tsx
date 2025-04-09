@@ -1,20 +1,18 @@
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import BibleVerseService from '@/services/BibleVerseService';
 import { useVerseContext } from '@/App';
-
-interface VerseResult {
-  text: string;
-  reference: string;
-  categories?: string[];
-  category?: string;
-}
+import { useVerseCache } from './useVerseCache';
+import { useVerseUrl } from './useVerseUrl';
+import { VerseResult } from '@/services/types/BibleVerseTypes';
 
 export const useVerseDisplay = () => {
   const { addToRecentVerses, currentVerse, language, isOfflineMode } = useVerseContext();
   const [searchParams] = useSearchParams();
+  const { getCachedVerses, setCachedVerses, hasCachedVerses } = useVerseCache();
+  const { updateUrlWithVerse } = useVerseUrl();
   
   const [verse, setVerse] = useState('');
   const [reference, setReference] = useState('');
@@ -25,8 +23,6 @@ export const useVerseDisplay = () => {
   const [verseCategory, setVerseCategory] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
   const { toast } = useToast();
-
-  const verseCache = useRef<Map<string, VerseResult[]>>(new Map());
 
   useEffect(() => {
     BibleVerseService.setLanguage(language);
@@ -87,11 +83,11 @@ export const useVerseDisplay = () => {
       
       // Use Promise.all for parallel loading
       await Promise.all(categories.map(async (category) => {
-        if (!verseCache.current.has(category)) {
+        if (!hasCachedVerses(category)) {
           try {
             const verses = await BibleVerseService.getVersesByCategory(category, 10);
             if (verses && verses.length) {
-              verseCache.current.set(category, verses);
+              setCachedVerses(category, verses);
             }
           } catch (error) {
             console.error(`Error preloading verses for category ${category}:`, error);
@@ -104,6 +100,22 @@ export const useVerseDisplay = () => {
       preloadCategoryVerses();
     }
   }, [language, isOfflineMode]);
+
+  const displayVerse = useCallback((result: VerseResult) => {
+    setVerse(result.text);
+    setReference(result.reference);
+    addToRecentVerses(result.text, result.reference);
+    setPreviousVerse(result.reference);
+    
+    updateUrlWithVerse(result.reference);
+    
+    if (result.categories && result.categories.length > 0) {
+      setCurrentCategory(result.categories[0]);
+      setVerseCategory(result.categories[0]);
+    } else if (result.category) {
+      setVerseCategory(result.category);
+    }
+  }, [addToRecentVerses, updateUrlWithVerse]);
 
   const handleSearch = useCallback((query: string) => {
     if (!query.trim()) return;
@@ -142,29 +154,7 @@ export const useVerseDisplay = () => {
         });
       })
       .finally(() => setIsLoading(false));
-  }, [toast]);
-
-  const displayVerse = useCallback((result: VerseResult) => {
-    setVerse(result.text);
-    setReference(result.reference);
-    addToRecentVerses(result.text, result.reference);
-    setPreviousVerse(result.reference);
-    
-    updateUrlWithVerse(result.reference);
-    
-    if (result.categories && result.categories.length > 0) {
-      setCurrentCategory(result.categories[0]);
-      setVerseCategory(result.categories[0]);
-    } else if (result.category) {
-      setVerseCategory(result.category);
-    }
-  }, [addToRecentVerses]);
-
-  const updateUrlWithVerse = (verseReference: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('bibleverse', verseReference);
-    window.history.pushState({}, '', url);
-  };
+  }, [displayVerse, toast]);
 
   const handleCategorySelect = useCallback((category: string) => {
     setIsLoading(true);
@@ -185,9 +175,9 @@ export const useVerseDisplay = () => {
   }, [currentCategory]);
 
   const getVerseFromCategory = useCallback((category: string) => {
-    if (category !== 'All' && verseCache.current.has(category)) {
-      const cachedVerses = verseCache.current.get(category)!;
-      
+    const cachedVerses = getCachedVerses(category);
+    
+    if (category !== 'All' && cachedVerses) {
       const filteredVerses = cachedVerses.filter(v => v.reference !== reference);
       
       if (filteredVerses.length > 0) {
@@ -270,7 +260,7 @@ export const useVerseDisplay = () => {
           });
       })
       .finally(() => setIsLoading(false));
-  }, [reference, addToRecentVerses, toast]);
+  }, [reference, addToRecentVerses, updateUrlWithVerse, toast, getCachedVerses]);
 
   return {
     verse,

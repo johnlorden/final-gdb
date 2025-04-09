@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { VerseContextProvider } from '@/contexts/VerseContext';
-import { SettingsContextProvider } from '@/contexts/SettingsContext';
+import { VerseContextProvider, useVerseContext as useVerseContextImport } from '@/contexts/VerseContext';
+import { SettingsContextProvider, useSettingsContext } from '@/contexts/SettingsContext';
 
 export const useAppContext = () => {
   // This is a composite hook that combines both contexts
-  const verse = require('@/contexts/VerseContext').useVerseContext();
-  const settings = require('@/contexts/SettingsContext').useSettingsContext();
+  const verse = useVerseContextImport();
+  const settings = useSettingsContext();
   
   return {
     ...verse,

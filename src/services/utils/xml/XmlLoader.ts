@@ -40,7 +40,8 @@ export class XmlLoader {
     }
     
     try {
-      return await this.xmlDocPromises[language]!;
+      const doc = await this.xmlDocPromises[language]!;
+      return doc;
     } catch (error) {
       // If there was an error and this isn't English, try to fall back to English
       if (language !== 'en') {
@@ -61,9 +62,9 @@ export class XmlLoader {
           // Disable the language because it's not working
           XmlManager.disableLanguage(language);
           
-          return fetch('/data/bible-verses.xml')
-            .then(res => res.text())
-            .then(this.processXmlText(language));
+          const fallbackResponse = await fetch('/data/bible-verses.xml');
+          const xmlText = await fallbackResponse.text();
+          return this.processXmlText(language)(xmlText);
         }
         throw new Error(`Failed to load Bible verses XML: ${response.status} ${response.statusText}`);
       }
