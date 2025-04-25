@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Globe, Check, AlertCircle, Loader2 } from 'lucide-react';
 import {
@@ -22,6 +22,24 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 }) => {
   const { toast } = useToast();
   const [isChanging, setIsChanging] = useState(false);
+  const [languageStatus, setLanguageStatus] = useState<Record<string, boolean>>({
+    en: true,
+    fil: true
+  });
+  
+  // Load language availability status on mount
+  useEffect(() => {
+    const checkLanguages = async () => {
+      const enAvailable = await BibleVerseService.isLanguageAvailable('en');
+      const filAvailable = await BibleVerseService.isLanguageAvailable('fil');
+      setLanguageStatus({
+        en: enAvailable,
+        fil: filAvailable
+      });
+    };
+    
+    checkLanguages();
+  }, []);
   
   const handleLanguageChange = async (language: string) => {
     if (language === currentLanguage) return;
@@ -61,13 +79,6 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     }
   };
   
-  // Function to check if a language is available
-  const isLanguageUnavailable = async (lang: string): Promise<boolean> => {
-    if (!lang) return false;
-    const available = await BibleVerseService.isLanguageAvailable(lang);
-    return !available;
-  };
-  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -98,7 +109,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             {currentLanguage === 'en' && (
               <Check className="h-4 w-4 ml-2" />
             )}
-            {BibleVerseService.getLanguage() === 'en' && !BibleVerseService.isLanguageAvailable('en') && (
+            {BibleVerseService.getLanguage() === 'en' && !languageStatus.en && (
               <AlertCircle className="h-4 w-4 ml-2 text-red-500" />
             )}
           </div>
@@ -113,7 +124,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             {currentLanguage === 'fil' && (
               <Check className="h-4 w-4 ml-2" />
             )}
-            {BibleVerseService.getLanguage() === 'fil' && !BibleVerseService.isLanguageAvailable('fil') && (
+            {BibleVerseService.getLanguage() === 'fil' && !languageStatus.fil && (
               <AlertCircle className="h-4 w-4 ml-2 text-red-500" />
             )}
           </div>
