@@ -13,9 +13,6 @@ export class XmlManager {
   private static disabledLanguages: Set<string> = new Set();
   private static localLanguages: Set<string> = new Set(['en', 'fil']);
   
-  /**
-   * Initialize XML URL mappings from the database
-   */
   static async initializeXmlUrls(): Promise<void> {
     try {
       const languages = await LanguageService.getActiveLanguages();
@@ -31,7 +28,6 @@ export class XmlManager {
       console.log('Initialized XML URLs for languages:', Object.keys(this.xmlUrlMap).join(', '));
     } catch (error) {
       console.error('Error initializing XML URLs:', error);
-      // Even if DB fails, we still have local languages
       console.log('Falling back to local languages: en, fil');
     }
   }
@@ -52,12 +48,10 @@ export class XmlManager {
     
     this.disabledLanguages.add(language);
     
-    // Update language status in database
     LanguageService.updateLanguageStatus(language, false)
       .then(() => console.log(`Disabled language ${language}`))
       .catch(err => console.error(`Failed to update language status for ${language}`, err));
     
-    // Trigger a custom event to notify components
     if (typeof window !== 'undefined') {
       const event = new CustomEvent('language-disabled', { detail: language });
       window.dispatchEvent(event);
@@ -65,13 +59,11 @@ export class XmlManager {
   }
   
   static getXmlUrl(language: string): string {
-    // Check if language is disabled
     if (this.disabledLanguages.has(language)) {
       console.warn(`Language ${language} is disabled due to previous errors, falling back to English`);
       language = 'en';
     }
     
-    // Check if we support this language
     if (!this.xmlUrlMap[language]) {
       console.warn(`Language ${language} not found in XML URL mappings, falling back to English`);
       language = 'en';
@@ -83,14 +75,12 @@ export class XmlManager {
   static async addLanguageXml(languageCode: string, xmlUrl: string): Promise<boolean> {
     this.xmlUrlMap[languageCode] = xmlUrl;
     
-    // Remove from disabled languages if it was previously disabled
     this.disabledLanguages.delete(languageCode);
     
     return true;
   }
 }
 
-// Initialize XML URLs immediately
 XmlManager.initializeXmlUrls().catch(err => 
   console.error("Failed to initialize XML URLs:", err)
 );

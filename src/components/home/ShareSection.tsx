@@ -5,7 +5,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { ShareButtonsSkeleton } from '@/components/LoadingSkeletons';
 
-// Lazy load the SocialShareBar component
 const SocialShareBar = lazy(() => import('@/components/SocialShareBar'));
 
 interface ShareSectionProps {
@@ -14,11 +13,9 @@ interface ShareSectionProps {
   category: string;
 }
 
-// Using memo to prevent unnecessary re-renders
 const ShareSection: React.FC<ShareSectionProps> = memo((props) => {
   const { verse, reference, category } = props;
   
-  // Don't render if any of the required props is missing
   if (!verse || !reference) {
     return null;
   }

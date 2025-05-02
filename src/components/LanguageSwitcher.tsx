@@ -31,26 +31,21 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     { code: 'fil', name: 'Filipino', isLocal: true, isDisabled: false }
   ]);
   
-  // Check available languages on mount
   useEffect(() => {
     const checkLanguages = async () => {
       try {
-        // Start with local languages
         const initialLanguages = [
           { code: 'en', name: 'English', isLocal: true, isDisabled: false },
           { code: 'fil', name: 'Filipino', isLocal: true, isDisabled: false }
         ];
         
-        // Check if languages are available
         await Promise.all(initialLanguages.map(async (lang) => {
           const available = await BibleVerseService.isLanguageAvailable(lang.code);
           lang.isDisabled = !available;
         }));
         
-        // Get additional languages from the database
         const dbLanguages = await LanguageService.getActiveLanguages();
         
-        // Convert DB languages to our format and skip 'en' and 'fil' which are already included
         const dbLangsFormatted = dbLanguages
           .filter(l => l.language_code !== 'en' && l.language_code !== 'fil')
           .map(l => ({
@@ -60,16 +55,12 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             isDisabled: !l.is_active || XmlManager.isLanguageDisabled(l.language_code)
           }));
         
-        // Merge arrays with local languages first
         setAvailableLanguages([...initialLanguages, ...dbLangsFormatted]);
         
-        // Preload languages in the background
         setTimeout(() => {
           dbLangsFormatted.forEach(lang => {
             if (!lang.isDisabled) {
-              BibleVerseService.isLanguageAvailable(lang.code).catch(() => {
-                // This will update the disabled status if it fails
-              });
+              BibleVerseService.isLanguageAvailable(lang.code).catch(() => {});
             }
           });
         }, 1000);
@@ -81,7 +72,6 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     
     checkLanguages();
     
-    // Listen for language disabled events
     const handleLanguageDisabled = (event: CustomEvent) => {
       const disabledLang = event.detail;
       setAvailableLanguages(prev => 
@@ -105,7 +95,6 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     setIsChanging(true);
     
     try {
-      // Find the language info
       const langInfo = availableLanguages.find(l => l.code === language);
       if (!langInfo) {
         toast({
@@ -116,7 +105,6 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         return;
       }
       
-      // Double check if the language is disabled
       if (langInfo.isDisabled) {
         toast({
           title: "Language Not Available",
@@ -126,7 +114,6 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         return;
       }
       
-      // Check if the language is available (for non-local languages)
       if (!langInfo.isLocal) {
         const isAvailable = await BibleVerseService.isLanguageAvailable(language);
         if (!isAvailable) {
@@ -189,7 +176,6 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Select Language</DropdownMenuLabel>
         
-        {/* Local Languages First */}
         {availableLanguages
           .filter(lang => lang.isLocal)
           .map(lang => (
@@ -213,7 +199,6 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         
         <DropdownMenuSeparator />
         
-        {/* Remote Languages */}
         {availableLanguages
           .filter(lang => !lang.isLocal)
           .map(lang => (
@@ -241,5 +226,4 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
 export default LanguageSwitcher;
 
-// Import needed for the component
 import LanguageService from '@/services/LanguageService';

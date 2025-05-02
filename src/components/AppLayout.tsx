@@ -5,7 +5,6 @@ import { HeaderSkeleton, PageSkeleton } from './LoadingSkeletons';
 import { useAppContext } from './AppContext';
 import { useToast } from '@/hooks/use-toast';
 
-// Lazy load the Header component
 const Header = lazy(() => import('./Header'));
 
 interface AppLayoutProps {
@@ -24,7 +23,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   
   const { toast } = useToast();
   
-  // Listen for language errors
   useEffect(() => {
     const handleLanguageDisabled = (event: CustomEvent) => {
       const disabledLang = event.detail;

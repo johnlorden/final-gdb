@@ -1,3 +1,4 @@
+
 import { VerseResult } from './types/BibleVerseTypes';
 import { XmlParser } from './utils/XmlParser';
 import { VerseCache } from './utils/VerseCache';
@@ -24,13 +25,10 @@ class BibleVerseService {
     if (this.isInitialized) return;
     
     try {
-      // Initialize XML file loader
       await XmlFileLoader.initializeXmlUrls();
       
-      // Get languages from database
       await this.refreshLanguageList();
       
-      // Pre-cache local languages
       this.preloadAllVerses('en').catch(() => console.warn("Failed to preload English verses"));
       this.preloadAllVerses('fil').catch(() => console.warn("Failed to preload Filipino verses"));
       
@@ -44,10 +42,8 @@ class BibleVerseService {
     try {
       const languages = await LanguageService.getActiveLanguages();
       
-      // Start with English and Filipino as available
       this.availableLanguages = new Set(['en', 'fil']);
       
-      // Add other active languages
       languages.forEach(l => {
         if (l.is_active) {
           this.availableLanguages.add(l.language_code);
@@ -70,7 +66,6 @@ class BibleVerseService {
     if (this.availableLanguages.has(language) || language === 'en' || language === 'fil') {
       this.currentLanguage = language;
       
-      // Validate the language immediately for non-local languages
       if (language !== 'en' && language !== 'fil') {
         this.validateLanguage(language).catch(err => {
           console.error(`Failed to validate language ${language}:`, err);
@@ -86,7 +81,6 @@ class BibleVerseService {
   
   private static async validateLanguage(language: string): Promise<boolean> {
     try {
-      // Try to load at least one verse to validate the language
       const xmlDoc = await XmlFileLoader.loadXmlDoc(language);
       const verseNodes = xmlDoc.getElementsByTagName('verse');
       
@@ -107,12 +101,10 @@ class BibleVerseService {
   }
 
   static async isLanguageAvailable(language: string): Promise<boolean> {
-    // If language has been marked as invalid, it's not available
     if (this.invalidLanguages.has(language)) {
       return false;
     }
     
-    // For local languages, always try to load them
     if (language === 'en' || language === 'fil') {
       try {
         const xmlDoc = await XmlFileLoader.loadXmlDoc(language);
@@ -124,12 +116,10 @@ class BibleVerseService {
       }
     }
     
-    // For other languages, check if they're in the available languages list
     if (!this.availableLanguages.has(language)) {
       return false;
     }
     
-    // Validate by attempting to load the XML
     try {
       const isValid = await this.validateLanguage(language);
       if (!isValid) {
@@ -146,7 +136,6 @@ class BibleVerseService {
   }
 
   static markLanguageAsInvalid(language: string): void {
-    // Never mark local languages as invalid
     if (language === 'en' || language === 'fil') {
       console.warn(`Cannot mark local language ${language} as invalid`);
       return;
@@ -160,7 +149,6 @@ class BibleVerseService {
       this.currentLanguage = 'en';
     }
     
-    // Update in database if possible
     try {
       LanguageService.updateLanguageStatus(language, false)
         .then(() => console.log(`Updated language ${language} status in database`))
@@ -169,7 +157,6 @@ class BibleVerseService {
       console.error(`Error updating language status:`, error);
     }
     
-    // Dispatch event to notify UI components
     if (typeof window !== 'undefined') {
       const event = new CustomEvent('language-disabled', { detail: language });
       window.dispatchEvent(event);
@@ -191,7 +178,6 @@ class BibleVerseService {
       if (verses.length === 0) {
         console.warn(`No verses found in XML document for language: ${lang}`);
         
-        // Mark this language as invalid
         this.markLanguageAsInvalid(lang);
         
         if (lang !== 'en') {
@@ -207,7 +193,6 @@ class BibleVerseService {
     } catch (error) {
       console.error('Error parsing all verses:', error);
       
-      // Mark this language as invalid if we can't load it and it's not a local language
       if (lang !== 'en' && lang !== 'fil') {
         this.markLanguageAsInvalid(lang);
       }
@@ -411,7 +396,6 @@ class BibleVerseService {
   }
 }
 
-// Initialize service immediately
 BibleVerseService.initializeService();
 
 export default BibleVerseService;

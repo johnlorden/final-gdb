@@ -1,5 +1,4 @@
 
-// This is a facade for the refactored XML utilities
 import { XmlLoader } from './xml/XmlLoader';
 import { XmlManager } from './xml/XmlManager';
 import { XmlCache } from './xml/XmlCache';
@@ -18,7 +17,6 @@ export class XmlFileLoader {
   }
   
   static async loadXmlDoc(language: string = 'en'): Promise<Document> {
-    // Ensure initialization before loading
     if (!this.isInitialized) {
       await this.initializeXmlUrls();
     }
@@ -30,7 +28,6 @@ export class XmlFileLoader {
   }
   
   static preloadAllLanguages(): void {
-    // Ensure initialization before preloading
     this.initializeXmlUrls().then(() => {
       XmlLoader.preloadAllLanguages();
     });
@@ -41,7 +38,6 @@ export class XmlFileLoader {
   }
 }
 
-// Initialize immediately instead of with setTimeout
 XmlFileLoader.initializeXmlUrls().catch(err => 
   console.error("Failed to initialize XML URLs:", err)
 );

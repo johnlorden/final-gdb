@@ -21,7 +21,6 @@ export class XmlCache {
   static clearCache(language: string): void {
     this.cachedXmlDocs[language] = null;
     
-    // Also clear from local storage if needed
     try {
       localStorage.removeItem(`bible_xml_${language}`);
     } catch (error) {
