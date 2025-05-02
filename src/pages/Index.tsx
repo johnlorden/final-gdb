@@ -6,6 +6,7 @@ import VerseSection from '@/components/home/VerseSection';
 import ShareSection from '@/components/home/ShareSection';
 import DonateFooter from '@/components/DonateFooter';
 import { useVerseDisplay } from '@/hooks/useVerseDisplay';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const Index: React.FC = () => {
   const { 
@@ -29,31 +30,37 @@ const Index: React.FC = () => {
     >
       <div className="flex flex-col gap-6">
         {/* Search and Categories Section */}
-        <SearchSection 
-          onSearch={handleSearch}
-          onCategorySelect={handleCategorySelect}
-          onRandomVerse={handleRandomVerse}
-          currentCategory={currentCategory}
-        />
+        <ErrorBoundary>
+          <SearchSection 
+            onSearch={handleSearch}
+            onCategorySelect={handleCategorySelect}
+            onRandomVerse={handleRandomVerse}
+            currentCategory={currentCategory}
+          />
+        </ErrorBoundary>
         
         {/* Verse Display Section */}
-        <VerseSection 
-          verse={verse}
-          reference={reference}
-          verseCategory={verseCategory}
-          currentCategory={currentCategory}
-          isLoading={isLoading}
-          hasError={hasError}
-          handleRandomVerse={handleRandomVerse}
-        />
+        <ErrorBoundary>
+          <VerseSection 
+            verse={verse}
+            reference={reference}
+            verseCategory={verseCategory}
+            currentCategory={currentCategory}
+            isLoading={isLoading}
+            hasError={hasError}
+            handleRandomVerse={handleRandomVerse}
+          />
+        </ErrorBoundary>
         
         {/* Share Section - Only shown when there's a verse to share */}
         {verse && reference && (
-          <ShareSection 
-            verse={verse} 
-            reference={reference} 
-            category={verseCategory || currentCategory} 
-          />
+          <ErrorBoundary>
+            <ShareSection 
+              verse={verse} 
+              reference={reference} 
+              category={verseCategory || currentCategory} 
+            />
+          </ErrorBoundary>
         )}
         
         {/* Donate Footer */}
@@ -62,7 +69,9 @@ const Index: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.3 }}
         >
-          <DonateFooter />
+          <ErrorBoundary>
+            <DonateFooter />
+          </ErrorBoundary>
         </motion.div>
       </div>
     </motion.div>

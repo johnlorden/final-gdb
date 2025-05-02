@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Twitter, Facebook, Mail, Instagram, Share2 } from 'lucide-react';
+import { Copy, Twitter, Facebook, Mail, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 
@@ -11,7 +10,7 @@ interface ShareButtonsProps {
   cardRef?: React.RefObject<HTMLDivElement>;
   template: string;
   backgroundColor: string;
-  backgroundImage: string | null;
+  backgroundImage: string | null; // Keep for type compatibility but won't use
 }
 
 export const ShareButtons: React.FC<ShareButtonsProps> = ({ 
@@ -19,8 +18,7 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
   reference, 
   cardRef,
   template,
-  backgroundColor,
-  backgroundImage
+  backgroundColor
 }) => {
   const { toast } = useToast();
   const verseText = `"${verse}" — ${reference}`;
@@ -50,54 +48,10 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
               el.style.lineHeight = '1.8';
             }
           });
-        } else if (template === 'elegant') {
-          clonedElement.style.padding = '35px';
-          clonedElement.style.backgroundColor = '#f8f5ff';
-          const innerElements = clonedElement.querySelectorAll('p');
-          innerElements.forEach(el => {
-            if (el instanceof HTMLElement) {
-              el.style.fontFamily = 'serif';
-              el.style.fontStyle = 'italic';
-            }
-          });
-        } else if (template === 'gradient' || template === 'custom') {
-          clonedElement.style.padding = '35px';
-          
-          if (backgroundImage) {
-            clonedElement.style.backgroundImage = `url(${backgroundImage})`;
-            clonedElement.style.backgroundSize = 'cover';
-            clonedElement.style.backgroundPosition = 'center';
-            
-            const textElements = clonedElement.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
-            textElements.forEach(el => {
-              if (el instanceof HTMLElement) {
-                el.style.textShadow = '1px 1px 3px rgba(0,0,0,0.3)';
-              }
-            });
-          } else {
-            clonedElement.style.background = backgroundColor;
-          }
-          
-          if (backgroundColor.includes('#171717') || backgroundColor.includes('220, 78%, 29%')) {
-            const textElements = clonedElement.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
-            textElements.forEach(el => {
-              if (el instanceof HTMLElement) {
-                el.style.color = '#ffffff';
-              }
-            });
-          }
         }
         
-        // Apply consistent style to inner elements
-        const innerElements = clonedElement.querySelectorAll('*');
-        innerElements.forEach(el => {
-          if (el instanceof HTMLElement) {
-            const style = window.getComputedStyle(el);
-            if (parseInt(style.borderRadius) > 0) {
-              el.style.borderRadius = '8px';
-            }
-          }
-        });
+        // Apply background color
+        clonedElement.style.backgroundColor = backgroundColor;
         
         // Add watermark
         const watermark = document.createElement('div');
@@ -106,7 +60,7 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
         watermark.style.right = '10px';
         watermark.style.fontSize = '10px';
         watermark.style.opacity = '0.7';
-        watermark.style.color = template === 'gradient' && backgroundColor.includes('dark') ? '#fff' : '#666';
+        watermark.style.color = backgroundColor.includes('#171717') ? '#fff' : '#666';
         watermark.textContent = 'Daily Bible Verse';
         clonedElement.style.position = 'relative';
         clonedElement.appendChild(watermark);
@@ -133,7 +87,7 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
     }
   };
   
-  const shareWithImage = async (platform: 'twitter' | 'facebook' | 'email' | 'instagram') => {
+  const shareWithImage = async (platform: 'twitter' | 'facebook' | 'email') => {
     try {
       const imageUrl = await generateImage();
       
@@ -154,20 +108,6 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
             '_blank',
             'noopener,noreferrer'
           );
-          break;
-        case 'instagram':
-          if (imageUrl) {
-            const link = document.createElement('a');
-            link.href = imageUrl;
-            link.download = `bible-verse-${reference.replace(/\s+/g, '-').replace(/:/g, '-')}.png`;
-            link.click();
-            
-            toast({
-              title: "Image Downloaded for Instagram",
-              description: "Save this image and share it on Instagram",
-              duration: 3000,
-            });
-          }
           break;
         case 'email':
           const subject = `Bible Verse: ${reference}`;
@@ -282,16 +222,6 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
       >
         <Facebook className="h-4 w-4" />
         <span className="hidden sm:inline">Facebook</span>
-      </Button>
-      
-      <Button 
-        onClick={() => shareWithImage('instagram')} 
-        variant="outline" 
-        size="sm" 
-        className="flex items-center gap-1"
-      >
-        <Instagram className="h-4 w-4" />
-        <span className="hidden sm:inline">Instagram</span>
       </Button>
       
       <Button 

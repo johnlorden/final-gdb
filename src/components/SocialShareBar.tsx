@@ -1,11 +1,15 @@
 
 import React, { useState } from 'react';
 import { ShareButtons } from './social/ShareButtons';
-import { Button } from '@/components/ui/button';
-import { Bookmark } from 'lucide-react';
 import BookmarkVerse from './BookmarkVerse';
 import VerseQRCode from './VerseQRCode';
-import { ShareTemplateSelector } from './ShareTemplateSelector';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SocialShareBarProps {
   verse: string;
@@ -18,9 +22,8 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
   reference,
   category,
 }) => {
-  const [template, setTemplate] = useState<'default' | 'minimal' | 'elegant' | 'gradient' | 'custom'>('default');
+  const [template, setTemplate] = useState<'default' | 'minimal'>('default');
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -28,10 +31,9 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
         <ShareButtons 
           verse={verse} 
           reference={reference}
-          // Remove category prop as it's not expected in ShareButtons component
           template={template}
           backgroundColor={backgroundColor}
-          backgroundImage={backgroundImage}
+          backgroundImage={null}
         />
         
         <BookmarkVerse 
@@ -45,15 +47,21 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
           reference={reference} 
         />
         
-        <ShareTemplateSelector 
-          currentTemplate={template}
-          onTemplateChange={setTemplate}
-          currentBackgroundColor={backgroundColor}
-          onBackgroundColorChange={setBackgroundColor}
-          currentBackgroundImage={backgroundImage}
-          onBackgroundImageChange={setBackgroundImage}
-          // Remove verse prop as it's not expected in ShareTemplateSelector component
-        />
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-sm text-muted-foreground">Template:</span>
+          <Select
+            value={template}
+            onValueChange={(value) => setTemplate(value as 'default' | 'minimal')}
+          >
+            <SelectTrigger className="w-[140px] h-8 text-xs">
+              <SelectValue placeholder="Select style" />
+            </SelectTrigger>
+            <SelectContent className="bg-background">
+              <SelectItem value="default">Default</SelectItem>
+              <SelectItem value="minimal">Minimal</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );

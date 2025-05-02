@@ -2,6 +2,8 @@
 import React, { memo, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { ShareButtonsSkeleton } from '@/components/LoadingSkeletons';
 
 // Lazy load the SocialShareBar component
 const SocialShareBar = lazy(() => import('@/components/SocialShareBar'));
@@ -21,9 +23,11 @@ const ShareSection: React.FC<ShareSectionProps> = memo((props) => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3, duration: 0.3 }}
     >
-      <Suspense fallback={<Skeleton className="h-16 w-full rounded-md" />}>
-        <SocialShareBar {...props} />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<ShareButtonsSkeleton />}>
+          <SocialShareBar {...props} />
+        </Suspense>
+      </ErrorBoundary>
     </motion.section>
   );
 });

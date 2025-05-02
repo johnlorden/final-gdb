@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Globe, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { Globe, Check, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,20 +22,23 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 }) => {
   const { toast } = useToast();
   const [isChanging, setIsChanging] = useState(false);
-  const [languageStatus, setLanguageStatus] = useState<Record<string, boolean>>({
-    en: true,
-    fil: true
-  });
+  const [availableLanguages, setAvailableLanguages] = useState<string[]>(['en']);
   
-  // Load language availability status on mount
+  // Check available languages on mount
   useEffect(() => {
     const checkLanguages = async () => {
-      const enAvailable = await BibleVerseService.isLanguageAvailable('en');
-      const filAvailable = await BibleVerseService.isLanguageAvailable('fil');
-      setLanguageStatus({
-        en: enAvailable,
-        fil: filAvailable
-      });
+      try {
+        const enAvailable = await BibleVerseService.isLanguageAvailable('en');
+        const filAvailable = await BibleVerseService.isLanguageAvailable('fil');
+        
+        const available = [];
+        if (enAvailable) available.push('en');
+        if (filAvailable) available.push('fil');
+        
+        setAvailableLanguages(available);
+      } catch (error) {
+        console.error('Error checking available languages:', error);
+      }
     };
     
     checkLanguages();
@@ -47,16 +50,13 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     setIsChanging(true);
     
     try {
-      // Check if the language is valid
-      const isValid = await BibleVerseService.isLanguageAvailable(language);
-      
-      if (!isValid) {
+      // Check if the language is available
+      if (!availableLanguages.includes(language)) {
         toast({
           title: "Language Not Available",
           description: `The selected language is not available.`,
           variant: "destructive"
         });
-        setIsChanging(false);
         return;
       }
       
@@ -102,30 +102,24 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <DropdownMenuItem 
           onClick={() => handleLanguageChange('en')}
           className={currentLanguage === 'en' ? 'bg-secondary' : ''}
-          disabled={isChanging}
+          disabled={isChanging || !availableLanguages.includes('en')}
         >
           <div className="flex items-center w-full justify-between">
             <span>English</span>
             {currentLanguage === 'en' && (
               <Check className="h-4 w-4 ml-2" />
             )}
-            {BibleVerseService.getLanguage() === 'en' && !languageStatus.en && (
-              <AlertCircle className="h-4 w-4 ml-2 text-red-500" />
-            )}
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => handleLanguageChange('fil')}
           className={currentLanguage === 'fil' ? 'bg-secondary' : ''}
-          disabled={isChanging}
+          disabled={isChanging || !availableLanguages.includes('fil')}
         >
           <div className="flex items-center w-full justify-between">
             <span>Filipino</span>
             {currentLanguage === 'fil' && (
               <Check className="h-4 w-4 ml-2" />
-            )}
-            {BibleVerseService.getLanguage() === 'fil' && !languageStatus.fil && (
-              <AlertCircle className="h-4 w-4 ml-2 text-red-500" />
             )}
           </div>
         </DropdownMenuItem>
