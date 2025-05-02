@@ -1,8 +1,9 @@
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import ErrorBoundary from './ErrorBoundary';
 import { HeaderSkeleton, PageSkeleton } from './LoadingSkeletons';
 import { useAppContext } from './AppContext';
+import { useToast } from '@/hooks/use-toast';
 
 // Lazy load the Header component
 const Header = lazy(() => import('./Header'));
@@ -20,6 +21,26 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     handleLanguageChange, 
     toggleOfflineMode 
   } = useAppContext();
+  
+  const { toast } = useToast();
+  
+  // Listen for language errors
+  useEffect(() => {
+    const handleLanguageDisabled = (event: CustomEvent) => {
+      const disabledLang = event.detail;
+      toast({
+        title: "Language Disabled",
+        description: `The ${disabledLang} language has been disabled due to errors.`,
+        variant: "destructive",
+        duration: 3000
+      });
+    };
+    
+    window.addEventListener('language-disabled', handleLanguageDisabled as EventListener);
+    return () => {
+      window.removeEventListener('language-disabled', handleLanguageDisabled as EventListener);
+    };
+  }, [toast]);
 
   return (
     <div className="flex flex-col min-h-screen">

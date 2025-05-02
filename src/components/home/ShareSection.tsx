@@ -16,6 +16,13 @@ interface ShareSectionProps {
 
 // Using memo to prevent unnecessary re-renders
 const ShareSection: React.FC<ShareSectionProps> = memo((props) => {
+  const { verse, reference, category } = props;
+  
+  // Don't render if any of the required props is missing
+  if (!verse || !reference) {
+    return null;
+  }
+  
   return (
     <motion.section 
       className="w-full max-w-2xl mx-auto"
@@ -25,7 +32,7 @@ const ShareSection: React.FC<ShareSectionProps> = memo((props) => {
     >
       <ErrorBoundary>
         <Suspense fallback={<ShareButtonsSkeleton />}>
-          <SocialShareBar {...props} />
+          <SocialShareBar verse={verse} reference={reference} category={category} />
         </Suspense>
       </ErrorBoundary>
     </motion.section>

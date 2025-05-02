@@ -41,4 +41,7 @@ export class XmlFileLoader {
   }
 }
 
-// We're removing the automatic setTimeout initialization to load on-demand instead
+// Initialize immediately instead of with setTimeout
+XmlFileLoader.initializeXmlUrls().catch(err => 
+  console.error("Failed to initialize XML URLs:", err)
+);

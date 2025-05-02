@@ -71,6 +71,21 @@ export class XmlLoader {
   
   private static async fetchXmlDocument(url: string, language: string): Promise<Document> {
     try {
+      // If it's a local language, prioritize loading from local files first
+      if (XmlManager.isLocalLanguage(language)) {
+        const localUrl = language === 'en' ? '/data/bible-verses.xml' : '/data/bible-verses-fil.xml';
+        try {
+          const response = await fetch(localUrl);
+          if (response.ok) {
+            const xmlText = await response.text();
+            return this.processXmlText(language)(xmlText);
+          }
+        } catch (localError) {
+          console.warn(`Failed to load local XML for ${language}, trying remote URL`);
+        }
+      }
+      
+      // Try remote URL
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -81,7 +96,7 @@ export class XmlLoader {
           
           const fallbackResponse = await fetch('/data/bible-verses.xml');
           const xmlText = await fallbackResponse.text();
-          return this.processXmlText(language)(xmlText);
+          return this.processXmlText('en')(xmlText);
         }
         throw new Error(`Failed to load Bible verses XML: ${response.status} ${response.statusText}`);
       }
@@ -91,12 +106,16 @@ export class XmlLoader {
     } catch (error) {
       console.error(`Error loading XML document for ${language}:`, error);
       
-      // Disable the language only if it's not English
-      if (language !== 'en') {
+      // Disable the language only if it's not a local language
+      if (language !== 'en' && language !== 'fil') {
         XmlManager.disableLanguage(language);
       }
       
-      this.xmlDocPromises[language] = null;
+      // For local languages, always retry
+      if (XmlManager.isLocalLanguage(language)) {
+        this.xmlDocPromises[language] = null;
+      }
+      
       throw error;
     }
   }
@@ -125,8 +144,10 @@ export class XmlLoader {
       } catch (xmlError) {
         console.error(`Invalid XML format for language ${language}:`, xmlError);
         
-        // Disable the language because it has invalid XML
-        XmlManager.disableLanguage(language);
+        // Disable non-local languages that have invalid XML
+        if (!XmlManager.isLocalLanguage(language)) {
+          XmlManager.disableLanguage(language);
+        }
         
         // Fallback to English
         if (language !== 'en') {
@@ -143,11 +164,30 @@ export class XmlLoader {
   }
   
   static preloadAllLanguages(): void {
-    // Get all languages and preload them
-    ['en', 'fil'].forEach(lang => {
-      this.loadXmlDoc(lang).catch(err => 
-        console.warn(`Failed to preload ${lang} XML`, err)
-      );
-    });
+    // Preload local languages first
+    this.loadXmlDoc('en').catch(err => 
+      console.warn(`Failed to preload English XML`, err)
+    );
+    
+    this.loadXmlDoc('fil').catch(err => 
+      console.warn(`Failed to preload Filipino XML`, err)
+    );
+    
+    // Then try loading other languages in the background
+    setTimeout(() => {
+      // Get all languages and preload them, except already loaded ones
+      LanguageService.getActiveLanguages().then(languages => {
+        languages.forEach(lang => {
+          if (lang.language_code !== 'en' && lang.language_code !== 'fil' && lang.is_active) {
+            this.loadXmlDoc(lang.language_code).catch(err => 
+              console.warn(`Failed to preload ${lang.language_code} XML`, err)
+            );
+          }
+        });
+      }).catch(err => console.error("Failed to get languages for preloading:", err));
+    }, 3000); // Delay non-critical languages loading
   }
 }
+
+// Import needed for the preload function
+import LanguageService from '../../LanguageService';

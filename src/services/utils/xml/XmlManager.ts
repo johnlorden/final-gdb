@@ -11,6 +11,7 @@ export class XmlManager {
   };
   
   private static disabledLanguages: Set<string> = new Set();
+  private static localLanguages: Set<string> = new Set(['en', 'fil']);
   
   /**
    * Initialize XML URL mappings from the database
@@ -30,16 +31,22 @@ export class XmlManager {
       console.log('Initialized XML URLs for languages:', Object.keys(this.xmlUrlMap).join(', '));
     } catch (error) {
       console.error('Error initializing XML URLs:', error);
+      // Even if DB fails, we still have local languages
+      console.log('Falling back to local languages: en, fil');
     }
   }
   
   static isLanguageDisabled(language: string): boolean {
     return this.disabledLanguages.has(language);
   }
+
+  static isLocalLanguage(language: string): boolean {
+    return this.localLanguages.has(language);
+  }
   
   static disableLanguage(language: string): void {
-    if (language === 'en') {
-      console.warn('Cannot disable English language - it is the fallback language');
+    if (this.isLocalLanguage(language)) {
+      console.warn(`Cannot disable local language ${language}`);
       return;
     }
     
@@ -83,7 +90,7 @@ export class XmlManager {
   }
 }
 
-// Initialize XML URLs when module loads
-setTimeout(() => {
-  XmlManager.initializeXmlUrls();
-}, 2000);
+// Initialize XML URLs immediately
+XmlManager.initializeXmlUrls().catch(err => 
+  console.error("Failed to initialize XML URLs:", err)
+);

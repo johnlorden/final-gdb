@@ -4,6 +4,7 @@ import { VerseCache } from './utils/VerseCache';
 import { XmlFileLoader } from './utils/XmlFileLoader';
 import { VerseSelector } from './utils/VerseSelector';
 import LanguageService from './LanguageService';
+import { XmlManager } from './utils/xml/XmlManager';
 
 class BibleVerseService {
   private static categories = [
@@ -17,24 +18,45 @@ class BibleVerseService {
   private static currentLanguage: string = 'en';
   private static availableLanguages: Set<string> = new Set(['en', 'fil']);
   private static invalidLanguages: Set<string> = new Set();
+  private static isInitialized: boolean = false;
+
+  static async initializeService(): Promise<void> {
+    if (this.isInitialized) return;
+    
+    try {
+      // Initialize XML file loader
+      await XmlFileLoader.initializeXmlUrls();
+      
+      // Get languages from database
+      await this.refreshLanguageList();
+      
+      // Pre-cache local languages
+      this.preloadAllVerses('en').catch(() => console.warn("Failed to preload English verses"));
+      this.preloadAllVerses('fil').catch(() => console.warn("Failed to preload Filipino verses"));
+      
+      this.isInitialized = true;
+    } catch (error) {
+      console.error("Failed to initialize BibleVerseService:", error);
+    }
+  }
 
   static async refreshLanguageList(): Promise<void> {
     try {
       const languages = await LanguageService.getActiveLanguages();
-      this.availableLanguages = new Set(languages.map(l => l.language_code));
       
-      if (languages.length === 0) {
-        // Default to English and Filipino if no languages are set
-        this.availableLanguages.add('en');
-        this.availableLanguages.add('fil');
-      }
+      // Start with English and Filipino as available
+      this.availableLanguages = new Set(['en', 'fil']);
+      
+      // Add other active languages
+      languages.forEach(l => {
+        if (l.is_active) {
+          this.availableLanguages.add(l.language_code);
+        }
+      });
       
       console.log('Available languages:', Array.from(this.availableLanguages).join(', '));
     } catch (error) {
       console.error('Error refreshing language list:', error);
-      
-      // Default to English and Filipino
-      this.availableLanguages = new Set(['en', 'fil']);
     }
   }
 
@@ -45,20 +67,20 @@ class BibleVerseService {
       return;
     }
 
-    if (this.availableLanguages.has(language)) {
+    if (this.availableLanguages.has(language) || language === 'en' || language === 'fil') {
       this.currentLanguage = language;
-      this.clearCache(language);
       
-      // Validate the language immediately
-      this.validateLanguage(language).catch(err => {
-        console.error(`Failed to validate language ${language}:`, err);
-        this.markLanguageAsInvalid(language);
-        this.currentLanguage = 'en';
-      });
+      // Validate the language immediately for non-local languages
+      if (language !== 'en' && language !== 'fil') {
+        this.validateLanguage(language).catch(err => {
+          console.error(`Failed to validate language ${language}:`, err);
+          this.markLanguageAsInvalid(language);
+          this.currentLanguage = 'en';
+        });
+      }
     } else {
       console.warn(`Language ${language} is not available, defaulting to English`);
       this.currentLanguage = 'en';
-      this.clearCache('en');
     }
   }
   
@@ -90,12 +112,19 @@ class BibleVerseService {
       return false;
     }
     
-    // Refresh language list if not yet loaded
-    if (this.availableLanguages.size <= 2) {
-      await this.refreshLanguageList();
+    // For local languages, always try to load them
+    if (language === 'en' || language === 'fil') {
+      try {
+        const xmlDoc = await XmlFileLoader.loadXmlDoc(language);
+        const verseCount = xmlDoc.getElementsByTagName('verse').length;
+        return verseCount > 0;
+      } catch (error) {
+        console.error(`Error checking local language availability for ${language}:`, error);
+        return false;
+      }
     }
     
-    // Check if language is in available languages list
+    // For other languages, check if they're in the available languages list
     if (!this.availableLanguages.has(language)) {
       return false;
     }
@@ -117,6 +146,12 @@ class BibleVerseService {
   }
 
   static markLanguageAsInvalid(language: string): void {
+    // Never mark local languages as invalid
+    if (language === 'en' || language === 'fil') {
+      console.warn(`Cannot mark local language ${language} as invalid`);
+      return;
+    }
+    
     this.invalidLanguages.add(language);
     console.warn(`Marked language ${language} as invalid`);
     
@@ -132,6 +167,12 @@ class BibleVerseService {
         .catch((err) => console.error(`Failed to update language status in database:`, err));
     } catch (error) {
       console.error(`Error updating language status:`, error);
+    }
+    
+    // Dispatch event to notify UI components
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('language-disabled', { detail: language });
+      window.dispatchEvent(event);
     }
   }
   
@@ -166,8 +207,10 @@ class BibleVerseService {
     } catch (error) {
       console.error('Error parsing all verses:', error);
       
-      // Mark this language as invalid if we can't load it
-      this.markLanguageAsInvalid(lang);
+      // Mark this language as invalid if we can't load it and it's not a local language
+      if (lang !== 'en' && lang !== 'fil') {
+        this.markLanguageAsInvalid(lang);
+      }
       
       if (lang !== 'en') {
         console.log('Error with non-English verses, falling back to English');
@@ -368,12 +411,7 @@ class BibleVerseService {
   }
 }
 
-// Refresh language list and preload verses when module loads
-setTimeout(() => {
-  console.log('Starting Bible verse initialization');
-  BibleVerseService.refreshLanguageList().then(() => {
-    BibleVerseService.preloadAllVerses();
-  });
-}, 1000);
+// Initialize service immediately
+BibleVerseService.initializeService();
 
 export default BibleVerseService;
