@@ -28,6 +28,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
         <ShareButtons 
           verse={verse} 
           reference={reference}
+          // Remove category prop as it's not expected in ShareButtons component
           template={template}
           backgroundColor={backgroundColor}
           backgroundImage={backgroundImage}
@@ -51,6 +52,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
           onBackgroundColorChange={setBackgroundColor}
           currentBackgroundImage={backgroundImage}
           onBackgroundImageChange={setBackgroundImage}
+          // Remove verse prop as it's not expected in ShareTemplateSelector component
         />
       </div>
     </div>
