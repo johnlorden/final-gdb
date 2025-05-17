@@ -3,6 +3,7 @@ import { XmlParser } from '../XmlParser';
 import { XmlDocPromises } from '../../types/BibleVerseTypes';
 import { XmlManager } from './XmlManager';
 import { XmlCache } from './XmlCache';
+import LanguageService from '../../LanguageService';
 
 export class XmlLoader {
   private static xmlDocPromises: XmlDocPromises = {
@@ -54,6 +55,12 @@ export class XmlLoader {
       if (language !== 'en') {
         console.warn(`Error loading ${language}, falling back to English`);
         XmlManager.disableLanguage(language);
+        
+        if (!XmlManager.isLocalLanguage(language)) {
+          LanguageService.updateLanguageStatus(language, false)
+            .catch(err => console.error(`Failed to update language status for ${language}:`, err));
+        }
+        
         return this.loadXmlDoc('en');
       }
       throw error;
@@ -75,12 +82,24 @@ export class XmlLoader {
         }
       }
       
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        }
+      });
       
       if (!response.ok) {
         if (language !== 'en') {
           console.warn(`${language} Bible verses not found, falling back to English`);
           XmlManager.disableLanguage(language);
+          
+          if (!XmlManager.isLocalLanguage(language)) {
+            LanguageService.updateLanguageStatus(language, false)
+              .catch(err => console.error(`Failed to update language status for ${language}:`, err));
+          }
           
           const fallbackResponse = await fetch('/data/bible-verses.xml');
           const xmlText = await fallbackResponse.text();
@@ -96,6 +115,11 @@ export class XmlLoader {
       
       if (language !== 'en' && language !== 'fil') {
         XmlManager.disableLanguage(language);
+        
+        if (!XmlManager.isLocalLanguage(language)) {
+          LanguageService.updateLanguageStatus(language, false)
+            .catch(err => console.error(`Failed to update language status for ${language}:`, err));
+        }
       }
       
       if (XmlManager.isLocalLanguage(language)) {
@@ -129,6 +153,9 @@ export class XmlLoader {
         
         if (!XmlManager.isLocalLanguage(language)) {
           XmlManager.disableLanguage(language);
+          
+          LanguageService.updateLanguageStatus(language, false)
+            .catch(err => console.error(`Failed to update language status for ${language}:`, err));
         }
         
         if (language !== 'en') {
@@ -166,5 +193,3 @@ export class XmlLoader {
     }, 3000);
   }
 }
-
-import LanguageService from '../../LanguageService';

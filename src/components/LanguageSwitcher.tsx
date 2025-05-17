@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import BibleVerseService from '@/services/BibleVerseService';
 import { Badge } from '@/components/ui/badge';
 import { XmlManager } from '@/services/utils/xml/XmlManager';
+import LanguageService from '@/services/LanguageService';
 
 interface LanguageSwitcherProps {
   currentLanguage: string;
@@ -83,9 +84,26 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       );
     };
     
+    const handleLanguagesInitialized = (event: CustomEvent) => {
+      const { disabledLanguages } = event.detail;
+      
+      if (disabledLanguages && Array.isArray(disabledLanguages)) {
+        setAvailableLanguages(prev => 
+          prev.map(lang => 
+            disabledLanguages.includes(lang.code) 
+              ? { ...lang, isDisabled: true }
+              : lang
+          )
+        );
+      }
+    };
+    
     window.addEventListener('language-disabled', handleLanguageDisabled as EventListener);
+    window.addEventListener('languages-initialized', handleLanguagesInitialized as EventListener);
+    
     return () => {
       window.removeEventListener('language-disabled', handleLanguageDisabled as EventListener);
+      window.removeEventListener('languages-initialized', handleLanguagesInitialized as EventListener);
     };
   }, []);
   
@@ -182,7 +200,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             <DropdownMenuItem 
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
-              className={currentLanguage === lang.code ? 'bg-secondary' : ''}
+              className={`${currentLanguage === lang.code ? 'bg-secondary' : ''} ${lang.isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={isChanging || lang.isDisabled}
             >
               <div className="flex items-center w-full justify-between">
@@ -204,8 +222,8 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           .map(lang => (
             <DropdownMenuItem 
               key={lang.code}
-              onClick={() => handleLanguageChange(lang.code)}
-              className={`${currentLanguage === lang.code ? 'bg-secondary' : ''} ${lang.isDisabled ? 'opacity-50' : ''}`}
+              onClick={() => !lang.isDisabled && handleLanguageChange(lang.code)}
+              className={`${currentLanguage === lang.code ? 'bg-secondary' : ''} ${lang.isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={isChanging || lang.isDisabled}
             >
               <div className="flex items-center w-full justify-between">
@@ -214,7 +232,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                   <Check className="h-4 w-4 ml-2" />
                 )}
                 {lang.isDisabled && (
-                  <Badge variant="outline" className="ml-2 text-xs bg-red-100 text-red-800">Disabled</Badge>
+                  <Badge variant="outline" className="ml-2 text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Disabled</Badge>
                 )}
               </div>
             </DropdownMenuItem>
@@ -225,5 +243,3 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 };
 
 export default LanguageSwitcher;
-
-import LanguageService from '@/services/LanguageService';

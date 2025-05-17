@@ -20,8 +20,18 @@ class BibleVerseService {
   private static availableLanguages: Set<string> = new Set(['en', 'fil']);
   private static invalidLanguages: Set<string> = new Set();
   private static isInitialized: boolean = false;
+  private static loadingPromise: Promise<void> | null = null;
 
   static async initializeService(): Promise<void> {
+    if (this.loadingPromise) {
+      return this.loadingPromise;
+    }
+    
+    this.loadingPromise = this._initializeService();
+    return this.loadingPromise;
+  }
+  
+  private static async _initializeService(): Promise<void> {
     if (this.isInitialized) return;
     
     try {
@@ -29,12 +39,39 @@ class BibleVerseService {
       
       await this.refreshLanguageList();
       
-      this.preloadAllVerses('en').catch(() => console.warn("Failed to preload English verses"));
-      this.preloadAllVerses('fil').catch(() => console.warn("Failed to preload Filipino verses"));
+      // Preload English and Filipino in parallel
+      await Promise.all([
+        this.preloadAllVerses('en').catch(() => console.warn("Failed to preload English verses")),
+        this.preloadAllVerses('fil').catch(() => console.warn("Failed to preload Filipino verses"))
+      ]);
+      
+      // Listen for language initialization events
+      if (typeof window !== 'undefined') {
+        window.addEventListener('languages-initialized', ((event: CustomEvent) => {
+          const { availableLanguages, disabledLanguages } = event.detail;
+          
+          availableLanguages.forEach((lang: string) => {
+            if (lang !== 'en' && lang !== 'fil') {
+              this.availableLanguages.add(lang);
+            }
+          });
+          
+          disabledLanguages.forEach((lang: string) => {
+            this.invalidLanguages.add(lang);
+          });
+          
+          console.log('BibleVerseService updated with available languages:', 
+            Array.from(this.availableLanguages).join(', '));
+          console.log('Invalid languages:', 
+            Array.from(this.invalidLanguages).join(', '));
+        }) as EventListener);
+      }
       
       this.isInitialized = true;
     } catch (error) {
       console.error("Failed to initialize BibleVerseService:", error);
+    } finally {
+      this.loadingPromise = null;
     }
   }
 
@@ -47,6 +84,8 @@ class BibleVerseService {
       languages.forEach(l => {
         if (l.is_active) {
           this.availableLanguages.add(l.language_code);
+        } else if (l.language_code !== 'en' && l.language_code !== 'fil') {
+          this.invalidLanguages.add(l.language_code);
         }
       });
       
@@ -172,6 +211,7 @@ class BibleVerseService {
     }
     
     try {
+      await this.initializeService();
       const xmlDoc = await XmlFileLoader.loadXmlDoc(lang);
       const verses = XmlParser.extractVersesFromDocument(xmlDoc);
       
@@ -373,11 +413,14 @@ class BibleVerseService {
       console.log(`Preloaded ${verses.length} verses for language: ${lang}`);
       
       if (verses.length > 0) {
-        for (const category of this.categories) {
+        const preloadPromises = this.categories.map(category => {
           if (!VerseCache.hasCachedVerses(category, lang)) {
-            await this.getVersesByCategory(category, 25, lang);
+            return this.getVersesByCategory(category, 25, lang);
           }
-        }
+          return Promise.resolve(null);
+        });
+        
+        await Promise.all(preloadPromises);
       }
     } catch (error) {
       console.error('Error preloading verses:', error);

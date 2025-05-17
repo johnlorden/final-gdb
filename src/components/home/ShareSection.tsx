@@ -27,7 +27,7 @@ const ShareSection: React.FC<ShareSectionProps> = memo((props) => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3, duration: 0.3 }}
     >
-      <ErrorBoundary>
+      <ErrorBoundary fallback={<div className="text-red-500">Failed to load sharing options</div>}>
         <Suspense fallback={<ShareButtonsSkeleton />}>
           <SocialShareBar verse={verse} reference={reference} category={category} />
         </Suspense>

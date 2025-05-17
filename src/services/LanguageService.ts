@@ -1,10 +1,9 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { BibleLanguage, UserLanguagePreference } from '@/types/LanguageTypes';
+import { XmlManager } from './utils/xml/XmlManager';
 
 class LanguageService {
-  /**
-   * Get all available languages
-   */
   static async getAllLanguages(): Promise<BibleLanguage[]> {
     try {
       const { data, error } = await supabase
@@ -24,9 +23,6 @@ class LanguageService {
     }
   }
 
-  /**
-   * Get active languages (enabled for use)
-   */
   static async getActiveLanguages(): Promise<BibleLanguage[]> {
     try {
       const { data, error } = await supabase
@@ -47,9 +43,6 @@ class LanguageService {
     }
   }
 
-  /**
-   * Get user's language preferences
-   */
   static async getUserLanguagePreferences(userId: string): Promise<UserLanguagePreference[]> {
     if (!userId) return [];
     
@@ -74,9 +67,6 @@ class LanguageService {
     }
   }
 
-  /**
-   * Save user language preference
-   */
   static async saveUserLanguagePreference(
     userId: string, 
     languageCode: string, 
@@ -111,9 +101,6 @@ class LanguageService {
     }
   }
 
-  /**
-   * Add a new language to the database
-   */
   static async addLanguage(language: Omit<BibleLanguage, 'id' | 'created_at' | 'updated_at'>): Promise<BibleLanguage | null> {
     try {
       const { data, error } = await supabase
@@ -132,6 +119,7 @@ class LanguageService {
         return null;
       }
       
+      await XmlManager.addLanguageXml(language.language_code, language.xml_url);
       return data;
     } catch (error) {
       console.error('Error in addLanguage:', error);
@@ -139,9 +127,6 @@ class LanguageService {
     }
   }
 
-  /**
-   * Update a language in the database
-   */
   static async updateLanguage(language: BibleLanguage): Promise<boolean> {
     try {
       const { error } = await supabase
@@ -159,6 +144,12 @@ class LanguageService {
         return false;
       }
       
+      if (language.is_active) {
+        await XmlManager.addLanguageXml(language.language_code, language.xml_url);
+      } else {
+        XmlManager.disableLanguage(language.language_code);
+      }
+      
       return true;
     } catch (error) {
       console.error('Error in updateLanguage:', error);
@@ -166,9 +157,6 @@ class LanguageService {
     }
   }
   
-  /**
-   * Update language active status in the database
-   */
   static async updateLanguageStatus(languageCode: string, isActive: boolean): Promise<boolean> {
     try {
       const { error } = await supabase
@@ -188,6 +176,35 @@ class LanguageService {
     } catch (error) {
       console.error('Error in updateLanguageStatus:', error);
       return false;
+    }
+  }
+
+  static async verifyLanguages(): Promise<void> {
+    try {
+      const languages = await this.getAllLanguages();
+      
+      for (const language of languages) {
+        if (language.language_code === 'en' || language.language_code === 'fil') continue;
+        
+        if (!language.xml_url) {
+          await this.updateLanguageStatus(language.language_code, false);
+          XmlManager.disableLanguage(language.language_code);
+          continue;
+        }
+        
+        try {
+          const response = await fetch(language.xml_url, { method: 'HEAD' });
+          if (!response.ok) {
+            await this.updateLanguageStatus(language.language_code, false);
+            XmlManager.disableLanguage(language.language_code);
+          }
+        } catch {
+          await this.updateLanguageStatus(language.language_code, false);
+          XmlManager.disableLanguage(language.language_code);
+        }
+      }
+    } catch (error) {
+      console.error('Error verifying languages:', error);
     }
   }
 }
