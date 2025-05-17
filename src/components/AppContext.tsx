@@ -6,7 +6,10 @@ import { SettingsContextProvider, useSettingsContext } from '@/contexts/Settings
 export const useAppContext = () => {
   // This is a composite hook that combines both contexts
   const verse = useVerseContextImport();
-  const settings = useSettingsContext();
+  const settings = {
+    ...useSettingsContext(),
+    language: useSettingsContext().language || 'en' // Ensure English is the default
+  };
   
   return {
     ...verse,

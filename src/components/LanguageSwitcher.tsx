@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Globe, Check, Loader2 } from 'lucide-react';
+import { Globe, Check } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,27 +28,31 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const { toast } = useToast();
   const [isChanging, setIsChanging] = useState(false);
   const [availableLanguages, setAvailableLanguages] = useState<{code: string, name: string, isLocal: boolean, isDisabled: boolean}[]>([
-    { code: 'en', name: 'English', isLocal: true, isDisabled: false },
-    { code: 'fil', name: 'Filipino', isLocal: true, isDisabled: false }
+    { code: 'en', name: 'English', isLocal: true, isDisabled: false }
   ]);
   
   useEffect(() => {
     const checkLanguages = async () => {
       try {
+        // Always start with English
         const initialLanguages = [
-          { code: 'en', name: 'English', isLocal: true, isDisabled: false },
-          { code: 'fil', name: 'Filipino', isLocal: true, isDisabled: false }
+          { code: 'en', name: 'English', isLocal: true, isDisabled: false }
         ];
         
-        await Promise.all(initialLanguages.map(async (lang) => {
-          const available = await BibleVerseService.isLanguageAvailable(lang.code);
-          lang.isDisabled = !available;
-        }));
+        // Only add Filipino if it's available
+        try {
+          const filAvailable = await BibleVerseService.isLanguageAvailable('fil');
+          if (filAvailable) {
+            initialLanguages.push({ code: 'fil', name: 'Filipino', isLocal: true, isDisabled: false });
+          }
+        } catch (error) {
+          console.warn("Filipino language not available:", error);
+        }
         
         const dbLanguages = await LanguageService.getActiveLanguages();
         
         const dbLangsFormatted = dbLanguages
-          .filter(l => l.language_code !== 'en' && l.language_code !== 'fil')
+          .filter(l => l.language_code !== 'en' && l.language_code !== 'fil' && l.is_active)
           .map(l => ({
             code: l.language_code,
             name: l.language_name,
@@ -57,17 +61,12 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           }));
         
         setAvailableLanguages([...initialLanguages, ...dbLangsFormatted]);
-        
-        setTimeout(() => {
-          dbLangsFormatted.forEach(lang => {
-            if (!lang.isDisabled) {
-              BibleVerseService.isLanguageAvailable(lang.code).catch(() => {});
-            }
-          });
-        }, 1000);
-        
       } catch (error) {
         console.error('Error checking available languages:', error);
+        // Ensure English is always available
+        setAvailableLanguages([
+          { code: 'en', name: 'English', isLocal: true, isDisabled: false }
+        ]);
       }
     };
     
@@ -80,30 +79,14 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           lang.code === disabledLang 
             ? { ...lang, isDisabled: true }
             : lang
-        )
+        ).filter(lang => lang.code === 'en' || !lang.isDisabled)  // Only keep English and enabled languages
       );
     };
     
-    const handleLanguagesInitialized = (event: CustomEvent) => {
-      const { disabledLanguages } = event.detail;
-      
-      if (disabledLanguages && Array.isArray(disabledLanguages)) {
-        setAvailableLanguages(prev => 
-          prev.map(lang => 
-            disabledLanguages.includes(lang.code) 
-              ? { ...lang, isDisabled: true }
-              : lang
-          )
-        );
-      }
-    };
-    
     window.addEventListener('language-disabled', handleLanguageDisabled as EventListener);
-    window.addEventListener('languages-initialized', handleLanguagesInitialized as EventListener);
     
     return () => {
       window.removeEventListener('language-disabled', handleLanguageDisabled as EventListener);
-      window.removeEventListener('languages-initialized', handleLanguagesInitialized as EventListener);
     };
   }, []);
   
@@ -113,59 +96,36 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     setIsChanging(true);
     
     try {
-      const langInfo = availableLanguages.find(l => l.code === language);
-      if (!langInfo) {
-        toast({
-          title: "Language Not Available",
-          description: `The selected language is not available.`,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (langInfo.isDisabled) {
-        toast({
-          title: "Language Not Available",
-          description: `The selected language is disabled due to errors.`,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (!langInfo.isLocal) {
+      // If switching away from English, verify the target language is available
+      if (language !== 'en') {
         const isAvailable = await BibleVerseService.isLanguageAvailable(language);
         if (!isAvailable) {
-          setAvailableLanguages(prev => 
-            prev.map(lang => 
-              lang.code === language 
-                ? { ...lang, isDisabled: true }
-                : lang
-            )
-          );
-          
           toast({
             title: "Language Not Available",
-            description: `Could not load the selected language. The language has been disabled.`,
+            description: `Could not load the selected language. Using English instead.`,
             variant: "destructive"
           });
+          onLanguageChange('en');
           return;
         }
       }
       
       onLanguageChange(language);
       
+      const langInfo = availableLanguages.find(l => l.code === language);
       toast({
         title: "Language Changed",
-        description: `Switched to ${langInfo.name}`,
+        description: `Switched to ${langInfo ? langInfo.name : language}`,
         duration: 2000,
       });
     } catch (error) {
       console.error('Error changing language:', error);
       toast({
         title: "Error",
-        description: "Could not change language. Please try again.",
+        description: "Could not change language. Switching to English.",
         variant: "destructive"
       });
+      onLanguageChange('en');
     } finally {
       setIsChanging(false);
     }
@@ -180,59 +140,51 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           className="flex items-center gap-1" 
           disabled={isChanging}
         >
-          {isChanging ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Globe className="h-4 w-4" />
-          )}
+          <Globe className="h-4 w-4" />
           <span className="hidden sm:inline">
-            {availableLanguages.find(l => l.code === currentLanguage)?.name || 
-             (currentLanguage === 'en' ? 'English' : currentLanguage === 'fil' ? 'Filipino' : currentLanguage)}
+            {availableLanguages.find(l => l.code === currentLanguage)?.name || 'English'}
           </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Select Language</DropdownMenuLabel>
         
+        {/* Only show English and Filipino as local languages */}
         {availableLanguages
-          .filter(lang => lang.isLocal)
+          .filter(lang => lang.isLocal && !lang.isDisabled)
           .map(lang => (
             <DropdownMenuItem 
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
-              className={`${currentLanguage === lang.code ? 'bg-secondary' : ''} ${lang.isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isChanging || lang.isDisabled}
+              className={currentLanguage === lang.code ? 'bg-secondary' : ''}
             >
               <div className="flex items-center w-full justify-between">
                 <span>{lang.name}</span>
                 {currentLanguage === lang.code && (
                   <Check className="h-4 w-4 ml-2" />
                 )}
-                {lang.isLocal && (
-                  <Badge variant="outline" className="ml-2 text-xs">Local</Badge>
-                )}
+                <Badge variant="outline" className="ml-2 text-xs">Local</Badge>
               </div>
             </DropdownMenuItem>
           ))}
         
-        <DropdownMenuSeparator />
+        {/* Only show active non-local languages */}
+        {availableLanguages.filter(lang => !lang.isLocal && !lang.isDisabled).length > 0 && (
+          <DropdownMenuSeparator />
+        )}
         
         {availableLanguages
-          .filter(lang => !lang.isLocal)
+          .filter(lang => !lang.isLocal && !lang.isDisabled)
           .map(lang => (
             <DropdownMenuItem 
               key={lang.code}
-              onClick={() => !lang.isDisabled && handleLanguageChange(lang.code)}
-              className={`${currentLanguage === lang.code ? 'bg-secondary' : ''} ${lang.isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isChanging || lang.isDisabled}
+              onClick={() => handleLanguageChange(lang.code)}
+              className={currentLanguage === lang.code ? 'bg-secondary' : ''}
             >
               <div className="flex items-center w-full justify-between">
                 <span>{lang.name}</span>
                 {currentLanguage === lang.code && (
                   <Check className="h-4 w-4 ml-2" />
-                )}
-                {lang.isDisabled && (
-                  <Badge variant="outline" className="ml-2 text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Disabled</Badge>
                 )}
               </div>
             </DropdownMenuItem>

@@ -76,6 +76,7 @@ class LanguageService {
     if (!userId) return false;
     
     try {
+      // Using upsert without onConflict since it's handled by the database constraint
       const { error } = await supabase
         .from('user_language_preferences')
         .upsert({
@@ -182,7 +183,7 @@ class LanguageService {
       const languages = await this.getAllLanguages();
       
       for (const language of languages) {
-        if (language.language_code === 'en' || language.language_code === 'fil') continue;
+        if (language.language_code === 'en') continue; // Always keep English active
         
         if (!language.xml_url) {
           await this.updateLanguageStatus(language.language_code, false);

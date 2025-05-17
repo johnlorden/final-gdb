@@ -55,12 +55,6 @@ export class XmlManager {
         });
         window.dispatchEvent(event);
       }
-      
-      setTimeout(() => {
-        LanguageService.verifyLanguages().catch(err => 
-          console.error("Failed to verify languages:", err)
-        );
-      }, 5000);
     } catch (error) {
       console.error('Error initializing XML URLs:', error);
       console.log('Falling back to local languages: en, fil');
@@ -70,6 +64,8 @@ export class XmlManager {
   }
   
   static isLanguageDisabled(language: string): boolean {
+    // English is never disabled
+    if (language === 'en') return false;
     return this.disabledLanguages.has(language);
   }
 
@@ -78,7 +74,12 @@ export class XmlManager {
   }
   
   static disableLanguage(language: string): void {
-    if (this.isLocalLanguage(language)) {
+    if (language === 'en') {
+      console.warn(`Cannot disable English language as it's the default`);
+      return;
+    }
+    
+    if (this.isLocalLanguage(language) && language !== 'en') {
       console.warn(`Cannot disable local language ${language}`);
       return;
     }
@@ -94,12 +95,12 @@ export class XmlManager {
   static getXmlUrl(language: string): string {
     if (this.disabledLanguages.has(language)) {
       console.warn(`Language ${language} is disabled due to previous errors, falling back to English`);
-      language = 'en';
+      return this.xmlUrlMap['en'];
     }
     
     if (!this.xmlUrlMap[language]) {
       console.warn(`Language ${language} not found in XML URL mappings, falling back to English`);
-      language = 'en';
+      return this.xmlUrlMap['en'];
     }
     
     return this.xmlUrlMap[language];

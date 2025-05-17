@@ -85,6 +85,20 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
       return;
     }
     
+    // If language is not English, let's ensure it's active
+    if (languageCode !== 'en') {
+      const language = languages.find(l => l.language_code === languageCode);
+      if (!language || !language.is_active) {
+        toast({
+          title: "Language Not Available",
+          description: `The selected language is not active. Using English instead.`,
+          variant: "destructive"
+        });
+        onLanguageChange('en');
+        return;
+      }
+    }
+    
     onLanguageChange(languageCode);
     
     toast({
@@ -216,15 +230,25 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
   // Get list of languages available for the dropdown
   const getLanguageOptions = (): LanguageOption[] => {
     if (isOfflineMode) {
-      // In offline mode, only show downloaded languages
+      // In offline mode, only show downloaded languages and ensure English is always available
       const downloadedLangs = OfflineVerseService.getDownloadedLanguages();
-      return downloadedLangs.map(dl => {
+      let offlineOptions = downloadedLangs.map(dl => {
         const lang = languages.find(l => l.language_code === dl.code);
         return {
           value: dl.code,
           label: lang?.language_name || dl.code
         };
       });
+      
+      // Ensure English is always available
+      if (!downloadedLangs.some(dl => dl.code === 'en')) {
+        offlineOptions.unshift({ 
+          value: 'en',
+          label: 'English'
+        });
+      }
+      
+      return offlineOptions;
     } else {
       // In online mode, show active languages
       return languages
@@ -307,6 +331,7 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
             <div className="space-y-2">
               <Label>Select languages:</Label>
               
+              {/* Only show active languages in the download dialog */}
               {languages.filter(l => l.is_active).map(language => {
                 const isDownloaded = OfflineVerseService.isLanguageDownloaded(language.language_code);
                 const progress = downloadProgress[language.language_code] || 0;
@@ -318,7 +343,10 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
                         type="checkbox"
                         id={`download-${language.language_code}`}
                         checked={!!selectedLanguages[language.language_code]}
-                        onChange={(e) => handleLanguageSelect(language.language_code, e.target.checked)}
+                        onChange={(e) => setSelectedLanguages(prev => ({
+                          ...prev, 
+                          [language.language_code]: e.target.checked
+                        }))}
                         className="h-4 w-4 rounded"
                         disabled={isLoading && progress === 0}
                       />
@@ -334,7 +362,17 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
                         <Button 
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleClearLanguageCache(language.language_code)}
+                          onClick={() => {
+                            OfflineVerseService.clearCache(language.language_code);
+                            setSelectedLanguages(prev => ({
+                              ...prev,
+                              [language.language_code]: false
+                            }));
+                            toast({
+                              title: "Cache Cleared",
+                              description: `Cleared offline cache for ${language.language_name}`
+                            });
+                          }}
                           disabled={isLoading}
                         >
                           <span className="text-xs text-red-500">Clear</span>
@@ -351,7 +389,67 @@ const AdvancedLanguageSwitcher: React.FC<AdvancedLanguageSwitcherProps> = ({
             <Button variant="outline" onClick={() => setDownloadOptions(false)} disabled={isLoading}>
               Cancel
             </Button>
-            <Button onClick={handleDownloadLanguages} disabled={isLoading}>
+            <Button 
+              onClick={async () => {
+                // Get languages that are selected for download
+                const languagesToDownload = Object.entries(selectedLanguages)
+                  .filter(([_, selected]) => selected)
+                  .map(([code]) => code);
+                  
+                if (languagesToDownload.length === 0) {
+                  toast({
+                    title: "No Languages Selected",
+                    description: "Please select at least one language to download",
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                
+                setIsLoading(true);
+                
+                for (const langCode of languagesToDownload) {
+                  const language = languages.find(l => l.language_code === langCode);
+                  if (!language) continue;
+                  
+                  try {
+                    // Update progress while downloading
+                    setDownloadProgress(prev => ({ ...prev, [langCode]: 10 }));
+                    
+                    const success = await OfflineVerseService.cacheVerses(verseCount, langCode);
+                    
+                    // Set progress to 100%
+                    setDownloadProgress(prev => ({ ...prev, [langCode]: 100 }));
+                    
+                    if (success) {
+                      toast({
+                        title: "Download Complete",
+                        description: `Successfully downloaded ${verseCount} verses for ${language.language_name}`
+                      });
+                    } else {
+                      toast({
+                        title: "Download Failed",
+                        description: `Failed to download verses for ${language.language_name}`,
+                        variant: "destructive"
+                      });
+                    }
+                    
+                    // Add a small delay between downloads
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                  } catch (error) {
+                    console.error(`Error downloading ${langCode}:`, error);
+                    toast({
+                      title: "Download Error",
+                      description: `An error occurred while downloading ${language.language_name}`,
+                      variant: "destructive"
+                    });
+                  }
+                }
+                
+                setIsLoading(false);
+                setDownloadOptions(false);
+              }}
+              disabled={isLoading}
+            >
               {isLoading ? "Downloading..." : "Download Selected"}
             </Button>
           </DialogFooter>
