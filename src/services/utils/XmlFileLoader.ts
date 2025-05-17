@@ -46,7 +46,16 @@ export class XmlFileLoader {
       language = 'en';
     }
     
-    return XmlLoader.loadXmlDoc(language);
+    try {
+      return await XmlLoader.loadXmlDoc(language);
+    } catch (error) {
+      console.error(`Error loading XML for language ${language}, falling back to English:`, error);
+      // Fall back to English if there's an error
+      if (language !== 'en') {
+        return XmlLoader.loadXmlDoc('en');
+      }
+      throw error;
+    }
   }
   
   static clearPromiseCache(language: string): void {

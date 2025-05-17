@@ -3,13 +3,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import BibleVerseService from '@/services/BibleVerseService';
-import { useVerseContext } from '@/App';
+import { useVerseContext } from '@/contexts/VerseContext';
+import { useSettingsContext } from '@/contexts/SettingsContext';
 import { useVerseCache } from './useVerseCache';
 import { useVerseUrl } from './useVerseUrl';
 import { VerseResult } from '@/services/types/BibleVerseTypes';
 
 export const useVerseDisplay = () => {
-  const { addToRecentVerses, currentVerse, language, isOfflineMode } = useVerseContext();
+  const { addToRecentVerses } = useVerseContext();
+  const { language } = useSettingsContext();
   const [searchParams] = useSearchParams();
   const { getCachedVerses, setCachedVerses, hasCachedVerses } = useVerseCache();
   const { updateUrlWithVerse } = useVerseUrl();
@@ -22,10 +24,11 @@ export const useVerseDisplay = () => {
   const [previousVerse, setPreviousVerse] = useState('');
   const [verseCategory, setVerseCategory] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
+  const [isOfflineMode] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    BibleVerseService.setLanguage(language);
+    BibleVerseService.setLanguage(language || 'en');
   }, [language]);
   
   // Listen for language changes and reload verse
@@ -57,6 +60,8 @@ export const useVerseDisplay = () => {
             setPreviousVerse(result.reference);
             if (result.category) {
               setVerseCategory(result.category);
+            } else if (result.categories && result.categories.length > 0) {
+              setVerseCategory(result.categories[0]);
             }
           } else {
             throw new Error(`Verse not found: ${bibleVerse}`);
@@ -81,39 +86,36 @@ export const useVerseDisplay = () => {
       setInitialLoad(false);
       handleRandomVerse();
     }
-  }, [searchParams, initialLoad]);
-
-  useEffect(() => {
-    if (currentVerse.verse && currentVerse.reference) {
-      setVerse(currentVerse.verse);
-      setReference(currentVerse.reference);
-    }
-  }, [currentVerse]);
+  }, [searchParams, initialLoad, addToRecentVerses, toast]);
 
   // Preload verses for each category to improve performance
   useEffect(() => {
     const preloadCategoryVerses = async () => {
-      const categories = BibleVerseService.getCategories();
-      
-      // Use Promise.all for parallel loading
-      await Promise.all(categories.map(async (category) => {
-        if (!hasCachedVerses(category)) {
-          try {
-            const verses = await BibleVerseService.getVersesByCategory(category, 10);
-            if (verses && verses.length) {
-              setCachedVerses(category, verses);
+      try {
+        const categories = BibleVerseService.getCategories();
+        
+        // Use Promise.all for parallel loading
+        await Promise.all(categories.map(async (category) => {
+          if (!hasCachedVerses(category)) {
+            try {
+              const verses = await BibleVerseService.getVersesByCategory(category, 10);
+              if (verses && verses.length) {
+                setCachedVerses(category, verses);
+              }
+            } catch (error) {
+              console.error(`Error preloading verses for category ${category}:`, error);
             }
-          } catch (error) {
-            console.error(`Error preloading verses for category ${category}:`, error);
           }
-        }
-      }));
+        }));
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
     };
     
     if (!isOfflineMode) {
       preloadCategoryVerses();
     }
-  }, [language, isOfflineMode]);
+  }, [language, isOfflineMode, hasCachedVerses, setCachedVerses]);
 
   const displayVerse = useCallback((result: VerseResult) => {
     setVerse(result.text);
@@ -188,92 +190,79 @@ export const useVerseDisplay = () => {
     return Promise.resolve();
   }, [currentCategory]);
 
-  const getVerseFromCategory = useCallback((category: string) => {
-    const cachedVerses = getCachedVerses(category);
-    
-    if (category !== 'All' && cachedVerses) {
-      const filteredVerses = cachedVerses.filter(v => v.reference !== reference);
+  const getVerseFromCategory = useCallback(async (category: string) => {
+    try {
+      const cachedVerses = getCachedVerses(category);
       
-      if (filteredVerses.length > 0) {
-        const randomIndex = Math.floor(Math.random() * filteredVerses.length);
-        const newVerse = filteredVerses[randomIndex];
+      if (category !== 'All' && cachedVerses && cachedVerses.length > 0) {
+        const filteredVerses = cachedVerses.filter(v => v.reference !== reference);
         
-        setVerse(newVerse.text);
-        setReference(newVerse.reference);
-        setVerseCategory(newVerse.category || category);
-        addToRecentVerses(newVerse.text, newVerse.reference);
-        setPreviousVerse(newVerse.reference);
-        
-        updateUrlWithVerse(newVerse.reference);
-        setIsLoading(false);
-        return;
-      }
-    }
-    
-    BibleVerseService.getVerseByCategory(category)
-      .then((result) => {
-        if (result) {
-          setVerse(result.text);
-          setReference(result.reference);
-          addToRecentVerses(result.text, result.reference);
-          setPreviousVerse(result.reference);
+        if (filteredVerses.length > 0) {
+          const randomIndex = Math.floor(Math.random() * filteredVerses.length);
+          const newVerse = filteredVerses[randomIndex];
           
-          if (category === 'All' && result.category) {
-            setVerseCategory(result.category);
-          } else if (result.categories && result.categories.length > 0) {
-            setVerseCategory(result.categories[0]);
-          } else {
-            setVerseCategory(category);
-          }
+          setVerse(newVerse.text);
+          setReference(newVerse.reference);
+          setVerseCategory(newVerse.category || category);
+          addToRecentVerses(newVerse.text, newVerse.reference);
+          setPreviousVerse(newVerse.reference);
           
-          updateUrlWithVerse(result.reference);
-          return null;
-        } else {
-          return BibleVerseService.getRandomVerse();
+          updateUrlWithVerse(newVerse.reference);
+          setIsLoading(false);
+          return;
         }
-      })
-      .then((randomResult) => {
+      }
+      
+      console.log(`Getting verse for category: ${category}`);
+      const result = await BibleVerseService.getVerseByCategory(category);
+      
+      if (result) {
+        setVerse(result.text);
+        setReference(result.reference);
+        addToRecentVerses(result.text, result.reference);
+        setPreviousVerse(result.reference);
+        
+        if (category === 'All' && result.category) {
+          setVerseCategory(result.category);
+        } else if (result.categories && result.categories.length > 0) {
+          setVerseCategory(result.categories[0]);
+        } else {
+          setVerseCategory(category);
+        }
+        
+        updateUrlWithVerse(result.reference);
+      } else {
+        throw new Error('No verse found for category');
+      }
+    } catch (error) {
+      console.error('Error getting verse by category:', error);
+      setHasError(true);
+      
+      toast({
+        title: "Error loading verse",
+        description: "Could not load a verse from the selected category. Trying a random verse instead.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      
+      try {
+        const randomResult = await BibleVerseService.getRandomVerse();
         if (randomResult) {
           setVerse(randomResult.text);
           setReference(randomResult.reference);
           addToRecentVerses(randomResult.text, randomResult.reference);
           setPreviousVerse(randomResult.reference);
-          
           if (randomResult.category) {
             setVerseCategory(randomResult.category);
           }
-          
           updateUrlWithVerse(randomResult.reference);
         }
-      })
-      .catch(error => {
-        console.error('Error getting verse by category:', error);
-        setHasError(true);
-        toast({
-          title: "Error loading verse",
-          description: "Could not load a verse from the selected category. Trying a random verse instead.",
-          variant: "destructive",
-          duration: 3000,
-        });
-        
-        BibleVerseService.getRandomVerse()
-          .then((result) => {
-            if (result) {
-              setVerse(result.text);
-              setReference(result.reference);
-              addToRecentVerses(result.text, result.reference);
-              setPreviousVerse(result.reference);
-              if (result.category) {
-                setVerseCategory(result.category);
-              }
-              updateUrlWithVerse(result.reference);
-            }
-          })
-          .catch(() => {
-            // Already showing error toast, no need for another
-          });
-      })
-      .finally(() => setIsLoading(false));
+      } catch (error) {
+        console.error('Error getting random verse:', error);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }, [reference, addToRecentVerses, updateUrlWithVerse, toast, getCachedVerses]);
 
   return {

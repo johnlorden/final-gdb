@@ -15,6 +15,7 @@ export class VerseSelector {
     let lastIndex = VerseCache.getCategoryLastIndex(category);
     let randomIndex;
     
+    // Make sure we don't get the same verse twice in a row
     do {
       randomIndex = Math.floor(Math.random() * verses.length);
     } while (randomIndex === lastIndex && verses.length > 1);
@@ -25,28 +26,34 @@ export class VerseSelector {
   }
   
   static rankSearchResults(verses: VerseResult[], searchTerm: string): VerseResult[] {
+    if (!searchTerm || !verses || verses.length === 0) {
+      return [];
+    }
+    
+    const termLower = searchTerm.toLowerCase();
+    
     const results = verses.map(verse => {
       let score = 0;
       
-      if (verse.reference.toLowerCase() === searchTerm) {
+      if (verse.reference.toLowerCase() === termLower) {
         score += 100;
       } 
-      else if (verse.reference.toLowerCase().includes(searchTerm)) {
+      else if (verse.reference.toLowerCase().includes(termLower)) {
         score += 50;
         
-        if (verse.reference.toLowerCase().startsWith(searchTerm)) {
+        if (verse.reference.toLowerCase().startsWith(termLower)) {
           score += 20;
         }
       }
       
       const textLower = verse.text.toLowerCase();
-      if (textLower === searchTerm) {
+      if (textLower === termLower) {
         score += 50;
-      } else if (textLower.includes(searchTerm)) {
+      } else if (textLower.includes(termLower)) {
         score += 30;
         
         const words = textLower.split(/\s+/);
-        if (words.some(word => word === searchTerm)) {
+        if (words.some(word => word === termLower)) {
           score += 15;
         }
       }
@@ -54,7 +61,7 @@ export class VerseSelector {
       if (verse.categories && 
           verse.categories.some(cat => {
             const catLower = cat.toLowerCase();
-            return catLower === searchTerm || catLower.includes(searchTerm);
+            return catLower === termLower || catLower.includes(termLower);
           })) {
         score += 20;
       }

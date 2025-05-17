@@ -1,14 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { RefreshCw, ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BibleVerseService from '@/services/BibleVerseService';
 
 interface CategoryProps {
   onCategorySelect: (category: string) => void;
-  onRandomVerse: (category?: string) => void; // Modified to accept optional category
+  onRandomVerse: (category?: string) => void; 
   currentCategory: string;
 }
 

@@ -1,7 +1,5 @@
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import BibleVerseService from '../services/BibleVerseService';
-import OfflineVerseService from '../services/OfflineVerseService';
 import { XmlFileLoader } from '../services/utils/XmlFileLoader';
 
 interface VerseItem {
@@ -47,7 +45,9 @@ export const VerseContextProvider: React.FC<{children: React.ReactNode}> = ({ ch
   
   // Initialize language files when app starts
   useEffect(() => {
-    XmlFileLoader.initializeXmlUrls();
+    XmlFileLoader.initializeXmlUrls().catch(err => 
+      console.error("Failed to initialize XML URLs in VerseContext:", err)
+    );
   }, []);
   
   // Save recent verses to localStorage when updated
@@ -71,6 +71,8 @@ export const VerseContextProvider: React.FC<{children: React.ReactNode}> = ({ ch
 
   // Add a verse to recent verses
   const addToRecentVerses = (verse: string, reference: string) => {
+    if (!verse || !reference) return;
+    
     setCurrentVerse({ verse, reference });
     
     const newVerse = {
