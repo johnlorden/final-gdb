@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Partner } from '@/types/PartnerTypes';
 import { Skeleton } from './ui/skeleton';
+import { Database } from '@/integrations/supabase/types';
 
 const Partners: React.FC = () => {
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -13,7 +14,6 @@ const Partners: React.FC = () => {
     const fetchPartners = async () => {
       try {
         setIsLoading(true);
-        // Using a type assertion to handle the type mismatch
         const { data, error } = await supabase
           .from('partners')
           .select('*')
@@ -23,7 +23,6 @@ const Partners: React.FC = () => {
           throw new Error(error.message);
         }
         
-        // Cast the data to Partner[] type
         setPartners((data || []) as Partner[]);
       } catch (err: any) {
         console.error('Error fetching partners:', err);

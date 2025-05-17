@@ -1,6 +1,5 @@
 
 import { XmlParser } from '../XmlParser';
-import { XmlManager } from './XmlManager';
 
 export class XmlCache {
   private static cachedXmlDocs: {

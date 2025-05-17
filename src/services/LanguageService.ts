@@ -85,8 +85,6 @@ class LanguageService {
           verses_downloaded: versesDownloaded,
           last_downloaded: offlineEnabled ? new Date().toISOString() : null,
           updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id, language_code'
         });
       
       if (error) {
