@@ -86,7 +86,7 @@ export const useVerseDisplay = () => {
         });
     } else if (initialLoad) {
       setInitialLoad(false);
-      handleRandomVerse();
+      handleRandomVerse('All');
     }
   }, [searchParams, initialLoad, addToRecentVerses, toast]);
 
@@ -241,7 +241,18 @@ export const useVerseDisplay = () => {
         
         updateUrlWithVerse(result.reference);
       } else {
-        throw new Error('No verse found for category');
+        console.warn('No verse found for category, trying random verse');
+        const randomVerse = await BibleVerseService.getRandomVerse();
+        if (randomVerse) {
+          setVerse(randomVerse.text);
+          setReference(randomVerse.reference);
+          setVerseCategory(randomVerse.category || 'All');
+          addToRecentVerses(randomVerse.text, randomVerse.reference);
+          setPreviousVerse(randomVerse.reference);
+          updateUrlWithVerse(randomVerse.reference);
+        } else {
+          throw new Error('No verse found');
+        }
       }
     } catch (error) {
       console.error('Error getting verse by category:', error);
@@ -265,6 +276,8 @@ export const useVerseDisplay = () => {
             setVerseCategory(randomResult.category);
           }
           updateUrlWithVerse(randomResult.reference);
+        } else {
+          throw new Error('Failed to get random verse');
         }
       } catch (error) {
         console.error('Error getting random verse:', error);

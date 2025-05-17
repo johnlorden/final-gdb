@@ -1,5 +1,5 @@
 
-import React, { memo, lazy, Suspense } from 'react';
+import React, { memo, lazy, Suspense, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -15,6 +15,7 @@ interface ShareSectionProps {
 
 const ShareSection: React.FC<ShareSectionProps> = memo((props) => {
   const { verse, reference, category } = props;
+  const cardRef = useRef<HTMLDivElement>(null);
   
   if (!verse || !reference) {
     return null;
@@ -29,7 +30,15 @@ const ShareSection: React.FC<ShareSectionProps> = memo((props) => {
     >
       <ErrorBoundary fallback={<div className="text-red-500">Failed to load sharing options</div>}>
         <Suspense fallback={<ShareButtonsSkeleton />}>
-          <SocialShareBar verse={verse} reference={reference} category={category} />
+          <SocialShareBar 
+            verse={verse} 
+            reference={reference} 
+            category={category} 
+            cardRef={cardRef}
+            template="default"
+            backgroundColor="#ffffff"
+            backgroundImage={null}
+          />
         </Suspense>
       </ErrorBoundary>
     </motion.section>

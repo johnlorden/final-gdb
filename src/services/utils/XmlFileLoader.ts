@@ -25,6 +25,8 @@ export class XmlFileLoader {
       console.log("XmlFileLoader initialized successfully");
     } catch (error) {
       console.error("Error initializing XML URLs:", error);
+      // Even if there's an error, mark as initialized to allow fallback to local files
+      this.isInitialized = true;
     } finally {
       this.initPromise = null;
     }
@@ -37,17 +39,17 @@ export class XmlFileLoader {
   }
   
   static async loadXmlDoc(language: string = 'en'): Promise<Document> {
-    if (!this.isInitialized) {
-      await this.initializeXmlUrls();
-    }
-    
-    // Always default to English if the requested language is disabled
-    if (language !== 'en' && XmlManager.isLanguageDisabled(language)) {
-      console.warn(`Language ${language} is disabled, using English instead`);
-      language = 'en';
-    }
-    
     try {
+      if (!this.isInitialized) {
+        await this.initializeXmlUrls();
+      }
+      
+      // Always default to English if the requested language is disabled
+      if (language !== 'en' && XmlManager.isLanguageDisabled(language)) {
+        console.warn(`Language ${language} is disabled, using English instead`);
+        language = 'en';
+      }
+      
       return await XmlLoader.loadXmlDoc(language);
     } catch (error) {
       console.error(`Error loading XML for language ${language}, falling back to English:`, error);
@@ -65,10 +67,21 @@ export class XmlFileLoader {
   
   static preloadAllLanguages(): void {
     this.initializeXmlUrls().then(() => {
+      console.log("Preloading all languages");
       // Always preload English
       XmlLoader.loadXmlDoc('en').catch(err => 
         console.error("Failed to preload English XML", err)
       );
+      
+      // Try to preload other languages
+      const languages = XmlManager.getAvailableLanguages();
+      languages.forEach(lang => {
+        if (lang !== 'en' && !XmlManager.isLanguageDisabled(lang)) {
+          XmlLoader.loadXmlDoc(lang).catch(() => {
+            // Silently fail for non-English languages
+          });
+        }
+      });
     });
   }
   

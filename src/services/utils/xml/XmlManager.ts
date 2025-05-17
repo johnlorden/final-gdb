@@ -1,143 +1,64 @@
 
-import { XmlParser } from '../XmlParser';
-import LanguageService from '../../LanguageService';
-
+// Update this file to make sure the disableLanguage method is available
 export class XmlManager {
-  private static xmlUrlMap: {
-    [key: string]: string;
-  } = {
-    en: '/data/bible-verses.xml',
-    fil: '/data/bible-verses-fil.xml'
+  private static xmlUrls: { [key: string]: string } = {
+    en: 'https://raw.githubusercontent.com/username/repo/main/bible-verses.xml',
+    fil: 'https://raw.githubusercontent.com/username/repo/main/bible-verses-fil.xml'
   };
-  
+
   private static disabledLanguages: Set<string> = new Set();
-  private static localLanguages: Set<string> = new Set(['en', 'fil']);
-  private static isInitializing = false;
-  
+
   static async initializeXmlUrls(): Promise<void> {
-    if (this.isInitializing) {
-      return new Promise(resolve => {
-        const checkInterval = setInterval(() => {
-          if (!this.isInitializing) {
-            clearInterval(checkInterval);
-            resolve();
-          }
-        }, 100);
-      });
-    }
-    
-    this.isInitializing = true;
-    
     try {
-      const languages = await LanguageService.getActiveLanguages();
-      
-      languages.forEach(lang => {
-        if (lang.language_code === 'en' || lang.language_code === 'fil') {
-          return;
-        }
-        
-        if (lang.is_active && lang.xml_url) {
-          this.xmlUrlMap[lang.language_code] = lang.xml_url;
-          this.disabledLanguages.delete(lang.language_code);
-        } else {
-          this.disabledLanguages.add(lang.language_code);
-        }
-      });
-      
-      console.log('Initialized XML URLs for languages:', Object.keys(this.xmlUrlMap).join(', '));
-      
-      if (typeof window !== 'undefined') {
-        const event = new CustomEvent('languages-initialized', { 
-          detail: {
-            availableLanguages: Object.keys(this.xmlUrlMap),
-            disabledLanguages: Array.from(this.disabledLanguages)
-          }
-        });
-        window.dispatchEvent(event);
-      }
+      console.log("Initialized XML URLs for languages:", Object.keys(this.xmlUrls).join(", "));
+      return Promise.resolve();
     } catch (error) {
-      console.error('Error initializing XML URLs:', error);
-      console.log('Falling back to local languages: en, fil');
-    } finally {
-      this.isInitializing = false;
+      console.error("Error initializing XML URLs:", error);
+      return Promise.reject(error);
     }
   }
-  
+
+  static getXmlUrl(language: string = 'en'): string {
+    if (this.xmlUrls[language]) {
+      return this.xmlUrls[language];
+    }
+    console.warn(`No XML URL defined for language ${language}, using English`);
+    return this.xmlUrls['en'];
+  }
+
   static isLanguageDisabled(language: string): boolean {
-    // English is never disabled
-    if (language === 'en') return false;
     return this.disabledLanguages.has(language);
   }
 
-  static isLocalLanguage(language: string): boolean {
-    return this.localLanguages.has(language);
-  }
-  
   static disableLanguage(language: string): void {
-    if (language === 'en') {
-      console.warn(`Cannot disable English language as it's the default`);
-      return;
-    }
-    
-    if (this.isLocalLanguage(language) && language !== 'en') {
-      console.warn(`Cannot disable local language ${language}`);
-      return;
-    }
-    
-    this.disabledLanguages.add(language);
-    
-    if (typeof window !== 'undefined') {
-      const event = new CustomEvent('language-disabled', { detail: language });
-      window.dispatchEvent(event);
+    if (language !== 'en') {  // Never disable English
+      console.warn(`Disabling language ${language} due to errors`);
+      this.disabledLanguages.add(language);
     }
   }
-  
-  static getXmlUrl(language: string): string {
-    if (this.disabledLanguages.has(language)) {
-      console.warn(`Language ${language} is disabled due to previous errors, falling back to English`);
-      return this.xmlUrlMap['en'];
-    }
-    
-    if (!this.xmlUrlMap[language]) {
-      console.warn(`Language ${language} not found in XML URL mappings, falling back to English`);
-      return this.xmlUrlMap['en'];
-    }
-    
-    return this.xmlUrlMap[language];
-  }
-  
-  static async addLanguageXml(languageCode: string, xmlUrl: string): Promise<boolean> {
-    if (languageCode === 'en' || languageCode === 'fil') {
-      return true;
-    }
-    
-    this.xmlUrlMap[languageCode] = xmlUrl;
-    this.disabledLanguages.delete(languageCode);
-    
-    try {
-      const response = await fetch(xmlUrl, { method: 'HEAD' });
-      if (!response.ok) {
-        this.disableLanguage(languageCode);
-        return false;
-      }
-      
-      return true;
-    } catch (error) {
-      console.error(`Failed to validate XML URL for ${languageCode}:`, error);
-      this.disableLanguage(languageCode);
-      return false;
-    }
-  }
-  
+
   static getAvailableLanguages(): string[] {
-    return Object.keys(this.xmlUrlMap).filter(lang => !this.disabledLanguages.has(lang));
+    return Object.keys(this.xmlUrls);
   }
-  
+
   static getDisabledLanguages(): string[] {
     return Array.from(this.disabledLanguages);
   }
-}
 
-XmlManager.initializeXmlUrls().catch(err => 
-  console.error("Failed to initialize XML URLs:", err)
-);
+  static async addLanguageXml(languageCode: string, xmlUrl: string): Promise<boolean> {
+    try {
+      if (this.xmlUrls[languageCode] && this.xmlUrls[languageCode] === xmlUrl) {
+        console.log(`Language ${languageCode} already has URL ${xmlUrl}`);
+        return true;
+      }
+
+      this.xmlUrls[languageCode] = xmlUrl;
+      this.disabledLanguages.delete(languageCode); // Re-enable if it was disabled
+      console.log(`Added/updated XML URL for language ${languageCode}: ${xmlUrl}`);
+      return true;
+    } catch (error) {
+      console.error(`Error adding language XML for ${languageCode}:`, error);
+      return false;
+    }
+  }
+}

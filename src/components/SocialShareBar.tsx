@@ -15,15 +15,23 @@ interface SocialShareBarProps {
   verse: string;
   reference: string;
   category: string;
+  cardRef?: React.RefObject<HTMLDivElement>;
+  template?: 'default' | 'minimal';
+  backgroundColor?: string;
+  backgroundImage?: string | null;
 }
 
 const SocialShareBar: React.FC<SocialShareBarProps> = ({
   verse,
   reference,
   category,
+  cardRef,
+  template = 'default',
+  backgroundColor = '#ffffff',
+  backgroundImage = null,
 }) => {
-  const [template, setTemplate] = useState<'default' | 'minimal'>('default');
-  const [backgroundColor, setBackgroundColor] = useState('#ffffff');
+  const [selectedTemplate, setSelectedTemplate] = useState<'default' | 'minimal'>(template);
+  const [selectedBackground, setSelectedBackground] = useState(backgroundColor);
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -31,9 +39,10 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
         <ShareButtons 
           verse={verse} 
           reference={reference}
-          template={template}
-          backgroundColor={backgroundColor}
-          backgroundImage={null}
+          cardRef={cardRef}
+          template={selectedTemplate}
+          backgroundColor={selectedBackground}
+          backgroundImage={backgroundImage}
         />
         
         <BookmarkVerse 
@@ -50,8 +59,8 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
         <div className="flex items-center justify-center gap-2">
           <span className="text-sm text-muted-foreground">Template:</span>
           <Select
-            value={template}
-            onValueChange={(value) => setTemplate(value as 'default' | 'minimal')}
+            value={selectedTemplate}
+            onValueChange={(value) => setSelectedTemplate(value as 'default' | 'minimal')}
           >
             <SelectTrigger className="w-[140px] h-8 text-xs">
               <SelectValue placeholder="Select style" />

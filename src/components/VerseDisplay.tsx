@@ -29,9 +29,10 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
   const isMobile = useIsMobile();
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Load a verse if none is loaded initially
   useEffect(() => {
-    // If no verse is loaded initially, get a random verse
     if (!isLoading && !verse && !hasError) {
+      console.log("No verse loaded on initialization, getting a random verse");
       handleRandomVerse('All');
     }
   }, [isLoading, verse, hasError, handleRandomVerse]);

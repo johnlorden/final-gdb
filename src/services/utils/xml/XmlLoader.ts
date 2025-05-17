@@ -25,21 +25,28 @@ export class XmlLoader {
     if (!this.xmlDocPromises[language]) {
       const localDoc = XmlCache.tryGetFromLocalStorage(language);
       if (localDoc) {
+        console.log(`Found cached XML for ${language} in localStorage`);
         this.xmlDocPromises[language] = Promise.resolve(localDoc);
         return localDoc;
       }
       
+      console.log(`No cached XML found for ${language}, fetching from URL`);
       const url = XmlManager.getXmlUrl(language);
       console.log(`Fetching XML document from URL: ${url} for language: ${language}`);
       this.xmlDocPromises[language] = this.fetchXmlDocument(url, language);
     }
     
     try {
+      console.log(`Waiting for XML promise to resolve for ${language}`);
       const doc = await this.xmlDocPromises[language]!;
       
       const verseCount = doc.getElementsByTagName('verse').length;
+      console.log(`XML document for ${language} loaded with ${verseCount} verses`);
+      
       if (verseCount === 0) {
         console.error(`XML document for ${language} doesn't contain any verses`);
+        XmlManager.disableLanguage(language);
+        
         if (language !== 'en') {
           console.warn(`Falling back to English`);
           return this.loadXmlDoc('en');
@@ -50,6 +57,8 @@ export class XmlLoader {
       return doc;
     } catch (error) {
       console.error(`Error loading XML for ${language}:`, error);
+      XmlManager.disableLanguage(language);
+      
       if (language !== 'en') {
         console.warn(`Error loading ${language}, falling back to English`);
         return this.loadXmlDoc('en');
@@ -60,20 +69,21 @@ export class XmlLoader {
   
   private static async fetchXmlDocument(url: string, language: string): Promise<Document> {
     try {
-      // Always try to load from public folder first
-      if (language === 'en') {
+      // Always try to load from public folder first if it's English or Filipino
+      if (language === 'en' || language === 'fil') {
+        const fileName = language === 'en' ? 'bible-verses.xml' : 'bible-verses-fil.xml';
         try {
-          const response = await fetch('/data/bible-verses.xml');
+          const response = await fetch(`/data/${fileName}`);
           if (response.ok) {
             const xmlText = await response.text();
             const doc = XmlParser.parseXmlDocument(xmlText);
-            console.log(`Successfully loaded English XML document from public folder`);
+            console.log(`Successfully loaded ${language} XML document from public folder`);
             XmlCache.saveToLocalStorage(language, xmlText);
             XmlCache.setCachedDocument(language, doc);
             return doc;
           }
         } catch (localError) {
-          console.warn(`Failed to load English XML from public folder`, localError);
+          console.warn(`Failed to load ${language} XML from public folder`, localError);
         }
       }
       
@@ -102,7 +112,9 @@ export class XmlLoader {
     } catch (error) {
       console.error(`Error loading XML document for ${language}:`, error);
       
+      // Disable the language for future attempts if it's not English
       if (language !== 'en') {
+        XmlManager.disableLanguage(language);
         console.warn(`Error loading ${language} XML, falling back to English`);
         return this.loadXmlDoc('en');
       }

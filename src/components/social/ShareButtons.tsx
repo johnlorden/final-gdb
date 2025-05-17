@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Twitter, Facebook, Mail, Share2 } from 'lucide-react';
@@ -10,7 +11,7 @@ interface ShareButtonsProps {
   cardRef?: React.RefObject<HTMLDivElement>;
   template: string;
   backgroundColor: string;
-  backgroundImage: string | null; // Keep for type compatibility but won't use
+  backgroundImage: string | null;
 }
 
 export const ShareButtons: React.FC<ShareButtonsProps> = ({ 
