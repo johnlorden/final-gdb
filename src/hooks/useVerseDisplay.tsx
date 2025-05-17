@@ -16,18 +16,19 @@ export const useVerseDisplay = () => {
   const { getCachedVerses, setCachedVerses, hasCachedVerses } = useVerseCache();
   const { updateUrlWithVerse } = useVerseUrl();
   
-  const [verse, setVerse] = useState('');
-  const [reference, setReference] = useState('');
+  const [verse, setVerse] = useState<string | null>(null);
+  const [reference, setReference] = useState<string | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [currentCategory, setCurrentCategory] = useState('All');
   const [previousVerse, setPreviousVerse] = useState('');
   const [verseCategory, setVerseCategory] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
-  const [isOfflineMode] = useState(false);
   const { toast } = useToast();
 
+  // Set the language for BibleVerseService
   useEffect(() => {
+    console.log(`Setting language to ${language || 'en'}`);
     BibleVerseService.setLanguage(language || 'en');
   }, [language]);
   
@@ -45,6 +46,7 @@ export const useVerseDisplay = () => {
     };
   }, [currentCategory]);
 
+  // Handle URL params for verse references
   useEffect(() => {
     const bibleVerse = searchParams.get('bibleverse');
     
@@ -93,6 +95,7 @@ export const useVerseDisplay = () => {
     const preloadCategoryVerses = async () => {
       try {
         const categories = BibleVerseService.getCategories();
+        console.log(`Preloading verses for ${categories.length} categories`);
         
         // Use Promise.all for parallel loading
         await Promise.all(categories.map(async (category) => {
@@ -101,6 +104,7 @@ export const useVerseDisplay = () => {
               const verses = await BibleVerseService.getVersesByCategory(category, 10);
               if (verses && verses.length) {
                 setCachedVerses(category, verses);
+                console.log(`Cached ${verses.length} verses for category ${category}`);
               }
             } catch (error) {
               console.error(`Error preloading verses for category ${category}:`, error);
@@ -112,10 +116,8 @@ export const useVerseDisplay = () => {
       }
     };
     
-    if (!isOfflineMode) {
-      preloadCategoryVerses();
-    }
-  }, [language, isOfflineMode, hasCachedVerses, setCachedVerses]);
+    preloadCategoryVerses();
+  }, [language, hasCachedVerses, setCachedVerses]);
 
   const displayVerse = useCallback((result: VerseResult) => {
     setVerse(result.text);
@@ -138,6 +140,8 @@ export const useVerseDisplay = () => {
     
     setIsLoading(true);
     setHasError(false);
+    console.log(`Searching for verse: "${query}"`);
+    
     BibleVerseService.getVerseByReference(query)
       .then((result) => {
         if (result) {
@@ -173,6 +177,7 @@ export const useVerseDisplay = () => {
   }, [displayVerse, toast]);
 
   const handleCategorySelect = useCallback((category: string) => {
+    console.log(`Category selected: ${category}`);
     setIsLoading(true);
     setCurrentCategory(category);
     setHasError(false);
@@ -181,6 +186,7 @@ export const useVerseDisplay = () => {
   }, []);
 
   const handleRandomVerse = useCallback((category?: string) => {
+    console.log(`Getting random verse for category: ${category || currentCategory}`);
     setIsLoading(true);
     setHasError(false);
     
@@ -201,6 +207,8 @@ export const useVerseDisplay = () => {
           const randomIndex = Math.floor(Math.random() * filteredVerses.length);
           const newVerse = filteredVerses[randomIndex];
           
+          console.log(`Found cached verse for category ${category}: ${newVerse.reference}`);
+          
           setVerse(newVerse.text);
           setReference(newVerse.reference);
           setVerseCategory(newVerse.category || category);
@@ -217,6 +225,7 @@ export const useVerseDisplay = () => {
       const result = await BibleVerseService.getVerseByCategory(category);
       
       if (result) {
+        console.log(`Got verse by category ${category}: ${result.reference}`);
         setVerse(result.text);
         setReference(result.reference);
         addToRecentVerses(result.text, result.reference);

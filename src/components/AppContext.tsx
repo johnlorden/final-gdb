@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { useVerseContext as useVerseContextImport } from '@/contexts/VerseContext';
+import { useVerseContext } from '@/contexts/VerseContext';
 import { useSettingsContext } from '@/contexts/SettingsContext';
 
 export const useAppContext = () => {
-  // This is a composite hook that combines both contexts
-  const verse = useVerseContextImport();
+  // Access both context hooks
+  const verse = useVerseContext();
   const settings = useSettingsContext();
   
   return {
@@ -14,8 +14,5 @@ export const useAppContext = () => {
     language: settings.language || 'en' // Ensure English is the default
   };
 };
-
-// No need for the AppContextProvider component anymore since
-// we're handling context providers in main.tsx
 
 export default useAppContext;

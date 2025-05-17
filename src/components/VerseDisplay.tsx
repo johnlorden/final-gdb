@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import BibleVerseCard from '@/components/BibleVerseCard';
 import SwipeVerseNavigation from '@/components/SwipeVerseNavigation';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface VerseDisplayProps {
-  verse: string;
-  reference: string;
+  verse: string | null;
+  reference: string | null;
   verseCategory: string | null;
   currentCategory: string;
   isLoading: boolean;
@@ -29,10 +29,17 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
   const isMobile = useIsMobile();
   const cardRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    // If no verse is loaded initially, get a random verse
+    if (!isLoading && !verse && !hasError) {
+      handleRandomVerse('All');
+    }
+  }, [isLoading, verse, hasError, handleRandomVerse]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.section 
-        key={reference || 'loading' || 'error'}
+        key={reference || 'loading' || 'error' || 'empty'}
         className="flex flex-col items-center justify-center"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -57,7 +64,7 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
               Try Again
             </Button>
           </div>
-        ) : verse ? (
+        ) : verse && reference ? (
           <div className="flex justify-center w-full">
             {isMobile ? (
               <SwipeVerseNavigation

@@ -22,6 +22,7 @@ export class XmlFileLoader {
     try {
       await XmlManager.initializeXmlUrls();
       this.isInitialized = true;
+      console.log("XmlFileLoader initialized successfully");
     } catch (error) {
       console.error("Error initializing XML URLs:", error);
     } finally {
@@ -68,14 +69,6 @@ export class XmlFileLoader {
       XmlLoader.loadXmlDoc('en').catch(err => 
         console.error("Failed to preload English XML", err)
       );
-      
-      // Only preload other languages if they're active
-      const availableLanguages = XmlManager.getAvailableLanguages();
-      if (availableLanguages.includes('fil')) {
-        XmlLoader.loadXmlDoc('fil').catch(err => 
-          console.warn("Failed to preload Filipino XML", err)
-        );
-      }
     });
   }
   
@@ -107,6 +100,5 @@ export class XmlFileLoader {
   }
 }
 
-XmlFileLoader.initializeXmlUrls().catch(err => 
-  console.error("Failed to initialize XML URLs:", err)
-);
+// Initialize on load
+XmlFileLoader.preloadAllLanguages();
