@@ -218,7 +218,7 @@ const About = () => {
           
           <div className="mt-4 text-center">
             <p className="text-muted-foreground text-sm">
-              Special thanks to <span className="font-semibold">Every Nation Campus</span> and my <span classname="font-semibold">Victory Group</span> for their continued support and guidance.
+              Special thanks to <span className="font-semibold">Every Nation Campus</span> and my <span className="font-semibold">Victory Group</span> for their continued support and guidance.
             </p>
           </div>
         </motion.section>
