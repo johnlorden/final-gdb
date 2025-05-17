@@ -1,30 +1,21 @@
 
 import React from 'react';
-import { VerseContextProvider, useVerseContext as useVerseContextImport } from '@/contexts/VerseContext';
-import { SettingsContextProvider, useSettingsContext } from '@/contexts/SettingsContext';
+import { useVerseContext as useVerseContextImport } from '@/contexts/VerseContext';
+import { useSettingsContext } from '@/contexts/SettingsContext';
 
 export const useAppContext = () => {
   // This is a composite hook that combines both contexts
   const verse = useVerseContextImport();
-  const settings = {
-    ...useSettingsContext(),
-    language: useSettingsContext().language || 'en' // Ensure English is the default
-  };
+  const settings = useSettingsContext();
   
   return {
     ...verse,
-    ...settings
+    ...settings,
+    language: settings.language || 'en' // Ensure English is the default
   };
 };
 
-export const AppContextProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  return (
-    <SettingsContextProvider>
-      <VerseContextProvider>
-        {children}
-      </VerseContextProvider>
-    </SettingsContextProvider>
-  );
-};
+// No need for the AppContextProvider component anymore since
+// we're handling context providers in main.tsx
 
-export default AppContextProvider;
+export default useAppContext;

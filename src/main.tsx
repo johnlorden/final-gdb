@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 import { ThemeProvider } from './components/ThemeProvider.tsx'
+import { SettingsContextProvider } from './contexts/SettingsContext.tsx'
+import { VerseContextProvider } from './contexts/VerseContext.tsx'
 
 // Use lazy loading for pages
 const Index = lazy(() => import('./pages/Index.tsx'))
@@ -25,32 +27,36 @@ const PageLoader = () => (
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="light" storageKey="bible-verse-theme">
-      <Router>
-        <Routes>
-          <Route path="/" element={<App />}>
-            <Route index element={
-              <Suspense fallback={<PageLoader />}>
-                <Index />
-              </Suspense>
-            } />
-            <Route path="about" element={
-              <Suspense fallback={<PageLoader />}>
-                <About />
-              </Suspense>
-            } />
-            <Route path="bookmarks" element={
-              <Suspense fallback={<PageLoader />}>
-                <Bookmarks />
-              </Suspense>
-            } />
-            <Route path="*" element={
-              <Suspense fallback={<PageLoader />}>
-                <NotFound />
-              </Suspense>
-            } />
-          </Route>
-        </Routes>
-      </Router>
+      <SettingsContextProvider>
+        <VerseContextProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<App />}>
+                <Route index element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Index />
+                  </Suspense>
+                } />
+                <Route path="about" element={
+                  <Suspense fallback={<PageLoader />}>
+                    <About />
+                  </Suspense>
+                } />
+                <Route path="bookmarks" element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Bookmarks />
+                  </Suspense>
+                } />
+                <Route path="*" element={
+                  <Suspense fallback={<PageLoader />}>
+                    <NotFound />
+                  </Suspense>
+                } />
+              </Route>
+            </Routes>
+          </Router>
+        </VerseContextProvider>
+      </SettingsContextProvider>
     </ThemeProvider>
   </React.StrictMode>
 );
