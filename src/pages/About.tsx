@@ -76,11 +76,11 @@ const About = () => {
               <h3 className="text-xl font-bold mb-2">John Lorden E.</h3>
               <div className="flex flex-wrap gap-2 mb-3">
                 <Badge variant="outline">Developer</Badge>
-                <Badge variant="outline">Believer</Badge>
-                <Badge variant="outline">Servant of God</Badge>
+                <Badge variant="outline">Student</Badge>
+                <Badge variant="outline">Christian</Badge>
               </div>
               <p className="mb-4">
-                John created God's Daily Bread with a mission to share the power of scripture with people seeking guidance, 
+                Lorden created God's Daily Bread with a mission to share the power of scripture with people seeking guidance, 
                 hope, and strength. His passion for technology and faith came together in this project to make the Word of God 
                 accessible to everyone, everywhere.
               </p>
@@ -91,7 +91,7 @@ const About = () => {
               </p>
               <div className="mt-4">
                 <a 
-                  href="https://itsme.johnlorden.online" 
+                  href="https://www.johnlorden.online" 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="text-primary hover:underline inline-flex items-center"
@@ -177,7 +177,8 @@ const About = () => {
               "Bookmark your favorite verses",
               "Customizable verse displays",
               "Dark and light mode support",
-              "Voice reading of verses"
+              "Download Verses as Images",
+              "Generate QR Codes for Verses"
             ].map((feature, index) => (
               <motion.div 
                 key={index}
@@ -217,7 +218,7 @@ const About = () => {
           
           <div className="mt-4 text-center">
             <p className="text-muted-foreground text-sm">
-              Special thanks to <span className="font-semibold">Every Nation Campus</span> for their continued support and guidance.
+              Special thanks to <span className="font-semibold">Every Nation Campus</span> and my <span classname="font-semibold">Victory Group</span> for their continued support and guidance.
             </p>
           </div>
         </motion.section>
@@ -233,7 +234,7 @@ const About = () => {
           <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
           <p className="mb-6">
             Have questions, feedback, or suggestions? We'd love to hear from you!
-            Please reach out to us at <a href="mailto:contact@godsdailybread.org" className="text-primary hover:underline">contact@godsdailybread.org</a>.
+            Please reach out to us at <a href="mailto:hello@johnlorden.online" className="text-primary hover:underline">hello@johnlorden.online</a>.
           </p>
           
           <div className="flex justify-center gap-4">
