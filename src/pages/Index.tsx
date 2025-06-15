@@ -4,12 +4,12 @@ import { motion } from 'framer-motion';
 import SearchSection from '@/components/home/SearchSection';
 import VerseSection from '@/components/home/VerseSection';
 import ShareSection from '@/components/home/ShareSection';
-import DonateFooter from '@/components/DonateFooter';
-import { useVerseDisplay } from '@/hooks/useVerseDisplay';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { VerseCategories } from '@/components/VerseCategories';
+import LocalBibleService from '@/services/LocalBibleService';
+import { useSimpleVerseDisplay } from '@/hooks/useSimpleVerseDisplay';
 
-const Index: React.FC = () => {
-  const { 
+const Index = () => {
+  const {
     verse,
     reference,
     verseCategory,
@@ -19,60 +19,37 @@ const Index: React.FC = () => {
     handleSearch,
     handleCategorySelect,
     handleRandomVerse
-  } = useVerseDisplay();
+  } = useSimpleVerseDisplay();
 
   return (
-    <motion.div 
-      className="container px-4 pt-4 mx-auto max-w-4xl"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="min-h-screen flex flex-col"
     >
-      <div className="flex flex-col gap-6">
-        {/* Search and Categories Section */}
-        <ErrorBoundary>
-          <SearchSection 
-            onSearch={handleSearch}
-            onCategorySelect={handleCategorySelect}
-            onRandomVerse={handleRandomVerse}
-            currentCategory={currentCategory}
-          />
-        </ErrorBoundary>
+      <div className="flex-1 container mx-auto px-4 py-8 space-y-8">
+        <SearchSection onSearch={handleSearch} />
         
-        {/* Verse Display Section */}
-        <ErrorBoundary>
-          <VerseSection 
-            verse={verse}
-            reference={reference}
-            verseCategory={verseCategory}
-            currentCategory={currentCategory}
-            isLoading={isLoading}
-            hasError={hasError}
-            handleRandomVerse={handleRandomVerse}
-          />
-        </ErrorBoundary>
+        <VerseCategories
+          categories={LocalBibleService.getCategories()}
+          selectedCategory={currentCategory}
+          onCategorySelect={handleCategorySelect}
+        />
         
-        {/* Share Section - Only shown when there's a verse to share */}
+        <VerseSection
+          verse={verse}
+          reference={reference}
+          verseCategory={verseCategory}
+          currentCategory={currentCategory}
+          isLoading={isLoading}
+          hasError={hasError}
+          handleRandomVerse={handleRandomVerse}
+        />
+        
         {verse && reference && (
-          <ErrorBoundary>
-            <ShareSection 
-              verse={verse} 
-              reference={reference} 
-              category={verseCategory || currentCategory} 
-            />
-          </ErrorBoundary>
+          <ShareSection verse={verse} reference={reference} />
         )}
-        
-        {/* Donate Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.3 }}
-        >
-          <ErrorBoundary>
-            <DonateFooter />
-          </ErrorBoundary>
-        </motion.div>
       </div>
     </motion.div>
   );

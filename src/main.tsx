@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 import { ThemeProvider } from './components/ThemeProvider.tsx'
-import { SettingsContextProvider } from './contexts/SettingsContext.tsx'
+import { SimpleSettingsContextProvider } from './contexts/SimpleSettingsContext.tsx'
 import { VerseContextProvider } from './contexts/VerseContext.tsx'
 import { AppLayout } from './components/AppLayout.tsx'
 
@@ -28,7 +28,7 @@ const PageLoader = () => (
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="light" storageKey="bible-verse-theme">
-      <SettingsContextProvider>
+      <SimpleSettingsContextProvider>
         <VerseContextProvider>
           <Router>
             <AppLayout>
@@ -59,7 +59,7 @@ createRoot(document.getElementById("root")!).render(
             </AppLayout>
           </Router>
         </VerseContextProvider>
-      </SettingsContextProvider>
+      </SimpleSettingsContextProvider>
     </ThemeProvider>
   </React.StrictMode>
 );
