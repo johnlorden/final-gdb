@@ -30,10 +30,8 @@ export class XmlLoader {
         return localDoc;
       }
       
-      console.log(`No cached XML found for ${language}, fetching from URL`);
-      const url = XmlManager.getXmlUrl(language);
-      console.log(`Fetching XML document from URL: ${url} for language: ${language}`);
-      this.xmlDocPromises[language] = this.fetchXmlDocument(url, language);
+      console.log(`Loading XML document for ${language} from local file`);
+      this.xmlDocPromises[language] = this.fetchXmlDocument(language);
     }
     
     try {
@@ -67,41 +65,26 @@ export class XmlLoader {
     }
   }
   
-  private static async fetchXmlDocument(url: string, language: string): Promise<Document> {
+  private static async fetchXmlDocument(language: string): Promise<Document> {
     try {
-      // Always try to load from public folder first if it's English or Filipino
-      if (language === 'en' || language === 'fil') {
-        const fileName = language === 'en' ? 'bible-verses.xml' : 'bible-verses-fil.xml';
-        try {
-          const response = await fetch(`/data/${fileName}`);
-          if (response.ok) {
-            const xmlText = await response.text();
-            const doc = XmlParser.parseXmlDocument(xmlText);
-            console.log(`Successfully loaded ${language} XML document from public folder`);
-            XmlCache.saveToLocalStorage(language, xmlText);
-            XmlCache.setCachedDocument(language, doc);
-            return doc;
-          }
-        } catch (localError) {
-          console.warn(`Failed to load ${language} XML from public folder`, localError);
-        }
-      }
+      const url = XmlManager.getXmlUrl(language);
+      console.log(`Fetching XML from: ${url}`);
       
-      // Fallback to remote URL
       const response = await fetch(url, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
-          'Expires': '0',
         }
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to load Bible verses XML: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to load XML file: ${response.status} ${response.statusText}`);
       }
       
       const xmlText = await response.text();
+      console.log(`Successfully fetched XML text for ${language}, length: ${xmlText.length}`);
+      
       const doc = XmlParser.parseXmlDocument(xmlText);
       
       // Cache the result
@@ -110,7 +93,7 @@ export class XmlLoader {
       
       return doc;
     } catch (error) {
-      console.error(`Error loading XML document for ${language}:`, error);
+      console.error(`Error fetching XML document for ${language}:`, error);
       
       // Disable the language for future attempts if it's not English
       if (language !== 'en') {

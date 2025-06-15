@@ -1,11 +1,8 @@
-
 import { VerseResult } from './types/BibleVerseTypes';
 import { XmlParser } from './utils/XmlParser';
 import { VerseCache } from './utils/VerseCache';
 import { XmlFileLoader } from './utils/XmlFileLoader';
 import { VerseSelector } from './utils/VerseSelector';
-import LanguageService from './LanguageService';
-import { XmlManager } from './utils/xml/XmlManager';
 
 class BibleVerseService {
   private static categories = [
@@ -17,8 +14,6 @@ class BibleVerseService {
   ];
   
   private static currentLanguage: string = 'en';
-  private static availableLanguages: Set<string> = new Set(['en', 'fil']);
-  private static invalidLanguages: Set<string> = new Set();
   private static isInitialized: boolean = false;
   private static loadingPromise: Promise<void> | null = null;
 
@@ -37,37 +32,11 @@ class BibleVerseService {
     try {
       await XmlFileLoader.initializeXmlUrls();
       
-      await this.refreshLanguageList();
-      
-      // Preload English and Filipino in parallel
-      await Promise.all([
-        this.preloadAllVerses('en').catch(() => console.warn("Failed to preload English verses")),
-        this.preloadAllVerses('fil').catch(() => console.warn("Failed to preload Filipino verses"))
-      ]);
-      
-      // Listen for language initialization events
-      if (typeof window !== 'undefined') {
-        window.addEventListener('languages-initialized', ((event: CustomEvent) => {
-          const { availableLanguages, disabledLanguages } = event.detail;
-          
-          availableLanguages.forEach((lang: string) => {
-            if (lang !== 'en' && lang !== 'fil') {
-              this.availableLanguages.add(lang);
-            }
-          });
-          
-          disabledLanguages.forEach((lang: string) => {
-            this.invalidLanguages.add(lang);
-          });
-          
-          console.log('BibleVerseService updated with available languages:', 
-            Array.from(this.availableLanguages).join(', '));
-          console.log('Invalid languages:', 
-            Array.from(this.invalidLanguages).join(', '));
-        }) as EventListener);
-      }
+      // Preload English verses
+      await this.preloadAllVerses('en').catch(() => console.warn("Failed to preload English verses"));
       
       this.isInitialized = true;
+      console.log("BibleVerseService initialized successfully");
     } catch (error) {
       console.error("Failed to initialize BibleVerseService:", error);
     } finally {
@@ -75,130 +44,33 @@ class BibleVerseService {
     }
   }
 
-  static async refreshLanguageList(): Promise<void> {
-    try {
-      const languages = await LanguageService.getActiveLanguages();
-      
-      this.availableLanguages = new Set(['en', 'fil']);
-      
-      languages.forEach(l => {
-        if (l.is_active) {
-          this.availableLanguages.add(l.language_code);
-        } else if (l.language_code !== 'en' && l.language_code !== 'fil') {
-          this.invalidLanguages.add(l.language_code);
-        }
-      });
-      
-      console.log('Available languages:', Array.from(this.availableLanguages).join(', '));
-    } catch (error) {
-      console.error('Error refreshing language list:', error);
-    }
-  }
-
   static setLanguage(language: string): void {
-    if (this.invalidLanguages.has(language)) {
-      console.warn(`Language ${language} was previously marked as invalid, defaulting to English`);
-      this.currentLanguage = 'en';
-      return;
-    }
-
-    if (this.availableLanguages.has(language) || language === 'en' || language === 'fil') {
+    // Only allow 'en' and 'fil'
+    if (language === 'en' || language === 'fil') {
       this.currentLanguage = language;
-      
-      if (language !== 'en' && language !== 'fil') {
-        this.validateLanguage(language).catch(err => {
-          console.error(`Failed to validate language ${language}:`, err);
-          this.markLanguageAsInvalid(language);
-          this.currentLanguage = 'en';
-        });
-      }
+      console.log(`Language set to: ${language}`);
     } else {
-      console.warn(`Language ${language} is not available, defaulting to English`);
+      console.warn(`Language ${language} is not supported, defaulting to English`);
       this.currentLanguage = 'en';
     }
   }
   
-  private static async validateLanguage(language: string): Promise<boolean> {
-    try {
-      const xmlDoc = await XmlFileLoader.loadXmlDoc(language);
-      const verseNodes = xmlDoc.getElementsByTagName('verse');
-      
-      if (verseNodes.length === 0) {
-        console.error(`No verses found for language ${language}`);
-        return false;
-      }
-      
-      return true;
-    } catch (error) {
-      console.error(`Error validating language ${language}:`, error);
-      return false;
-    }
-  }
-
   static getLanguage(): string {
     return this.currentLanguage;
   }
 
   static async isLanguageAvailable(language: string): Promise<boolean> {
-    if (this.invalidLanguages.has(language)) {
-      return false;
-    }
-    
-    if (language === 'en' || language === 'fil') {
-      try {
-        const xmlDoc = await XmlFileLoader.loadXmlDoc(language);
-        const verseCount = xmlDoc.getElementsByTagName('verse').length;
-        return verseCount > 0;
-      } catch (error) {
-        console.error(`Error checking local language availability for ${language}:`, error);
-        return false;
-      }
-    }
-    
-    if (!this.availableLanguages.has(language)) {
+    if (language !== 'en' && language !== 'fil') {
       return false;
     }
     
     try {
-      const isValid = await this.validateLanguage(language);
-      if (!isValid) {
-        this.markLanguageAsInvalid(language);
-        return false;
-      }
-      
-      return true;
+      const xmlDoc = await XmlFileLoader.loadXmlDoc(language);
+      const verseCount = xmlDoc.getElementsByTagName('verse').length;
+      return verseCount > 0;
     } catch (error) {
       console.error(`Error checking language availability for ${language}:`, error);
-      this.markLanguageAsInvalid(language);
       return false;
-    }
-  }
-
-  static markLanguageAsInvalid(language: string): void {
-    if (language === 'en' || language === 'fil') {
-      console.warn(`Cannot mark local language ${language} as invalid`);
-      return;
-    }
-    
-    this.invalidLanguages.add(language);
-    console.warn(`Marked language ${language} as invalid`);
-    
-    if (this.currentLanguage === language) {
-      console.warn(`Current language ${language} is invalid, switching to English`);
-      this.currentLanguage = 'en';
-    }
-    
-    try {
-      LanguageService.updateLanguageStatus(language, false)
-        .then(() => console.log(`Updated language ${language} status in database`))
-        .catch((err) => console.error(`Failed to update language status in database:`, err));
-    } catch (error) {
-      console.error(`Error updating language status:`, error);
-    }
-    
-    if (typeof window !== 'undefined') {
-      const event = new CustomEvent('language-disabled', { detail: language });
-      window.dispatchEvent(event);
     }
   }
   
@@ -207,18 +79,18 @@ class BibleVerseService {
     
     const cachedVerses = VerseCache.getAllVerses(lang);
     if (cachedVerses && cachedVerses.length > 0) {
+      console.log(`Using cached verses for ${lang}: ${cachedVerses.length} verses`);
       return cachedVerses;
     }
     
     try {
       await this.initializeService();
+      console.log(`Loading XML document for ${lang}`);
       const xmlDoc = await XmlFileLoader.loadXmlDoc(lang);
       const verses = XmlParser.extractVersesFromDocument(xmlDoc);
       
       if (verses.length === 0) {
         console.warn(`No verses found in XML document for language: ${lang}`);
-        
-        this.markLanguageAsInvalid(lang);
         
         if (lang !== 'en') {
           console.log('Falling back to English verses');
@@ -228,14 +100,11 @@ class BibleVerseService {
         return [];
       }
       
+      console.log(`Loaded ${verses.length} verses for ${lang}`);
       VerseCache.setAllVerses(verses, lang);
       return verses;
     } catch (error) {
       console.error('Error parsing all verses:', error);
-      
-      if (lang !== 'en' && lang !== 'fil') {
-        this.markLanguageAsInvalid(lang);
-      }
       
       if (lang !== 'en') {
         console.log('Error with non-English verses, falling back to English');
@@ -257,6 +126,7 @@ class BibleVerseService {
       }
       
       const randomVerse = VerseSelector.getRandomVerseFromArray(allVerses);
+      console.log(`Selected random verse: ${randomVerse.reference}`);
       return randomVerse;
     } catch (error) {
       console.error('Error fetching random verse:', error);
@@ -382,24 +252,6 @@ class BibleVerseService {
     }
   }
   
-  static async searchVersesByText(query: string, language?: string): Promise<VerseResult[]> {
-    const lang = language || this.currentLanguage;
-    
-    if (!query || query.trim().length < 2) return [];
-    
-    try {
-      const allVerses = await this.getAllVerses(lang);
-      const searchTerm = query.trim().toLowerCase();
-      
-      return allVerses.filter(verse => 
-        verse.text.toLowerCase().includes(searchTerm)
-      );
-    } catch (error) {
-      console.error(`Error searching verses by text '${query}':`, error);
-      return [];
-    }
-  }
-  
   static getCategories(): string[] {
     return [...new Set(this.categories)];
   }
@@ -439,6 +291,7 @@ class BibleVerseService {
   }
 }
 
+// Initialize on load
 BibleVerseService.initializeService();
 
 export default BibleVerseService;

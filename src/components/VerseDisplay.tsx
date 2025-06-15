@@ -37,6 +37,8 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
     }
   }, [isLoading, verse, hasError, handleRandomVerse]);
 
+  console.log("VerseDisplay render:", { verse: !!verse, reference, isLoading, hasError });
+
   return (
     <AnimatePresence mode="wait">
       <motion.section 
@@ -50,12 +52,15 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
         {isLoading ? (
           <div className="w-full max-w-2xl">
             <Skeleton className="h-[200px] w-full rounded-xl" />
+            <div className="text-center mt-4 text-sm text-muted-foreground">
+              Loading verse...
+            </div>
           </div>
         ) : hasError ? (
           <div className="w-full max-w-2xl p-8 text-center bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-200 dark:border-red-900">
             <h3 className="text-lg font-medium text-red-800 dark:text-red-300 mb-2">Could not load Bible verse</h3>
             <p className="text-red-600 dark:text-red-400 mb-4">
-              There was an error loading the verse. This could be due to network issues or the language file not being available.
+              There was an error loading the verse. This could be due to the XML file not being available.
             </p>
             <Button 
               variant="outline" 
@@ -92,7 +97,7 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
           <div className="w-full max-w-2xl p-8 text-center bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-900">
             <h3 className="text-lg font-medium text-amber-800 dark:text-amber-300 mb-2">No verse loaded</h3>
             <p className="text-amber-600 dark:text-amber-400 mb-4">
-              We couldn't find a verse to display. Please try searching or selecting a category.
+              Click the button below to load a verse.
             </p>
             <Button onClick={() => handleRandomVerse('All')}>
               Get Random Verse
