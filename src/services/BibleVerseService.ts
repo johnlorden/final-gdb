@@ -3,6 +3,7 @@ import { XmlParser } from './utils/XmlParser';
 import { VerseCache } from './utils/VerseCache';
 import { XmlFileLoader } from './utils/XmlFileLoader';
 import { VerseSelector } from './utils/VerseSelector';
+import { XmlManager } from './utils/xml/XmlManager';
 
 class BibleVerseService {
   private static categories = [
@@ -59,6 +60,11 @@ class BibleVerseService {
     return this.currentLanguage;
   }
 
+  static markLanguageAsInvalid(language: string): void {
+    console.warn(`Marking language ${language} as invalid`);
+    XmlManager.disableLanguage(language);
+  }
+  
   static async isLanguageAvailable(language: string): Promise<boolean> {
     if (language !== 'en' && language !== 'fil') {
       return false;

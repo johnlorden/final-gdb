@@ -37,6 +37,23 @@ export class XmlManager {
     }
   }
 
+  static async addLanguageXml(languageCode: string, xmlUrl: string): Promise<boolean> {
+    try {
+      // For this local-only implementation, we only support en and fil
+      if (languageCode === 'en' || languageCode === 'fil') {
+        this.xmlUrls[languageCode] = xmlUrl;
+        console.log(`Added XML URL for ${languageCode}: ${xmlUrl}`);
+        return true;
+      }
+      
+      console.warn(`Language ${languageCode} is not supported in local mode`);
+      return false;
+    } catch (error) {
+      console.error(`Error adding language XML for ${languageCode}:`, error);
+      return false;
+    }
+  }
+
   static getAvailableLanguages(): string[] {
     return Object.keys(this.xmlUrls);
   }
