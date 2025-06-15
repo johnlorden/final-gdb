@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ThemeToggle from './ThemeToggle';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import RecentVerses from './RecentVerses';
 import SimpleLanguageSwitcher from './SimpleLanguageSwitcher';
-import OfflineMode from './OfflineMode';
 import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
 

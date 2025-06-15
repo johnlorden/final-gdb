@@ -1,12 +1,10 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Menu, X, Home, Bookmark, Info, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Link } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import SimpleLanguageSwitcher from './SimpleLanguageSwitcher';
-import OfflineMode from './OfflineMode';
 import { useSimpleSettingsContext } from '@/contexts/SimpleSettingsContext';
 
 const MobileMenu: React.FC = () => {

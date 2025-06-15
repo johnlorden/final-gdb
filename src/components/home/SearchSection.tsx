@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import EnhancedSearchBar from '@/components/EnhancedSearchBar';
-import VerseCategories from '@/components/VerseCategories';
+// Removed VerseCategories import
 
 interface SearchSectionProps {
   onSearch: (query: string) => void;
@@ -25,13 +25,10 @@ const SearchSection: React.FC<SearchSectionProps> = ({
       transition={{ delay: 0.1, duration: 0.3 }}
     >
       <EnhancedSearchBar onSearch={onSearch} />
-      <VerseCategories 
-        onCategorySelect={onCategorySelect} 
-        onRandomVerse={onRandomVerse}
-        currentCategory={currentCategory}
-      />
+      {/* VerseCategories was REMOVED. It is rendered once (correctly) in Index.tsx */}
     </motion.section>
   );
 };
 
 export default SearchSection;
+
