@@ -7,6 +7,7 @@ import './index.css'
 import { ThemeProvider } from './components/ThemeProvider.tsx'
 import { SettingsContextProvider } from './contexts/SettingsContext.tsx'
 import { VerseContextProvider } from './contexts/VerseContext.tsx'
+import { AppLayout } from './components/AppLayout.tsx'
 
 // Use lazy loading for pages
 const Index = lazy(() => import('./pages/Index.tsx'))
@@ -30,30 +31,32 @@ createRoot(document.getElementById("root")!).render(
       <SettingsContextProvider>
         <VerseContextProvider>
           <Router>
-            <Routes>
-              <Route path="/" element={<App />}>
-                <Route index element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Index />
-                  </Suspense>
-                } />
-                <Route path="about" element={
-                  <Suspense fallback={<PageLoader />}>
-                    <About />
-                  </Suspense>
-                } />
-                <Route path="bookmarks" element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Bookmarks />
-                  </Suspense>
-                } />
-                <Route path="*" element={
-                  <Suspense fallback={<PageLoader />}>
-                    <NotFound />
-                  </Suspense>
-                } />
-              </Route>
-            </Routes>
+            <AppLayout>
+              <Routes>
+                <Route path="/" element={<App />}>
+                  <Route index element={
+                    <Suspense fallback={<PageLoader />}>
+                      <Index />
+                    </Suspense>
+                  } />
+                  <Route path="about" element={
+                    <Suspense fallback={<PageLoader />}>
+                      <About />
+                    </Suspense>
+                  } />
+                  <Route path="bookmarks" element={
+                    <Suspense fallback={<PageLoader />}>
+                      <Bookmarks />
+                    </Suspense>
+                  } />
+                  <Route path="*" element={
+                    <Suspense fallback={<PageLoader />}>
+                      <NotFound />
+                    </Suspense>
+                  } />
+                </Route>
+              </Routes>
+            </AppLayout>
           </Router>
         </VerseContextProvider>
       </SettingsContextProvider>
