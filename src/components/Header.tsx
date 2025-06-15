@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import RecentVerses from './RecentVerses';
-import AdvancedLanguageSwitcher from './AdvancedLanguageSwitcher';
+import SimpleLanguageSwitcher from './SimpleLanguageSwitcher';
 import OfflineMode from './OfflineMode';
 import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -22,22 +22,10 @@ interface VerseItem {
 }
 
 interface HeaderProps {
-  recentVerses: VerseItem[];
-  onSelectVerse: (verse: string, reference: string) => void;
-  currentLanguage: string;
-  onLanguageChange: (language: string) => void;
-  isOfflineMode: boolean;
-  toggleOfflineMode: () => void;
+  children?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
-  recentVerses, 
-  onSelectVerse, 
-  currentLanguage, 
-  onLanguageChange,
-  isOfflineMode,
-  toggleOfflineMode
-}) => {
+const Header: React.FC<HeaderProps> = ({ children }) => {
   const isMobile = useIsMobile();
 
   return (
@@ -45,12 +33,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="container px-4 sm:px-6 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           {isMobile ? (
-            <MobileMenu 
-              currentLanguage={currentLanguage} 
-              onLanguageChange={onLanguageChange}
-              isOfflineMode={isOfflineMode}
-              toggleOfflineMode={toggleOfflineMode}
-            />
+            <MobileMenu />
           ) : (
             <Link to="/">
               <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -61,13 +44,9 @@ const Header: React.FC<HeaderProps> = ({
           <h1 className="text-lg sm:text-xl font-bold truncate">God's Daily Bread</h1>
         </div>
         <div className="flex items-center space-x-2">
+          {children}
           {!isMobile && (
             <>
-              <OfflineMode 
-                isOffline={isOfflineMode}
-                toggleOfflineMode={toggleOfflineMode}
-              />
-              
               <Link to="/about">
                 <Button variant="ghost" size="sm" className="flex items-center space-x-1">
                   <Info className="h-4 w-4" />
@@ -82,27 +61,6 @@ const Header: React.FC<HeaderProps> = ({
                 </Button>
               </Link>
               
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-1">
-                    <Clock className="h-4 w-4" />
-                    <span className="hidden sm:inline">Recent</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[300px] bg-background">
-                  <div className="p-2">
-                    <h3 className="font-medium mb-2 px-2">Recently Viewed Verses</h3>
-                    <RecentVerses verses={recentVerses} onSelectVerse={onSelectVerse} />
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              <AdvancedLanguageSwitcher 
-                currentLanguage={currentLanguage}
-                onLanguageChange={onLanguageChange}
-                isOfflineMode={isOfflineMode}
-              />
-              
               <a 
                 href="https://www.bible.com" 
                 target="_blank" 
@@ -116,21 +74,6 @@ const Header: React.FC<HeaderProps> = ({
               
               <ThemeToggle />
             </>
-          )}
-          {isMobile && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <Clock className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[300px] bg-background">
-                <div className="p-2">
-                  <h3 className="font-medium mb-2 px-2">Recently Viewed Verses</h3>
-                  <RecentVerses verses={recentVerses} onSelectVerse={onSelectVerse} />
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
           )}
         </div>
       </div>

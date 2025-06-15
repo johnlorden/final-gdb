@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import BibleVerseService from '@/services/BibleVerseService';
+import LocalBibleService from '@/services/LocalBibleService';
 
 interface SuggestionProps {
   text: string;
@@ -32,7 +32,7 @@ const AutoSuggest: React.FC<AutoSuggestProps> = ({ query, onSelect }) => {
     debounceTimerRef.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const results = await BibleVerseService.searchVerses(query);
+        const results = await LocalBibleService.searchVerses(query);
         setSuggestions(results.slice(0, 5).map(verse => ({
           text: verse.text,
           reference: verse.reference,

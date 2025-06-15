@@ -3,18 +3,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import BibleVerseService from '@/services/BibleVerseService';
+import LocalBibleService from '@/services/LocalBibleService';
 
 interface CategoryProps {
   onCategorySelect: (category: string) => void;
   onRandomVerse: (category?: string) => void; 
   currentCategory: string;
+  categories: string[];
+  selectedCategory: string;
 }
 
 const VerseCategories: React.FC<CategoryProps> = ({ 
   onCategorySelect,
   onRandomVerse,
-  currentCategory
+  currentCategory,
+  categories,
+  selectedCategory
 }) => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -23,8 +27,8 @@ const VerseCategories: React.FC<CategoryProps> = ({
   const [showRightArrow, setShowRightArrow] = useState(true);
   const [clickedButton, setClickedButton] = useState<string | null>(null);
   
-  // Get categories from service
-  const categories = ['All', ...BibleVerseService.getCategories()];
+  // Use categories from props
+  const categoriesList = ['All', ...categories];
   
   // Update scroll buttons visibility based on scroll position
   useEffect(() => {
@@ -78,7 +82,7 @@ const VerseCategories: React.FC<CategoryProps> = ({
   useEffect(() => {
     const scrollToSelectedCategory = () => {
       if (scrollRef.current && scrollContainerRef.current) {
-        const selectedButton = scrollRef.current.querySelector(`[data-category="${currentCategory}"]`) as HTMLElement;
+        const selectedButton = scrollRef.current.querySelector(`[data-category="${selectedCategory}"]`) as HTMLElement;
         
         if (selectedButton) {
           // Calculate position to scroll the category to the center
@@ -96,7 +100,7 @@ const VerseCategories: React.FC<CategoryProps> = ({
     // Small delay to ensure DOM is ready
     const timerId = setTimeout(scrollToSelectedCategory, 100);
     return () => clearTimeout(timerId);
-  }, [currentCategory]);
+  }, [selectedCategory]);
 
   return (
     <motion.div 
@@ -149,7 +153,7 @@ const VerseCategories: React.FC<CategoryProps> = ({
             ref={scrollRef}
             style={{ minWidth: 'max-content' }}
           >
-            {categories.map((category) => (
+            {categoriesList.map((category) => (
               <motion.div 
                 key={category}
                 whileHover={{ scale: 1.05 }}
@@ -159,11 +163,11 @@ const VerseCategories: React.FC<CategoryProps> = ({
               >
                 <Button
                   onClick={() => handleCategorySelect(category)}
-                  variant={currentCategory === category ? "default" : "outline"}
+                  variant={selectedCategory === category ? "default" : "outline"}
                   size="sm"
                   data-category={category}
                   className={`rounded-full whitespace-nowrap transition-all duration-300 ${
-                    currentCategory === category 
+                    selectedCategory === category 
                       ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600' 
                       : ''
                   }`}

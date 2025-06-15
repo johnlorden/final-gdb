@@ -12,7 +12,7 @@ import {
   CommandList 
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import BibleVerseService from '@/services/BibleVerseService';
+import LocalBibleService from '@/services/LocalBibleService';
 
 interface SearchBarProps {
   onSearch: (term: string) => void;
@@ -34,7 +34,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
       setIsLoading(true);
       try {
         // Search by reference and by text content
-        const results = await BibleVerseService.searchVerses(searchTerm);
+        const results = await LocalBibleService.searchVerses(searchTerm);
         setSuggestions(results.slice(0, 5)); // Limit to top 5 matches
       } catch (error) {
         console.error('Error getting suggestions:', error);
