@@ -39,10 +39,13 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
 
   console.log("VerseDisplay render:", { verse: !!verse, reference, isLoading, hasError });
 
+  // Create a stable key for AnimatePresence to prevent DOM issues
+  const animationKey = reference || (isLoading ? 'loading' : hasError ? 'error' : 'empty');
+
   return (
     <AnimatePresence mode="wait">
       <motion.section 
-        key={reference || 'loading' || 'error' || 'empty'}
+        key={animationKey}
         className="flex flex-col items-center justify-center"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -77,20 +80,22 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
                 onNextVerse={() => handleRandomVerse(currentCategory)}
                 onPreviousVerse={() => handleRandomVerse(currentCategory)}
               >
+                <div ref={cardRef}>
+                  <BibleVerseCard 
+                    verse={verse} 
+                    reference={reference} 
+                    category={verseCategory || currentCategory} 
+                  />
+                </div>
+              </SwipeVerseNavigation>
+            ) : (
+              <div ref={cardRef}>
                 <BibleVerseCard 
                   verse={verse} 
                   reference={reference} 
                   category={verseCategory || currentCategory} 
-                  ref={cardRef} 
                 />
-              </SwipeVerseNavigation>
-            ) : (
-              <BibleVerseCard 
-                verse={verse} 
-                reference={reference} 
-                category={verseCategory || currentCategory} 
-                ref={cardRef} 
-              />
+              </div>
             )}
           </div>
         ) : (
