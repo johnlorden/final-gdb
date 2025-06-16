@@ -56,6 +56,27 @@ export const useSimpleVerseDisplay = () => {
     }
   }, [searchParams, initialLoad, addToRecentVerses, language]);
 
+  // Listen for language changes to refresh verse
+  useEffect(() => {
+    const handleLanguageVerseRefresh = (event: CustomEvent) => {
+      const newLanguage = event.detail.language;
+      console.log(`Language verse refresh triggered for: ${newLanguage}`);
+      
+      // Generate a new verse in the current category with the new language
+      if (!initialLoad) {
+        handleRandomVerse(currentCategory);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('language-verse-refresh', handleLanguageVerseRefresh as EventListener);
+      
+      return () => {
+        window.removeEventListener('language-verse-refresh', handleLanguageVerseRefresh as EventListener);
+      };
+    }
+  }, [currentCategory, initialLoad]);
+
   const displayVerse = useCallback((result: VerseResult) => {
     setVerse(result.text);
     setReference(result.reference);
@@ -97,6 +118,11 @@ export const useSimpleVerseDisplay = () => {
       .catch(error => {
         console.error('Error searching for verse:', error);
         setHasError(true);
+        toast({
+          title: "Search error",
+          description: `Error searching for verses in ${language === 'fil' ? 'Filipino' : 'English'}. Please try again.`,
+          variant: "destructive",
+        });
       })
       .finally(() => setIsLoading(false));
   }, [displayVerse, toast, language]);
@@ -120,9 +146,14 @@ export const useSimpleVerseDisplay = () => {
       .catch(error => {
         console.error('Error getting verse by category:', error);
         setHasError(true);
+        toast({
+          title: "Loading error",
+          description: `Error loading verse in ${language === 'fil' ? 'Filipino' : 'English'}. Please try again.`,
+          variant: "destructive",
+        });
       })
       .finally(() => setIsLoading(false));
-  }, [addToRecentVerses, language]);
+  }, [addToRecentVerses, language, toast]);
 
   const handleRandomVerse = useCallback((category?: string) => {
     setIsLoading(true);
@@ -144,11 +175,16 @@ export const useSimpleVerseDisplay = () => {
       .catch(error => {
         console.error('Error getting random verse:', error);
         setHasError(true);
+        toast({
+          title: "Loading error",
+          description: `Error loading verse in ${language === 'fil' ? 'Filipino' : 'English'}. Please try again.`,
+          variant: "destructive",
+        });
       })
       .finally(() => setIsLoading(false));
       
     return Promise.resolve();
-  }, [currentCategory, addToRecentVerses, language]);
+  }, [currentCategory, addToRecentVerses, language, toast]);
 
   return {
     verse,

@@ -41,7 +41,16 @@ export const SimpleSettingsContextProvider: React.FC<{children: React.ReactNode}
   
   // Handle language switch
   const handleLanguageChange = (newLanguage: string) => {
+    console.log(`Switching language from ${language} to ${newLanguage}`);
     setLanguage(newLanguage);
+    
+    // Dispatch event to trigger new verse generation
+    setTimeout(() => {
+      const event = new CustomEvent('language-verse-refresh', { 
+        detail: { language: newLanguage } 
+      });
+      window.dispatchEvent(event);
+    }, 100);
   };
 
   const value = {
