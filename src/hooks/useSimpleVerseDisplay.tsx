@@ -64,7 +64,8 @@ export const useSimpleVerseDisplay = () => {
       
       // Generate a new verse in the current category with the new language
       if (!initialLoad) {
-        handleRandomVerse(currentCategory);
+        // Use the new language from the event detail instead of the hook context
+        handleRandomVerseWithLanguage(currentCategory, newLanguage);
       }
     };
 
@@ -155,13 +156,16 @@ export const useSimpleVerseDisplay = () => {
       .finally(() => setIsLoading(false));
   }, [addToRecentVerses, language, toast]);
 
-  const handleRandomVerse = useCallback((category?: string) => {
+  const handleRandomVerseWithLanguage = useCallback((category?: string, targetLanguage?: string) => {
     setIsLoading(true);
     setHasError(false);
     
     const categoryToUse = category || currentCategory;
+    const languageToUse = targetLanguage || language;
     
-    LocalBibleService.getVerseByCategory(categoryToUse, language)
+    console.log(`Getting random verse for category: ${categoryToUse}, language: ${languageToUse}`);
+    
+    LocalBibleService.getVerseByCategory(categoryToUse, languageToUse)
       .then((result) => {
         if (result) {
           setVerse(result.text);
@@ -177,14 +181,18 @@ export const useSimpleVerseDisplay = () => {
         setHasError(true);
         toast({
           title: "Loading error",
-          description: `Error loading verse in ${language === 'fil' ? 'Filipino' : 'English'}. Please try again.`,
+          description: `Error loading verse in ${languageToUse === 'fil' ? 'Filipino' : 'English'}. Please try again.`,
           variant: "destructive",
         });
       })
       .finally(() => setIsLoading(false));
       
     return Promise.resolve();
-  }, [currentCategory, addToRecentVerses, language, toast]);
+  }, [currentCategory, language, addToRecentVerses, toast]);
+
+  const handleRandomVerse = useCallback((category?: string) => {
+    return handleRandomVerseWithLanguage(category, language);
+  }, [handleRandomVerseWithLanguage, language]);
 
   return {
     verse,
