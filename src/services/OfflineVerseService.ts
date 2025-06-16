@@ -2,6 +2,11 @@
 import { VerseResult } from './types/BibleVerseTypes';
 import LocalBibleService from './LocalBibleService';
 
+interface UserPreferences {
+  backgroundImages?: string[];
+  [key: string]: any;
+}
+
 class OfflineVerseService {
   private static isOffline = false;
   
@@ -31,6 +36,26 @@ class OfflineVerseService {
   
   static getCategories(): string[] {
     return LocalBibleService.getCategories();
+  }
+  
+  static getUserPreferences(): UserPreferences {
+    try {
+      const prefs = localStorage.getItem('user_preferences');
+      return prefs ? JSON.parse(prefs) : { backgroundImages: [] };
+    } catch (error) {
+      console.error('Error loading user preferences:', error);
+      return { backgroundImages: [] };
+    }
+  }
+  
+  static saveUserPreferences(preferences: Partial<UserPreferences>): void {
+    try {
+      const existingPrefs = this.getUserPreferences();
+      const updatedPrefs = { ...existingPrefs, ...preferences };
+      localStorage.setItem('user_preferences', JSON.stringify(updatedPrefs));
+    } catch (error) {
+      console.error('Error saving user preferences:', error);
+    }
   }
 }
 

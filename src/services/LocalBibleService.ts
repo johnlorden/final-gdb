@@ -38,6 +38,8 @@ class LocalBibleService {
 
     try {
       const xmlUrl = language === 'fil' ? '/data/bible-verses-fil.xml' : '/data/bible-verses.xml';
+      console.log(`Loading verses from: ${xmlUrl}`);
+      
       const response = await fetch(xmlUrl);
       
       if (!response.ok) {
@@ -45,14 +47,35 @@ class LocalBibleService {
       }
       
       const xmlText = await response.text();
+      console.log(`XML text length for ${language}:`, xmlText.length);
+      
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
       
-      const verses = Array.from(xmlDoc.getElementsByTagName('verse')).map(verse => {
-        const text = verse.getElementsByTagName('text')[0]?.textContent || '';
-        const reference = verse.getElementsByTagName('reference')[0]?.textContent || '';
-        const categoryNode = verse.getElementsByTagName('category')[0]?.textContent || '';
+      // Check for parsing errors
+      const parseError = xmlDoc.querySelector('parsererror');
+      if (parseError) {
+        console.error('XML parsing error:', parseError.textContent);
+        throw new Error('XML parsing failed');
+      }
+      
+      const verseElements = xmlDoc.getElementsByTagName('verse');
+      console.log(`Found ${verseElements.length} verse elements for ${language}`);
+      
+      const verses = Array.from(verseElements).map(verse => {
+        const textElement = verse.getElementsByTagName('text')[0];
+        const referenceElement = verse.getElementsByTagName('reference')[0];
+        const categoryElement = verse.getElementsByTagName('category')[0];
+        
+        const text = textElement?.textContent?.trim() || '';
+        const reference = referenceElement?.textContent?.trim() || '';
+        const categoryNode = categoryElement?.textContent?.trim() || '';
         const categories = categoryNode ? [categoryNode] : [];
+        
+        if (!text || !reference) {
+          console.warn(`Invalid verse found in ${language}:`, { text, reference });
+          return null;
+        }
         
         return { 
           text, 
@@ -60,15 +83,16 @@ class LocalBibleService {
           categories,
           category: categoryNode
         };
-      });
+      }).filter(verse => verse !== null) as VerseResult[];
       
       this.versesCache[language] = verses;
-      console.log(`Loaded ${verses.length} verses for ${language}`);
+      console.log(`Successfully loaded ${verses.length} verses for ${language}`);
       return verses;
     } catch (error) {
       console.error(`Error loading verses for ${language}:`, error);
       // Fallback to English if Filipino fails
       if (language === 'fil') {
+        console.log('Falling back to English verses for Filipino');
         return this.loadVerses('en');
       }
       return [];
@@ -92,7 +116,10 @@ class LocalBibleService {
 
   static async getRandomVerse(language?: string): Promise<VerseResult | null> {
     const verses = await this.getAllVerses(language);
-    if (verses.length === 0) return null;
+    if (verses.length === 0) {
+      console.warn(`No verses available for language: ${language || this.currentLanguage}`);
+      return null;
+    }
     
     const randomIndex = Math.floor(Math.random() * verses.length);
     return verses[randomIndex];
@@ -109,6 +136,7 @@ class LocalBibleService {
     );
     
     if (matchingVerses.length === 0) {
+      console.warn(`No verses found for category: ${category} in language: ${language || this.currentLanguage}`);
       return this.getRandomVerse(language);
     }
     
