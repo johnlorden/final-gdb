@@ -1,22 +1,21 @@
 
 import React from 'react';
 import Header from './Header';
-import { useSimpleAppContext } from './SimpleAppContext';
 import SimpleLanguageSwitcher from './SimpleLanguageSwitcher';
 
 interface AppLayoutProps {
   children: React.ReactNode;
+  language: string;
+  onLanguageChange: (language: string) => void;
 }
 
-export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  const { language, handleLanguageChange } = useSimpleAppContext();
-
+export const AppLayout: React.FC<AppLayoutProps> = ({ children, language, onLanguageChange }) => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header>
         <SimpleLanguageSwitcher 
           currentLanguage={language} 
-          onLanguageChange={handleLanguageChange} 
+          onLanguageChange={onLanguageChange} 
         />
       </Header>
       <main>{children}</main>

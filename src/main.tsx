@@ -7,7 +7,7 @@ import './index.css'
 import { ThemeProvider } from './components/ThemeProvider.tsx'
 import { SimpleSettingsContextProvider } from './contexts/SimpleSettingsContext.tsx'
 import { VerseContextProvider } from './contexts/VerseContext.tsx'
-import { AppLayout } from './components/AppLayout.tsx'
+import { AppLayoutWrapper } from './components/AppLayoutWrapper.tsx'
 
 // Use lazy loading for pages
 const Index = lazy(() => import('./pages/Index.tsx'))
@@ -31,7 +31,7 @@ createRoot(document.getElementById("root")!).render(
       <SimpleSettingsContextProvider>
         <VerseContextProvider>
           <Router>
-            <AppLayout>
+            <AppLayoutWrapper>
               <Routes>
                 <Route path="/" element={<App />}>
                   <Route index element={
@@ -56,7 +56,7 @@ createRoot(document.getElementById("root")!).render(
                   } />
                 </Route>
               </Routes>
-            </AppLayout>
+            </AppLayoutWrapper>
           </Router>
         </VerseContextProvider>
       </SimpleSettingsContextProvider>
