@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Twitter, Facebook, Mail, Share2 } from 'lucide-react';
+import { Copy, Twitter, Facebook, Mail, Share2, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 
@@ -29,27 +29,22 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
   currentURL.search = `?bibleverse=${encodeURIComponent(reference)}`;
   const shareURL = currentURL.toString();
   
-  const generateImage = async () => {
+  const downloadImage = async () => {
     try {
       if (cardRef?.current) {
         const clonedElement = cardRef.current.cloneNode(true) as HTMLElement;
         document.body.appendChild(clonedElement);
         
-        // Apply styling based on template
-        clonedElement.style.padding = '20px';
-        clonedElement.style.borderRadius = '8px';
+        // Style the cloned element for export
+        clonedElement.style.position = 'fixed';
+        clonedElement.style.top = '-9999px';
+        clonedElement.style.left = '-9999px';
+        clonedElement.style.padding = '30px';
+        clonedElement.style.borderRadius = '12px';
+        clonedElement.style.border = 'none';
         clonedElement.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
-        
-        if (template === 'minimal') {
-          clonedElement.style.padding = '30px';
-          const innerElements = clonedElement.querySelectorAll('p');
-          innerElements.forEach(el => {
-            if (el instanceof HTMLElement) {
-              el.style.fontFamily = 'sans-serif';
-              el.style.lineHeight = '1.8';
-            }
-          });
-        }
+        clonedElement.style.maxWidth = '600px';
+        clonedElement.style.width = 'auto';
         
         // Apply background color
         clonedElement.style.backgroundColor = backgroundColor;
@@ -69,29 +64,44 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
         // Generate canvas
         const canvas = await html2canvas(clonedElement, { 
           backgroundColor: null,
-          scale: 3,
+          scale: 2,
           useCORS: true,
           allowTaint: true,
-          logging: false
+          logging: false,
+          width: clonedElement.offsetWidth,
+          height: clonedElement.offsetHeight
         });
         
         document.body.removeChild(clonedElement);
         
+        // Create download link
         const imageUrl = canvas.toDataURL('image/png');
-        localStorage.setItem('verse_image', imageUrl);
-        return imageUrl;
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = `bible-verse-${reference.replace(/\s+/g, '-').replace(/:/g, '-')}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        toast({
+          title: "Image Downloaded",
+          description: "Verse image has been saved to your device",
+          duration: 2000,
+        });
       }
-      return null;
     } catch (error) {
-      console.error('Error generating image:', error);
-      return null;
+      console.error('Error downloading image:', error);
+      toast({
+        title: "Download Failed",
+        description: "Could not download the image. Please try again.",
+        variant: "destructive",
+        duration: 2000,
+      });
     }
   };
   
   const shareWithImage = async (platform: 'twitter' | 'facebook' | 'email') => {
     try {
-      const imageUrl = await generateImage();
-      
       const shareText = `${verseText}`;
       const appUrl = shareURL;
       
@@ -125,18 +135,10 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
       });
     } catch (error) {
       console.error('Error sharing:', error);
-      
-      const shareText = `${verseText}`;
-      const url = platform === 'twitter'
-        ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareURL)}&hashtags=Bible,DailyVerse`
-        : platform === 'facebook'
-          ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL)}&quote=${encodeURIComponent(shareText)}`
-          : `mailto:?subject=${encodeURIComponent(`Bible Verse: ${reference}`)}&body=${encodeURIComponent(`${shareText}\n\nRead more: ${shareURL}`)}`;
-      
-      window.open(url, '_blank', 'noopener,noreferrer');
       toast({
-        title: "Shared using fallback method",
-        description: "We used a simpler sharing method",
+        title: "Sharing Failed",
+        description: "Please try again",
+        variant: "destructive",
         duration: 2000,
       });
     }
@@ -195,6 +197,16 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
 
   return (
     <div className="flex flex-wrap justify-center gap-2">
+      <Button 
+        onClick={downloadImage} 
+        variant="outline" 
+        size="sm" 
+        className="flex items-center gap-1"
+      >
+        <Download className="h-4 w-4" />
+        <span className="hidden sm:inline">Download</span>
+      </Button>
+      
       <Button 
         onClick={copyToClipboard} 
         variant="outline" 
