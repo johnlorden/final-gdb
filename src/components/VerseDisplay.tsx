@@ -80,24 +80,20 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
                 onNextVerse={() => handleRandomVerse(currentCategory)}
                 onPreviousVerse={() => handleRandomVerse(currentCategory)}
               >
-                <div ref={cardRef}>
-                  <BibleVerseCard 
-                    verse={verse} 
-                    reference={reference} 
-                    category={verseCategory || currentCategory} 
-                    cardRef={cardRef}
-                  />
-                </div>
-              </SwipeVerseNavigation>
-            ) : (
-              <div ref={cardRef}>
                 <BibleVerseCard 
+                  ref={cardRef}
                   verse={verse} 
                   reference={reference} 
                   category={verseCategory || currentCategory} 
-                  cardRef={cardRef}
                 />
-              </div>
+              </SwipeVerseNavigation>
+            ) : (
+              <BibleVerseCard 
+                ref={cardRef}
+                verse={verse} 
+                reference={reference} 
+                category={verseCategory || currentCategory} 
+              />
             )}
           </div>
         ) : (
