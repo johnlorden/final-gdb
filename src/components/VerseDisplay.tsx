@@ -85,6 +85,7 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
                     verse={verse} 
                     reference={reference} 
                     category={verseCategory || currentCategory} 
+                    cardRef={cardRef}
                   />
                 </div>
               </SwipeVerseNavigation>
@@ -94,6 +95,7 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
                   verse={verse} 
                   reference={reference} 
                   category={verseCategory || currentCategory} 
+                  cardRef={cardRef}
                 />
               </div>
             )}
